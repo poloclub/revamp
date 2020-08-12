@@ -5,6 +5,7 @@ This repository contains the code and models necessary to replicate the results 
 **Do Adversarially Robust ImageNet Models Transfer Better?** <br>
 *Hadi Salman\*, Andrew Ilyas\*, Logan Engstrom, Ashish Kapoor, Aleksander Madry* <br>
 Paper: https://arxiv.org/abs/2007.08489 <br>
+Blog post:  https://www.microsoft.com/en-us/research/blog/adversarial-robustness-as-a-prior-for-better-transfer-learning/ <br>
 
 ```bibtex
     @InProceedings{salman2020adversarially,
