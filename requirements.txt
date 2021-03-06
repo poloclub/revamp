@@ -1,6 +1,6 @@
 torch
 torchvision
-robustness==1.2.post1
+robustness
 numpy 
 scipy
 GPUtil
