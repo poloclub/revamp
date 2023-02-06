@@ -1,0 +1,536 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="4096"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="100.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-152.50001050470587"/>
+			<rotate y="1" angle="-44.9999978371445"/>
+			<rotate z="1" angle="-180.00000500895632"/>
+			<translate value="17.382526 13.115926 17.382524"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="default-bsdf">
+		<bsdf type="diffuse"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material">
+		<bsdf type="principled">
+			<rgb value="0.002980 0.065576 1.000000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.400000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.004">
+		<bsdf type="principled">
+			<rgb value="0.800000 0.012200 0.000000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.003">
+		<bsdf type="principled">
+			<rgb value="0.000000 0.000000 0.000000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.007">
+		<bsdf type="principled">
+			<rgb value="0.000000 0.800000 0.003089" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.001">
+		<bsdf type="principled">
+			<rgb value="0.800000 0.012200 0.000000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+
+	<emitter type="point">
+		<point name="position" x="4.076245307922363" y="5.903861999511719" z="-1.0054539442062378"/>
+		<rgb value="79.577469 79.577469 79.577469" name="intensity"/>
+	</emitter>
+	<emitter type="point">
+		<point name="position" x="-5.461642265319824" y="5.903861999511719" z="-1.07048499584198"/>
+		<rgb value="79.577469 79.577469 79.577469" name="intensity"/>
+	</emitter>
+	<emitter type="point">
+		<point name="position" x="0.06599712371826172" y="5.903861999511719" z="-5.037378311157227"/>
+		<rgb value="79.577469 79.577469 79.577469" name="intensity"/>
+	</emitter>
+	<emitter type="point">
+		<point name="position" x="0.23941324651241302" y="5.903861999511719" z="5.3242340087890625"/>
+		<rgb value="79.577469 79.577469 79.577469" name="intensity"/>
+	</emitter>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/Plane.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="default-bsdf" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Sphere.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_110.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_110.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_100.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_100.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_100">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_100.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_100" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 1.100000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 -0.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_550.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_550.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_550">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_550.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_550" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 5.100000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 -5.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_5m50.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_5m50.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_5m50">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_5m50.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_5m50" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 5.100000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 4.900000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_m550.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_m550.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_m550">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_m550.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_m550" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 -4.900000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 -5.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_m550_001.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_m550_001.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_m550_001">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_m550_001.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_m550_001" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 -4.900000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 4.900000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_010.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_010.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_010">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_010.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_010" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 0.100000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 -1.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_m110.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_m110.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_m110">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_m110.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_m110" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 -0.900000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 -1.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_m100.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_m100.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_m100">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_m100.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_m100" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 -0.900000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 -0.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_m1m10.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_m1m10.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_m1m10">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_m1m10.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_m1m10" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 -0.900000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 0.900000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark__0m10.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text__0m10.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text__0m10">
+		<shape type="ply">
+			<string name="filename" value="meshes/text__0m10.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text__0m10" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 0.100000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 0.900000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_1m10.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_1m10.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_1m10">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_1m10.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_1m10" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 1.100000 0.000000 0.000000 1.000000 0.000100 0.000000 -1.000000 0.000000 0.900000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_001.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_001.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_001">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_001.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_001" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 0.100000 0.000000 1.000000 -0.000000 1.100000 0.000000 0.000000 1.000000 -0.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_1m11.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_1m11.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_1m11">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_1m11.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_1m11" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 1.100000 0.000000 1.000000 -0.000000 1.100000 0.000000 0.000000 1.000000 1.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_m1m11.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.007" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_m1m111.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_m1m111">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_m1m111.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_m1m111" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 -0.900000 0.000000 1.000000 -0.000000 1.100000 0.000000 0.000000 1.000000 1.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_111.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.007" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_111.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_111">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_111.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_111" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 1.100000 0.000000 1.000000 -0.000000 1.100000 0.000000 0.000000 1.000000 -1.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_m111.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/text_m111.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-text_m111">
+		<shape type="ply">
+			<string name="filename" value="meshes/text_m111.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-Material.003" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-text_m111" name="shape"/>
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 -0.900000 0.000000 1.000000 -0.000000 1.100000 0.000000 0.000000 1.000000 -1.100000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/mark_000.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tex_000.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+</scene>

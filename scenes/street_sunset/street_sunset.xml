@@ -1,0 +1,1121 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="128"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path">
+		<integer name="max_depth" value="4"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="18.122417981389773"/>
+			<rotate y="1" angle="-33.494260727407465"/>
+			<rotate z="1" angle="0.572533723626296"/>
+			<translate value="2.951952 0.876198 -9.854250"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-162.41624306627045"/>
+			<rotate y="1" angle="-35.713778509527295"/>
+			<rotate z="1" angle="179.4075134192144"/>
+			<translate value="2.612565 0.538781 -2.873373"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-151.14977772844273"/>
+			<rotate y="1" angle="-1.6272465727003462"/>
+			<rotate z="1" angle="179.55601539214882"/>
+			<translate value="0.765696 1.206812 -2.527161"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="30.84010385745387"/>
+			<rotate y="1" angle="0.40491042266701643"/>
+			<rotate z="1" angle="0.42594628473274504"/>
+			<translate value="0.697612 1.743692 -10.192348"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-9.03697547951968"/>
+			<rotate y="1" angle="-87.7131185665745"/>
+			<rotate z="1" angle="12.683682633054834"/>
+			<translate value="5.394260 -0.191106 -6.219615"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="88.83628853406974"/>
+			<rotate y="1" angle="-0.15854627303702346"/>
+			<rotate z="1" angle="0.22459628338430948"/>
+			<translate value="0.666733 7.597985 -6.150995"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-160.2806204977259"/>
+			<rotate y="1" angle="35.139318619194206"/>
+			<rotate z="1" angle="179.45378112065208"/>
+			<translate value="-0.598175 0.245808 -3.949520"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="23.7846550486141"/>
+			<rotate y="1" angle="19.228170966501477"/>
+			<rotate z="1" angle="0.46057320939059404"/>
+			<translate value="-0.268127 0.706351 -9.210246"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+
+
+<emitter type="envmap">
+	<string name="filename" value="textures/city.hdr"/>
+	<float name="scale" value="1.00000"/>
+	<transform name="to_world">
+		<matrix value="0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+	</transform>
+</emitter>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-building">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-windows">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-rooftop">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/concrete.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
+	</bsdf>
+	<bsdf type="twosided" id="mat-road">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/road.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-lampe">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/lamp post.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.464040"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-lumière">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/lamp post.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-building2">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building2.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-windows2">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building2.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-air conditioner">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/air conditioner.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-chain link fence">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/chain fence.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-metal">
+		<bsdf type="principled">
+			<rgb value="0.800000 0.800000 0.800000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.726804"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-building3">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building3.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-windows3">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building3.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-building4">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-windows4">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building4.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-door1">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/door012_florence_620_product_preview.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-parking lot">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/parking lot.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-garbage_container_green">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/garbage.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
+	</bsdf>	
+	<bsdf type="twosided" id="mat-garbage_cover">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/TexturesCom_RooftilesBitumen0020_1_seamless_S.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
+	</bsdf>	
+	<bsdf type="twosided" id="mat-trash">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/trash.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-wheel">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-garbage_container_blue">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/garbage.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
+	</bsdf>	
+	<bsdf type="twosided" id="mat-cardboard">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/cardboard.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-building5">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building5.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-windows5">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building5.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-building5.001">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building5.001.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-windows5.001">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building5.001.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-building3.001">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building3.001.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="1.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-windows3.001">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/building3.001.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-rooftop.002">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/concrete.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
+	</bsdf>
+	<bsdf type="twosided" id="mat-13914_Taxi_parts.002">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/13914_Taxi_parts.002.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.858579"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.450000"/>
+		</bsdf>
+	</bsdf>	
+	<bsdf type="twosided" id="mat-13914_Taxi_tyre.002">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/13914_Taxi_tyre_diffuse.002.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.858579"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.450000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-13914_Taxi_car.002">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/13914_Taxi_car_diffuse.002.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.858579"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.450000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="thindielectric" id="mat-glass_mat.001">
+		<string name="int_ior" value="bk7"/>
+		<string name="ext_ior" value="air"/>
+	</bsdf>	
+	<bsdf type="twosided" id="mat-Material">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<!-- <string name="filename" value="textures/taxi_car_diffuse.png"/> -->
+				<string name="filename" value="textures/perturbed_tex_map.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>	
+	<bsdf type="twosided" id="mat-taxi_parts">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/13914_Taxi_parts.002.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.858579"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.450000"/>
+		</bsdf>
+	</bsdf>	
+	<bsdf type="twosided" id="mat-taxi_tire">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/13914_Taxi_tyre_diffuse.002.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.858579"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.450000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-taxi_car">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/13914_Taxi_car_diffuse.002.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.858579"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.450000"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+
+	<emitter type="directional">
+		<rgb value="5.000000 2.497952 0.707067" name="irradiance"/>
+		<transform name="to_world">
+			<matrix value="0.889701 -0.366677 -0.271991 3.376821 -0.434059 -0.864041 -0.255003 4.523581 -0.141508 0.344937 -0.927898 5.206067 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</emitter>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/building-building.ply"/>
+		<ref id="mat-building" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building-windows.ply"/>
+		<ref id="mat-windows" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building-rooftop.ply"/>
+		<ref id="mat-rooftop" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Plane.ply"/>
+		<ref id="mat-road" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Cylinder-lampe.ply"/>
+		<ref id="mat-lampe" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Cylinder-lumière.ply"/>
+		<ref id="mat-lumière" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Cylinder_002-lampe.ply"/>
+		<ref id="mat-lampe" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Cylinder_002-lumière.ply"/>
+		<ref id="mat-lumière" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building2-building2.ply"/>
+		<ref id="mat-building2" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building2-windows2.ply"/>
+		<ref id="mat-windows2" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building2-rooftop.ply"/>
+		<ref id="mat-rooftop" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/air_conditioner.ply"/>
+		<ref id="mat-air conditioner" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/air_conditioner_001.ply"/>
+		<ref id="mat-air conditioner" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3.ply"/>
+		<ref id="mat-road" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/chain_link_fence-chain link fence.ply"/>
+		<ref id="mat-chain link fence" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/chain_link_fence-metal.ply"/>
+		<ref id="mat-metal" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_001-building3.ply"/>
+		<ref id="mat-building3" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_001-windows3.ply"/>
+		<ref id="mat-windows3" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_001-rooftop.ply"/>
+		<ref id="mat-rooftop" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_002.ply"/>
+		<ref id="mat-road" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building_001-building.ply"/>
+		<ref id="mat-building" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building_001-windows.ply"/>
+		<ref id="mat-windows" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building_001-rooftop.ply"/>
+		<ref id="mat-rooftop" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building4-building4.ply"/>
+		<ref id="mat-windows4" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building4-windows4.ply"/>
+		<ref id="mat-windows4" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building4-rooftop.ply"/>
+		<ref id="mat-rooftop" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building4-door1.ply"/>
+		<ref id="mat-door1" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_003.ply"/>
+		<ref id="mat-road" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/chain_link_fence_002-chain link fence.ply"/>
+		<ref id="mat-chain link fence" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/chain_link_fence_002-metal.ply"/>
+		<ref id="mat-metal" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_004.ply"/>
+		<ref id="mat-road" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/chain_link_fence_003-chain link fence.ply"/>
+		<ref id="mat-chain link fence" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/chain_link_fence_003-metal.ply"/>
+		<ref id="mat-metal" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/parking_lot.ply"/>
+		<ref id="mat-parking lot" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage-garbage_container_green.ply"/>
+		<ref id="mat-garbage_container_green" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage-garbage_cover.ply"/>
+		<ref id="mat-garbage_cover" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage-trash.ply"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage-wheel.ply"/>
+		<ref id="mat-wheel" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage_001-garbage_container_green.ply"/>
+		<ref id="mat-garbage_container_green" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage_001-garbage_cover.ply"/>
+		<ref id="mat-garbage_cover" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage_001-trash.ply"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/garbage_001-wheel.ply"/>
+		<ref id="mat-wheel" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/blue_garbage-garbage_container_green.ply"/>
+		<ref id="mat-garbage_container_green" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/blue_garbage-garbage_cover.ply"/>
+		<ref id="mat-garbage_cover" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/blue_garbage-trash.ply"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/blue_garbage-wheel.ply"/>
+		<ref id="mat-wheel" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/blue_garbage-garbage_container_blue.ply"/>
+		<ref id="mat-garbage_container_blue" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box-cardboard.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-cardboard" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box-trash.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_001-cardboard.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-cardboard" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_001-trash.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_002-cardboard.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-cardboard" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_002-trash.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_003-cardboard.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-cardboard" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_003-trash.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_004-cardboard.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-cardboard" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_004-trash.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_005-cardboard.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-cardboard" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_005-trash.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_006-cardboard.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-cardboard" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/cardboard_box_006-trash.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-trash" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building5-building5.ply"/>
+		<ref id="mat-building5" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building5-windows5.ply"/>
+		<ref id="mat-windows5" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/air_conditioner_002.ply"/>
+		<ref id="mat-air conditioner" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building5_001-building5.001.ply"/>
+		<ref id="mat-building5.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building5_001-windows5.001.ply"/>
+		<ref id="mat-windows5.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_005-building3.001.ply"/>
+		<ref id="mat-building3.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_005-windows3.001.ply"/>
+		<ref id="mat-windows3.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/building3_005-rooftop.002.ply"/>
+		<ref id="mat-rooftop.002" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/taxI_cab.ply"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/taxi_windows.ply"/>
+		<ref id="mat-glass_mat.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/taxi_parts-taxi_parts.ply"/>
+		<ref id="mat-taxi_parts" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/taxi_parts-taxi_tire.ply"/>
+		<ref id="mat-taxi_tire" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/taxi_parts-taxi_car.ply"/>
+		<ref id="mat-taxi_car" name="bsdf"/>
+	</shape>
+</scene>

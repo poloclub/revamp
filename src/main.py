@@ -164,6 +164,20 @@ def get_model(args, ds):
     '''Given arguments and a dataset object, returns an ImageNet model (with appropriate last layer changes to 
     fit the target dataset) and a checkpoint.The checkpoint is set to None if noe resuming training.
     '''
+
+    pytorch_models = {
+        'alexnet': models.alexnet,
+        'vgg16': models.vgg16,
+        'vgg16_bn': models.vgg16_bn,
+        'squeezenet': models.squeezenet1_0,
+        'densenet': models.densenet161,
+        'shufflenet': models.shufflenet_v2_x1_0,
+        'mobilenet': models.mobilenet_v2,
+        'resnext50_32x4d': models.resnext50_32x4d,
+        'mnasnet': models.mnasnet1_0,
+        'resnet50': models.resnet50
+    }
+
     finetuned_model_path = os.path.join(
         args.out_dir, args.exp_name, 'checkpoint.pt.latest')
     if args.resume and os.path.isfile(finetuned_model_path):
@@ -194,7 +208,6 @@ def get_model(args, ds):
         else:
             print('[NOT replacing the last layer]')
     return model, checkpoint
-
 
 def freeze_model(model, freeze_level):
     '''
@@ -253,7 +266,8 @@ def args_preprocess(args):
     # Preprocess args
     args = defaults.check_and_fill_args(args, defaults.CONFIG_ARGS, None)
     if not args.eval_only:
-        args = defaults.check_and_fill_args(args, defaults.TRAINING_ARGS, None)
+        # args = defaults.check_and_fill_args(args, defaults.TRAINING_ARGS, None)
+        args = defaults.check_and_fill_args(args, defaults.TRAINING_ARGS, datasets.CIFAR)
     if args.adv_train or args.adv_eval:
         args = defaults.check_and_fill_args(args, defaults.PGD_ARGS, None)
     args = defaults.check_and_fill_args(args, defaults.MODEL_LOADER_ARGS, None)
@@ -275,6 +289,7 @@ if __name__ == "__main__":
         'mobilenet': models.mobilenet_v2,
         'resnext50_32x4d': models.resnext50_32x4d,
         'mnasnet': models.mnasnet1_0,
+        'resnet50': models.resnet50
     }
 
     # Create store and log the args
