@@ -30,7 +30,7 @@ def run(cfg: DictConfig) -> None:
     target_param_key = cfg.attack.scene.target_param_key
     sensor_key = cfg.attack.scene.sensor_key
 
-    score_thesh_test = cfg.model.score_thresh_test
+    score_thresh_test = cfg.model.score_thresh_test
     weights_file  = cfg.model.weights_file
     model_config = cfg.model.config
 
@@ -47,7 +47,7 @@ def run(cfg: DictConfig) -> None:
 
     sensor_positions = cfg.scenario.sensor_positions.function 
     randomize_sensors = cfg.scenario.randomize_positions
-    output_path = schema["sysconfig"]["output_path"]
+    output_path = cfg.sysconfig.output_path
     if os.path.exists(output_path) == False:
         os.mkdir(output_path)
 

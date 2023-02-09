@@ -19,3 +19,6 @@ attack:
 dataset:
   name: coco_2017_train
   library: detectron2
+
+sysconfig:
+  output_path: null
