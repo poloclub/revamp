@@ -7,58 +7,49 @@ import glob
 import numpy as np
 from detectron2.data import MetadataCatalog
 import dt2
+from omegaconf import DictConfig, OmegaConf
+import hydra
 
-if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("config" \
-        ,type=str \
-        ,default = "scenario_configs/coco_sports_ball.json" \
-        ,help="Path to the JSON-formatted config file")
-    args = parser.parse_args()
+@hydra.main(version_base=None, config_path="conf", config_name="config")
+def run(cfg: DictConfig) -> None:
+    print(OmegaConf.to_yaml(cfg))
+    print(f"scene path: {cfg.attack.scene.path}")
 
-    config_path = args.config
     original_cwd = os.getcwd()
+    passes = cfg.attack.passes
+    passes_names = cfg.attack.passes_names
+    batch_size = cfg.attack.batch_size
+    eps = cfg.attack.eps
+    eps_step =  cfg.attack.eps_step
+    targeted =  cfg.attack.targeted
+    target = cfg.attack.target
+    iters = cfg.attack.iters
+    spp = cfg.attack.samples_per_pixel    
+    scene_file = cfg.attack.scene.path
+    target_param_key = cfg.attack.scene.target_param_key
+    sensor_key = cfg.attack.scene.sensor_key
 
-    with open(config_path, "r") as schema_file:
-        schema = json.load(schema_file)
-        passes = schema["attack"]["kwargs"]["passes"]
-        passes_names = schema["attack"]["kwargs"]["passes_names"]
-        batch_size = schema["attack"]["kwargs"]["batch_size"]
-        eps = schema["attack"]["kwargs"]["eps"]
-        eps_step = schema["attack"]["kwargs"]["eps_step"]
-        targeted = schema["attack"]["kwargs"]["targeted"]
-        target = schema["attack"]["kwargs"]["target"]
-        iters = schema["attack"]["kwargs"]["iters"]
-        spp = schema["attack"]["kwargs"]["samples_per_pixel"]
-        scene_file = schema["attack"]["kwargs"]["scene_file"]
-        target_param_key = schema["attack"]["kwargs"]["target_param_key"]
-        sensor_key = schema["attack"]["kwargs"]["sensor_key"]
+    score_thesh_test = cfg.model.score_thresh_test
+    weights_file  = cfg.model.weights_file
+    model_config = cfg.model.config
 
-        score_thresh_test = schema["model"]["model_kwargs"]["score_thresh_test"]
-        weights_file = schema["model"]["weights_file"]
-        model_config = schema["model"]["config"]
+    dataset = cfg.dataset.name 
+    library = cfg.dataset.library
 
-        library = schema["dataset"]["library"]
-        dataset = schema["dataset"]["name"]
-        
-        # parse the target class string and determine index
-        # e.g., person class is @ index 0 in coco_train_2017
-        if library == "detectron2":
-            # TODO - raise exception if target class is not found in DT2
-            # handle 2-word classes e.g., : "sports_ball" --> "sports ball"
-            target = target.lower()
-            formatted_target = target.replace("_", " ")
-            classes = MetadataCatalog.get(dataset).thing_classes
-            target_index = classes.index(formatted_target)
+    if library == "detectron2":
+        # TODO - raise exception if target class is not found in DT2
+        # handle 2-word classes e.g., : "sports_ball" --> "sports ball"
+        target = target.lower()
+        formatted_target = target.replace("_", " ")
+        classes = MetadataCatalog.get(dataset).thing_classes
+        target_index = classes.index(formatted_target)
 
-        sensor_positions = schema["scenario"]["scenario_kwargs"]["sensor_positions"]
-        randomize_sensors = schema["scenario"]["scenario_kwargs"]["randomize_sensors"]
-
-        output_path = schema["sysconfig"]["output_path"]
-        if os.path.exists(output_path) == False:
-            os.mkdir(output_path)
-        
+    sensor_positions = cfg.scenario.sensor_positions.function 
+    randomize_sensors = cfg.scenario.randomize_positions
+    output_path = schema["sysconfig"]["output_path"]
+    if os.path.exists(output_path) == False:
+        os.mkdir(output_path)
 
     opts = [
         " -bs {}".format(batch_size),
@@ -78,7 +69,7 @@ if __name__ == "__main__":
         " -p {}".format(sensor_positions),
         " -rs {}".format(randomize_sensors),
         " > {}".format(output_path)
-    ]
+    ]   
 
     passes = list(range(passes))
     if passes_names is not None:
@@ -116,3 +107,7 @@ if __name__ == "__main__":
         next_tex = os.path.join(tex_dir, f"tex_{passes[i]}.png")
         set_tex = f"make TARGET={target} {next_tex}.set_tex"
         subprocess.run(set_tex, shell=True, check=True)
+
+
+if __name__ == "__main__":
+    run()
