@@ -11,7 +11,7 @@ from omegaconf import DictConfig, OmegaConf
 import hydra
 
 
-@hydra.main(version_base=None, config_path="conf", config_name="config")
+@hydra.main(version_base=None, config_path="../conf", config_name="config")
 def run(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     print(f"scene path: {cfg.attack.scene.path}")

@@ -263,7 +263,7 @@ def generate_cube_scene_orbit_cam_positions(reps_per_position=1) -> np.array:
         'type': 'scene',
         'sphere': {
             'type': 'ply',
-            'filename': "/nvmescratch/mhull32/robust-models-transfer/scenes/cube_scene/meshes/cube_orbit.ply"
+            'filename': "scenes/cube_scene/meshes/cube_orbit.ply"
         },
     })
 
@@ -271,14 +271,14 @@ def generate_cube_scene_orbit_cam_positions(reps_per_position=1) -> np.array:
         'type': 'scene',
         'sphere': {
             'type': 'ply',
-            'filename': "/nvmescratch/mhull32/robust-models-transfer/scenes/cube_scene/meshes/cube_orbit_1.ply"
+            'filename': "scenes/cube_scene/meshes/cube_orbit_1.ply"
         },
     })  
     sphere_2 = mi.load_dict({
         'type': 'scene',
         'sphere': {
             'type': 'ply',
-            'filename': "/nvmescratch/mhull32/robust-models-transfer/scenes/cube_scene/meshes/cube_orbit_2.ply"
+            'filename': "scenes/cube_scene/meshes/cube_orbit_2.ply"
         },
     })        
     ip = mi.traverse(sphere)

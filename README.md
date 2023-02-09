@@ -27,12 +27,11 @@ See `Makefile` for available commands
 ### Examples
 Run a texture attack on Detectron2 and log the results to a file
 
-`make attack_dt2 > results/results.txt`
+`python src/run.py attack.target=cat sysconfig.output_path=results/cat`
 
 ### Clean-up renders/ predicted renders images
 
 `make clean`
-
 
 ## Pipeline to use an attacked texture, render a batch of images, and predict results. 
 Here `TEX_NUM=0` refers to the index of the texture
@@ -85,4 +84,4 @@ generate_cube_scene_cam_positions
 
 ### Unset a texture and use original tex
 
-`make scenes/cube_scene_c/textures/traffic_light_tex/tex_2.png.unset_tex`
+`make scenes/cube_scene/textures/traffic_light_tex/tex_2.png.unset_tex`
