@@ -9,13 +9,14 @@ from detectron2.data import MetadataCatalog
 import dt2
 from omegaconf import DictConfig, OmegaConf
 import hydra
-
+import logging
+logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO)
 
 @hydra.main(version_base=None, config_path="../conf", config_name="config")
 def run(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
-    print(f"scene path: {cfg.attack.scene.path}")
-
+    logger.info("logginginfo")
     original_cwd = os.getcwd()
     passes = cfg.attack.passes
     passes_names = cfg.attack.passes_names

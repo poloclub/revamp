@@ -20,9 +20,13 @@ import json
 import time
 import copy
 import argparse
+import hydra
+from omegaconf import DictConfig
+import logging
 
-from detectron2.utils.logger import setup_logger
-setup_logger()
+
+# from detectron2.utils.logger import setup_logger
+# setup_logger()
 
 # detectron2 utilities
 from detectron2 import model_zoo
@@ -49,6 +53,9 @@ from detectron2.data.detection_utils import *
 from fvcore.transforms.transform import NoOpTransform
 from detectron2.utils.file_io import PathManager
 
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("dt2")
 
 cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=0)
 # gpu_devices = cuda_visible_devices.split(',')
@@ -555,6 +562,7 @@ if __name__ == "__main__":
         cam_idx = 0
         for it in range(iters):
             print(f'iter {it}')
+            logger.info(f"iter {it}")
             # keep 2 sets of parameters because we only need to differentiate wrt texture
             diff_params = mi.traverse(scene)
             non_diff_params = mi.traverse(scene)
@@ -576,6 +584,7 @@ if __name__ == "__main__":
             if success:
                 cam_idx += 1
                 print(f"Successful pred, using camera_idx {cam_idx}")
+                logger.info(f"Successful pred, using camera_idx {cam_idx}")
             N, H, W, C = batch_size, non_diff_params[k2][0], non_diff_params[k2][1], 3
             imgs = dr.empty(dr.cuda.ad.Float, N * H * W * C)
 
@@ -586,6 +595,7 @@ if __name__ == "__main__":
                 # set the camera position, render & attack
                 if cam_idx > len(sampled_camera_positions)-1:
                     print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
+                    logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
                     sys.exit(0)
                 if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
                     non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
@@ -619,7 +629,9 @@ if __name__ == "__main__":
             if (dr.grad_enabled(imgs)==False):
                 dr.enable_grad(imgs)
             loss = model_input(imgs, target)
-            print(f"sensor: {str(camera_idx[it])}, loss: {str(loss.array[0])[0:7]}")
+            sensor_loss = f"sensor: {str(camera_idx[it])}, loss: {str(loss.array[0])[0:7]}"
+            print(sensor_loss)
+            logger.info(sensor_loss)
             # model.train = False
             dr.enable_grad(loss)
             dr.backward(loss)
