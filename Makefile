@@ -68,7 +68,6 @@ attack_dt2:
 # modify directories vars as needed
 # this was written to quickly set a texture in a scene
 
-
 $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/%.png.set_tex:
 > rm -f $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
 > cp $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/$*.png $(SCENES)/$(TARGET_SCENE)/textures/
@@ -78,16 +77,3 @@ $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/%.png.set_tex:
 $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/%.png.unset_tex:
 > rm -f $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
 > cp $(SCENES)/$(TARGET_SCENE)/textures/orig_tex/$(ORIG_TEX) $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
-
-
-$(SCENARIOS)/%.json.run: $(SCENARIOS)/%.json
-> python src/run.py $(*D)/$<
-
-# use COCO 2017 train split for DT2 attacks
-$(SCENARIOS)/coco.json: $(SCENARIOS)/baseline.json
-> cat $< | $(JQ) '.dataset.name = "coco_2017_train"' > $@
-
-# specify any COCO label as a string e.g., "sports_ball" or "person"
-$(SCENARIOS)/coco_%.json: $(SCENARIOS)/coco.json
->	cat $< | $(JQ) '.attack.kwargs.target = "$*"'  \
-         | $(JQ) '.sysconfig.output_path = "results/$*"' > $@
