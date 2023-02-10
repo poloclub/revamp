@@ -1,0 +1,24 @@
+defaults:
+  - attack/scene: cube_scene
+  - model: faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x
+  - scenario: scenario
+  - scenario/sensor_positions: generate_cube_scene_orbit_cam_positions
+  - _self_
+  
+attack: 
+  passes: 7
+  passes_names: null
+  batch_size: 1
+  eps:  5.0
+  eps_step: 0.312
+  targeted: true
+  target: null
+  iters: 1000
+  samples_per_pixel: 256
+      
+dataset:
+  name: coco_2017_train
+  library: detectron2
+
+sysconfig:
+  output_path: null

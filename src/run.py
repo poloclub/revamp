@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
-@hydra.main(version_base=None, config_path="../conf", config_name="config")
+@hydra.main(version_base=None, config_path="../configs", config_name="config")
 def run(cfg: DictConfig) -> None:
     print(OmegaConf.to_yaml(cfg))
     logger.info("logginginfo")
