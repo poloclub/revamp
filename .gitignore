@@ -151,3 +151,4 @@ results/*/*.csv
 wget-log
 None
 rm
+outputs/*/*/.hydra/*yaml

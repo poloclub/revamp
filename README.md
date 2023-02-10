@@ -20,14 +20,17 @@ This project uses configurable scenarios that can be used to create experiments 
 
 For example, one scenario uses a "cube scene" consisting of a single cube and some lights.  The attackable parameter is the cube texture. 
 
-`make scenario configs`
-
-See `Makefile` for available commands
 
 ### Examples
 Run a texture attack on Detectron2 and log the results to a file
 
 `python src/run.py attack.target=cat sysconfig.output_path=results/cat`
+
+Continue an experiment by adding extra passes with explicit pass names:
+1. Set the texture:
+` make TARGET=truck TARGET_TEX=truck_tex scenes/cube_scene/textures/truck_tex/tex_6.png.set_tex`
+2. run: `python src/run.py attack.target=truck attack.passes=1 attack.passes_names=[7] sysconfig.output_path=results/truck`
+
 
 ### Clean-up renders/ predicted renders images
 
@@ -58,7 +61,7 @@ e.g., Use the file `tex_0.png` for the `PERSON` class and render/predict a batch
 
 ### Set an (optional alternate) texture before rendering
 
-`make scenes/cube_scene_c/textures/traffic_light_tex/tex_2.png.set_tex`
+`make scenes/cube_scene/textures/traffic_light_tex/tex_2.png.set_tex`
 
 or 
 
