@@ -1,3 +1,0 @@
-score_thresh_test: 0.3
-weights_file: "pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth"
-config: "pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml"
