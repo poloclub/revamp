@@ -150,4 +150,5 @@ results/*/*.csv
 *.vscode
 wget-log
 results/**/*.yaml
-reultts/**/*.log
+results/**/*.log
+results/**/*.csv
