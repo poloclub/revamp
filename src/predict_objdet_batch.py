@@ -20,14 +20,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # specify an object detector model
-    cfg = get_cfg()
-    cfg.merge_from_file("pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml")
-    cfg.MODEL.WEIGHTS = "pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth"
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.scores_thresh
-    cfg.MODEL.DEVICE=0
-    model = build_model(cfg)
+    dt2_cfg = get_cfg()
+    dt2_cfg.merge_from_file("pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml")
+    dt2_cfg.MODEL.WEIGHTS = "pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth"
+    dt2_cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = args.scores_thresh
+    dt2_cfg.MODEL.DEVICE=0
+    model = build_model(dt2_cfg)
     checkpointer = DetectionCheckpointer(model)
-    checkpointer.load(cfg.MODEL.WEIGHTS)    
+    checkpointer.load(dt2_cfg.MODEL.WEIGHTS)    
 
     # source directory with images we want to predict on
     directory_in_str = f'renders/{args.input_dir}/'
@@ -40,4 +40,4 @@ if __name__ == "__main__":
             # print(filename)
             im_path = os.path.join(directory_in_str, filename)
             input = dt2_input(im_path)
-            save_adv_image_preds(model=model, cfg=cfg, input=input, instance_mask_thresh=args.scores_thresh, path=f'preds/{args.input_dir}/{filename}')
+            save_adv_image_preds(model=model, dt2_config=dt2_cfg, input=input, instance_mask_thresh=args.scores_thresh, path=f'preds/{args.input_dir}/{filename}')

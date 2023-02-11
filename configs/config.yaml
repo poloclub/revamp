@@ -27,4 +27,4 @@ sysconfig:
 
 hydra:
   run:
-    dir: ./outputs/${attack.target}/${now:%Y-%m-%d}/${now:%H-%M-%S}  
+    dir: ./results/${attack.target}/${now:%Y-%m-%d}/${now:%H-%M-%S}  

@@ -149,6 +149,5 @@ results/*/*.csv
 *.lprof
 *.vscode
 wget-log
-None
-rm
-outputs/*/*/.hydra/*yaml
+results/**/*.yaml
+reultts/**/*.log
