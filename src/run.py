@@ -75,6 +75,9 @@ def run(cfg: DictConfig) -> None:
         set_tex = f"make TARGET={target} {next_tex}.set_tex"
         subprocess.run(set_tex, shell=True, check=True)
 
-    
+    # process logfile
+    process_logs = f"python src/results.py -i {cfg.sysconfig.log_dir}/run.log"
+    subprocess.run(process_logs, shell=True, check=True)
+
 if __name__ == "__main__":
     run()
