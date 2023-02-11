@@ -15,6 +15,7 @@ logging.basicConfig(level=logging.INFO)
 
 @hydra.main(version_base=None, config_path="../configs", config_name="config")
 def run(cfg: DictConfig) -> None:
+
     print(OmegaConf.to_yaml(cfg))
     original_cwd = os.getcwd()
     passes = cfg.attack.passes
@@ -67,12 +68,13 @@ def run(cfg: DictConfig) -> None:
         
         # make predictions using the same camera angles utilized for producing perturbation
         # FIXME - ensure camera position is same as used in config! 
-        render_predict = f"make TARGET={target} TEX_NUM={passes[i]} render_predict"
+        render_predict = f"make TARGET={target} RESULTS_DIR={cfg.sysconfig.log_dir} TEX_NUM={passes[i]} render_predict"
         subprocess.run(render_predict, shell=True, check=True)
 
         next_tex = os.path.join(tex_dir, f"tex_{passes[i]}.png")
         set_tex = f"make TARGET={target} {next_tex}.set_tex"
         subprocess.run(set_tex, shell=True, check=True)
 
+    
 if __name__ == "__main__":
     run()
