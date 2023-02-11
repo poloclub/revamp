@@ -26,7 +26,7 @@ render_predict: clean
 > python src/render_batch.py -s scenes/cube_scene/cube_scene.xml -cm generate_cube_scene_orbit_cam_positions
 > $(MAKE) img_to_pred
 > python src/predict_objdet_batch.py -d red_cube -st 0.3 > results/$(TARGET)/$(TEX_NUM)_scores.txt
-> $(MAKE) $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/tex_$(TEX_NUM).png.unset_tex
+> $(MAKE) unset_tex
 
 
 .PHONY: img_to_pred
@@ -73,7 +73,7 @@ $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/%.png.set_tex:
 > cp $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/$*.png $(SCENES)/$(TARGET_SCENE)/textures/
 > mv $(SCENES)/$(TARGET_SCENE)/textures/$*.png $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
 
-# running same target as above except use '.unset' will remove the copy of the tex and replace the original tex
-$(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/%.png.unset_tex:
+.PHONY: unset_tex
+unset_tex: 
 > rm -f $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
 > cp $(SCENES)/$(TARGET_SCENE)/textures/orig_tex/$(ORIG_TEX) $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)

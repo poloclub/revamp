@@ -13,6 +13,7 @@ attack:
   eps_step: 0.312
   targeted: true
   target: null
+  target_idx: null
   iters: 1000
   samples_per_pixel: 256
       

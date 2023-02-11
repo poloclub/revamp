@@ -54,8 +54,6 @@ from fvcore.transforms.transform import NoOpTransform
 from detectron2.utils.file_io import PathManager
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("dt2")
 
 cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=0)
 # gpu_devices = cuda_visible_devices.split(',')
@@ -384,45 +382,28 @@ def generate_cube_scene_cam_positions() -> np.array:
     positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in cam_pos_ring])
     return positions
 
-if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-bs", "--batch-size", type=int, default=1, help="batch size", required=True)
-    parser.add_argument("-e", "--eps", type=float,  default=5.0, help="epsilon attack budget", required=True)
-    parser.add_argument("-es", "--eps-step", type=float,  default=0.312, help="epsilon step size", required=True)
-    parser.add_argument("-t", "--targeted", type=bool,  default=True, help="Specify if this is a targeted attack", required=True)
-    parser.add_argument("-tc", "--target-class", type=int,  help="target class", required=True)
-    parser.add_argument("-ts", "--target-string", type=str,  help="string rep of target class", required=True)
-    parser.add_argument("-it", "--iters", type=int,  default=1000, help="number of iterations for entire attack scenario", required=True)
-    parser.add_argument("-sp", "--spp", type=int,  default=256, help="Samples per pixel for each render during attack", required=True)
-    parser.add_argument("-sf", "--scene-file", type=str, help="Mitsuba scene file to use during attack - .xml format required", required=True)
-    parser.add_argument("-pk", "--param-key", type=str, help="Mitsuba scene parameter to attack / perturb", required=True)
-    parser.add_argument("-sk", "--sensor-key", type=str, help="Mitsuba scene sensor key to use for rendering", required=True)
+def attack_dt2(cfg:DictConfig) -> None:
 
-    parser.add_argument("-st", "--score-thresh", type=float, help="Detectron2 score threshold for an object detection", required=True)
-    parser.add_argument("-wf", "--weights-file", type=str, help="Detectron2 weights file path", required=True)
-    parser.add_argument("-mc", "--model-config", type=str, help="Detectron2 weights config file path", required=True)
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("dt2")
 
-    parser.add_argument("-p", "--sensor-positions", type=str, help="function for generating sensor positions", required=True)
-    parser.add_argument("-rs", "--randomize_sensors", type=bool, default=False, help="Randomize sensors", required=True)
-    args = parser.parse_args()
-
-    batch_size = args.batch_size
-    eps = args.eps
-    eps_step = args.eps_step
-    targeted = args.targeted
-    target_class = args.target_class
-    target_string = args.target_string
-    iters = args.iters
-    spp = args.spp
-    scene_file = args.scene_file 
-    param_key = args.param_key 
-    sensor_key = args.sensor_key 
-    score_thresh = args.score_thresh 
-    weights_file = args.weights_file 
-    model_config = args.model_config 
-    sensor_positions = args.sensor_positions 
-    randomize_sensors = args.randomize_sensors # NOT IMPLEMENTED
+    batch_size = cfg.attack.batch_size
+    eps = cfg.attack.eps
+    eps_step =  cfg.attack.eps_step
+    targeted =  cfg.attack.targeted
+    target_class = cfg.attack.target_idx
+    target_string = cfg.attack.target
+    iters = cfg.attack.iters
+    spp = cfg.attack.samples_per_pixel
+    scene_file = cfg.attack.scene.path
+    param_key = cfg.attack.scene.target_param_key
+    sensor_key = cfg.attack.scene.sensor_key
+    score_thresh = cfg.model.score_thresh_test
+    weights_file = cfg.model.weights_file 
+    model_config = cfg.model.config
+    sensor_positions = cfg.scenario.sensor_positions.function
+    randomize_sensors = cfg.scenario.randomize_positions # NOT IMPLEMENTED
     scene_file_dir = os.path.dirname(scene_file)
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
