@@ -8,7 +8,7 @@ import mitsuba as mi
 import drjit as dr
 import os
 import argparse
-
+import time
 
 from dt2 import (generate_sunset_taxi_cam_positions
 ,generate_cube_scene_orbit_cam_positions
@@ -42,4 +42,5 @@ if __name__  == "__main__":
         img =  mi.render(scene, params=params, spp=256, sensor=0, seed=i+1)
         rendered_img_path = os.path.join(args.outdir,f"render_{i}.png")
         mi.util.write_bitmap(rendered_img_path, data=img)
+        time.sleep(0.2)
     print('done')

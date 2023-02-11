@@ -382,7 +382,6 @@ def generate_cube_scene_cam_positions() -> np.array:
     positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in cam_pos_ring])
     return positions
 
-
 def attack_dt2(cfg:DictConfig) -> None:
 
     logging.basicConfig(level=logging.INFO)
@@ -439,6 +438,8 @@ def attack_dt2(cfg:DictConfig) -> None:
     # moves_matrices = generate_cube_scene_cam_positions()
     # moves_matrices = generate_cube_scene_orbit_cam_positions()
     moves_matrices = eval(sensor_positions + "()")
+    if randomize_sensors:
+        np.random.shuffle(moves_matrices)
 
     # sanity check-render the scene
     # with dr.suspend_grad():
@@ -657,9 +658,11 @@ def attack_dt2(cfg:DictConfig) -> None:
             
             
             mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"perturbed_tex_map_b{it}.png"), data=perturbed_tex)
+            time.sleep(0.2)
             if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
                 perturbed_tex = mi.Bitmap(params[k])
-                mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex)        
+                mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex)
+                time.sleep(0.2) 
         return scene
     
     # iters = iters  
@@ -786,4 +789,5 @@ def attack_dt2(cfg:DictConfig) -> None:
             if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
                 perturbed_tex = mi.Bitmap(params[k])
                 mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex)
+                time.sleep(0.2)
         return scene
