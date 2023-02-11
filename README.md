@@ -53,7 +53,7 @@ e.g., Use the file `tex_0.png` for the `PERSON` class and render/predict a batch
 
 ### Proccess output logs into loss results - outputs `{filename}.csv`
 
-`python src/results.py -i results/results.txt`
+`python src/results.py -i results/cat/2023-02-10/21-04-51/run.log`
 
 ### Process output scores into score results - outputs `{filename}.csv`
 
