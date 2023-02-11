@@ -20,9 +20,13 @@ import json
 import time
 import copy
 import argparse
+import hydra
+from omegaconf import DictConfig
+import logging
 
-from detectron2.utils.logger import setup_logger
-setup_logger()
+
+# from detectron2.utils.logger import setup_logger
+# setup_logger()
 
 # detectron2 utilities
 from detectron2 import model_zoo
@@ -48,6 +52,7 @@ import detectron2.data.transforms as T
 from detectron2.data.detection_utils import *
 from fvcore.transforms.transform import NoOpTransform
 from detectron2.utils.file_io import PathManager
+
 
 
 cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=0)
@@ -80,7 +85,7 @@ MOTORCYCLE = 3
 #     """Returns DT2 formatted model inputs for a COCO image path"""
 #     img_names = [c['file_name'] for c in coco_train_dataset_dicts]
 #     idx = img_names.index(image_path)
-#     dsm = DatasetMapper(cfg, is_train=True, augmentations=[])
+#     dsm = DatasetMapper(dt2_config, is_train=True, augmentations=[])
 #     input = dsm.__call__(coco_train_dataset_dicts[idx])
 #     print(input['file_name'])
 #     return input
@@ -109,7 +114,7 @@ def dt2_input(image_path:str)->dict:
     input['instances'] = instances
     return input
 
-def save_adv_image_preds(model, cfg, input, instance_mask_thresh=0.7, target:int=None, format="RGB", path:str=None):
+def save_adv_image_preds(model, dt2_config, input, instance_mask_thresh=0.7, target:int=None, format="RGB", path:str=None):
     """
     Helper fn to save the predictions on an adversarial image
     attacked_image:ch.Tensor An attacked image
@@ -126,9 +131,9 @@ def save_adv_image_preds(model, cfg, input, instance_mask_thresh=0.7, target:int
         pbi = ch.tensor(perturbed_image, requires_grad=False).detach().cpu().numpy()
         if format=="BGR":
             pbi = pbi[:, :, ::-1]
-        v = Visualizer(pbi, MetadataCatalog.get(cfg.DATASETS.TRAIN[0]),scale=1.0)
+        v = Visualizer(pbi, MetadataCatalog.get(dt2_config.DATASETS.TRAIN[0]),scale=1.0)
         instances = adv_outputs[0]['instances']
-        things = np.array(MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).thing_classes) # holds class labels
+        things = np.array(MetadataCatalog.get(dt2_config.DATASETS.TRAIN[0]).thing_classes) # holds class labels
         predicted_classes = things[instances.pred_classes.cpu().numpy().tolist()] 
         print(f'Predicted Class: {predicted_classes}')        
         mask = instances.scores > instance_mask_thresh
@@ -263,7 +268,7 @@ def generate_cube_scene_orbit_cam_positions(reps_per_position=1) -> np.array:
         'type': 'scene',
         'sphere': {
             'type': 'ply',
-            'filename': "/nvmescratch/mhull32/robust-models-transfer/scenes/cube_scene/meshes/cube_orbit.ply"
+            'filename': "scenes/cube_scene/meshes/cube_orbit.ply"
         },
     })
 
@@ -271,14 +276,14 @@ def generate_cube_scene_orbit_cam_positions(reps_per_position=1) -> np.array:
         'type': 'scene',
         'sphere': {
             'type': 'ply',
-            'filename': "/nvmescratch/mhull32/robust-models-transfer/scenes/cube_scene/meshes/cube_orbit_1.ply"
+            'filename': "scenes/cube_scene/meshes/cube_orbit_1.ply"
         },
     })  
     sphere_2 = mi.load_dict({
         'type': 'scene',
         'sphere': {
             'type': 'ply',
-            'filename': "/nvmescratch/mhull32/robust-models-transfer/scenes/cube_scene/meshes/cube_orbit_2.ply"
+            'filename': "scenes/cube_scene/meshes/cube_orbit_2.ply"
         },
     })        
     ip = mi.traverse(sphere)
@@ -377,45 +382,28 @@ def generate_cube_scene_cam_positions() -> np.array:
     positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in cam_pos_ring])
     return positions
 
-if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-bs", "--batch-size", type=int, default=1, help="batch size", required=True)
-    parser.add_argument("-e", "--eps", type=float,  default=5.0, help="epsilon attack budget", required=True)
-    parser.add_argument("-es", "--eps-step", type=float,  default=0.312, help="epsilon step size", required=True)
-    parser.add_argument("-t", "--targeted", type=bool,  default=True, help="Specify if this is a targeted attack", required=True)
-    parser.add_argument("-tc", "--target-class", type=int,  help="target class", required=True)
-    parser.add_argument("-ts", "--target-string", type=str,  help="string rep of target class", required=True)
-    parser.add_argument("-it", "--iters", type=int,  default=1000, help="number of iterations for entire attack scenario", required=True)
-    parser.add_argument("-sp", "--spp", type=int,  default=256, help="Samples per pixel for each render during attack", required=True)
-    parser.add_argument("-sf", "--scene-file", type=str, help="Mitsuba scene file to use during attack - .xml format required", required=True)
-    parser.add_argument("-pk", "--param-key", type=str, help="Mitsuba scene parameter to attack / perturb", required=True)
-    parser.add_argument("-sk", "--sensor-key", type=str, help="Mitsuba scene sensor key to use for rendering", required=True)
+def attack_dt2(cfg:DictConfig) -> None:
 
-    parser.add_argument("-st", "--score-thresh", type=float, help="Detectron2 score threshold for an object detection", required=True)
-    parser.add_argument("-wf", "--weights-file", type=str, help="Detectron2 weights file path", required=True)
-    parser.add_argument("-mc", "--model-config", type=str, help="Detectron2 weights config file path", required=True)
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger("dt2")
 
-    parser.add_argument("-p", "--sensor-positions", type=str, help="function for generating sensor positions", required=True)
-    parser.add_argument("-rs", "--randomize_sensors", type=bool, default=False, help="Randomize sensors", required=True)
-    args = parser.parse_args()
-
-    batch_size = args.batch_size
-    eps = args.eps
-    eps_step = args.eps_step
-    targeted = args.targeted
-    target_class = args.target_class
-    target_string = args.target_string
-    iters = args.iters
-    spp = args.spp
-    scene_file = args.scene_file 
-    param_key = args.param_key 
-    sensor_key = args.sensor_key 
-    score_thresh = args.score_thresh 
-    weights_file = args.weights_file 
-    model_config = args.model_config 
-    sensor_positions = args.sensor_positions 
-    randomize_sensors = args.randomize_sensors # NOT IMPLEMENTED
+    batch_size = cfg.attack.batch_size
+    eps = cfg.attack.eps
+    eps_step =  cfg.attack.eps_step
+    targeted =  cfg.attack.targeted
+    target_class = cfg.attack.target_idx
+    target_string = cfg.attack.target
+    iters = cfg.attack.iters
+    spp = cfg.attack.samples_per_pixel
+    scene_file = cfg.attack.scene.path
+    param_key = cfg.attack.scene.target_param_key
+    sensor_key = cfg.attack.scene.sensor_key
+    score_thresh = cfg.model.score_thresh_test
+    weights_file = cfg.model.weights_file 
+    model_config = cfg.model.config
+    sensor_positions = cfg.scenario.sensor_positions.function
+    randomize_sensors = cfg.scenario.randomize_positions # NOT IMPLEMENTED
     scene_file_dir = os.path.dirname(scene_file)
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
@@ -458,15 +446,15 @@ if __name__ == "__main__":
     #     mi.util.write_bitmap("renders/render.png", data=img)
 
     # load pre-trained robust faster-rcnn model
-    cfg = get_cfg()
-    cfg.merge_from_file(model_config)
-    cfg.MODEL.WEIGHTS = weights_file
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
+    dt2_config = get_cfg()
+    dt2_config.merge_from_file(model_config)
+    dt2_config.MODEL.WEIGHTS = weights_file
+    dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
     # FIXME - Get GPU Device form environment variable.
-    cfg.MODEL.DEVICE=DEVICE
-    model = build_model(cfg)
+    dt2_config.MODEL.DEVICE=DEVICE
+    model = build_model(dt2_config)
     checkpointer = DetectionCheckpointer(model)
-    checkpointer.load(cfg.MODEL.WEIGHTS)
+    checkpointer.load(dt2_config.MODEL.WEIGHTS)
     model.train = True
     model.training = True
     model.proposal_generator.training = True
@@ -554,7 +542,8 @@ if __name__ == "__main__":
         
         cam_idx = 0
         for it in range(iters):
-            print(f'iter {it}')
+            # print(f'iter {it}')
+            # logger.info(f"iter {it}")
             # keep 2 sets of parameters because we only need to differentiate wrt texture
             diff_params = mi.traverse(scene)
             non_diff_params = mi.traverse(scene)
@@ -576,6 +565,7 @@ if __name__ == "__main__":
             if success:
                 cam_idx += 1
                 print(f"Successful pred, using camera_idx {cam_idx}")
+                logger.info(f"Successful pred, using camera_idx {cam_idx}")
             N, H, W, C = batch_size, non_diff_params[k2][0], non_diff_params[k2][1], 3
             imgs = dr.empty(dr.cuda.ad.Float, N * H * W * C)
 
@@ -586,6 +576,7 @@ if __name__ == "__main__":
                 # set the camera position, render & attack
                 if cam_idx > len(sampled_camera_positions)-1:
                     print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
+                    logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
                     sys.exit(0)
                 if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
                     non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
@@ -609,8 +600,8 @@ if __name__ == "__main__":
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
                 success = save_adv_image_preds(model \
-                    , cfg, input=rendered_img_input \
-                    , instance_mask_thresh=cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST \
+                    , dt2_config, input=rendered_img_input \
+                    , instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST \
                     , target = label
                     , path=f'preds/render_b{it}_s{b}.png')
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
@@ -619,7 +610,9 @@ if __name__ == "__main__":
             if (dr.grad_enabled(imgs)==False):
                 dr.enable_grad(imgs)
             loss = model_input(imgs, target)
-            print(f"sensor: {str(camera_idx[it])}, loss: {str(loss.array[0])[0:7]}")
+            sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
+            print(sensor_loss)
+            logger.info(sensor_loss)
             # model.train = False
             dr.enable_grad(loss)
             dr.backward(loss)
@@ -770,7 +763,7 @@ if __name__ == "__main__":
             time.sleep(1.0)
             # Get and Vizualize DT2 Predictions from rendered image
             rendered_img_input = dt2_input(rendered_img_path)
-            success = save_adv_image_preds(model, cfg, rendered_img_input, path=f'preds/render_{it}_s{camera_idx[it]}.png')
+            success = save_adv_image_preds(model, dt2_config, rendered_img_input, path=f'preds/render_{it}_s{camera_idx[it]}.png')
             target = dr.cuda.ad.TensorXf([label], shape=(1,))
             loss = model_input(img, target)
             print(f"sensor: {str(camera_idx[it])}, loss: {str(loss.array[0])[0:7]}")

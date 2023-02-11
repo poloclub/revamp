@@ -17,23 +17,38 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     fp = args.input
-    base = os.path.basename(fp)
-    base = os.path.splitext(base)[0]
-    dir = os.path.dirname(fp)
-    op = os.path.join(dir,f"{base}.csv")
 
-    losses = []
-    with open(fp, 'r') as file:
-        for line in file:
-            if "loss" in line:
-                result = re.search(r'loss: (\d+\.\d+)', line)
-                if result:
-                    extracted_number = float(result.group(1))
-                    losses.append(extracted_number)
-                    print(extracted_number)
-                else:
-                    print("Number not found in string.") 
-    
-    with open(op, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(losses)
+    # get number of passes, make individual .csvs
+    with open(fp, "r") as log:
+        content = log.read()
+    passes = re.findall(r"\[PASS \d+\]", content)
+    num_passes = len(set(passes))    
+
+    pass_names = []
+    for p in passes:
+        result = re.search(r"\[PASS (\d+)\]", p)
+        number = int(result.group(1))
+        pass_names.append(number)
+    pass_names = sorted(list(set(pass_names)))
+
+    for p in range(num_passes):
+        base = pass_names[p]
+        dir = os.path.dirname(fp)
+        op = os.path.join(dir,f"{base}.csv")
+
+        losses = []
+        with open(fp, 'r') as file:           
+            for line in file:
+                if f"[PASS {base}]" in line:
+                    if "loss" in line:
+                        result = re.search(r'loss: (\d+\.\d+)', line)
+                        if result:
+                            extracted_number = float(result.group(1))
+                            losses.append(extracted_number)
+                            print(extracted_number)
+                        else:
+                            print("Number not found in string.") 
+        
+        with open(op, 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(losses)

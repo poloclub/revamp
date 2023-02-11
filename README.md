@@ -20,19 +20,21 @@ This project uses configurable scenarios that can be used to create experiments 
 
 For example, one scenario uses a "cube scene" consisting of a single cube mesh and some lights.  The attackable parameter is the cube's texture in bitmap format. The victim model is a 2-stage object detector (faster-rcnn).  The rendering settings specify that the scene be rendered 48 different sensor positions during the attack.  
 
-`make scenario configs`
-
-See `Makefile` for available commands
 
 ### Examples
 Run a texture attack on Detectron2 and log the results to a file
 
-`make attack_dt2 > results/results.txt`
+`python src/run.py attack.target=cat sysconfig.output_path=results/cat`
+
+Continue an experiment by adding extra passes with explicit pass names:
+1. Set the texture:
+` make TARGET=truck TARGET_TEX=truck_tex scenes/cube_scene/textures/truck_tex/tex_6.png.set_tex`
+2. run: `python src/run.py attack.target=truck attack.passes=1 attack.passes_names=[7] sysconfig.output_path=results/truck`
+
 
 ### Clean-up renders/ predicted renders images
 
 `make clean`
-
 
 ## Pipeline to use an attacked texture, render a batch of images, and predict results. 
 Here `TEX_NUM=0` refers to the index of the texture
@@ -51,7 +53,7 @@ e.g., Use the file `tex_0.png` for the `PERSON` class and render/predict a batch
 
 ### Proccess output logs into loss results - outputs `{filename}.csv`
 
-`python src/results.py -i results/results.txt`
+`python src/results.py -i results/cat/2023-02-10/21-04-51/run.log`
 
 ### Process output scores into score results - outputs `{filename}.csv`
 
@@ -59,7 +61,7 @@ e.g., Use the file `tex_0.png` for the `PERSON` class and render/predict a batch
 
 ### Set an (optional alternate) texture before rendering
 
-`make scenes/cube_scene_c/textures/traffic_light_tex/tex_2.png.set_tex`
+`make scenes/cube_scene/textures/traffic_light_tex/tex_2.png.set_tex`
 
 or 
 
@@ -85,4 +87,4 @@ generate_cube_scene_cam_positions
 
 ### Unset a texture and use original tex
 
-`make scenes/cube_scene_c/textures/traffic_light_tex/tex_2.png.unset_tex`
+`make scenes/cube_scene/textures/traffic_light_tex/tex_2.png.unset_tex`

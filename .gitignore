@@ -144,10 +144,10 @@ dmypy.json
 *.code-workspace
 events.out.tfevents.*
 
-results/*/*.txt
-results/*/*.csv
 *.lprof
 *.vscode
 wget-log
-None
-rm
+results/**/*.yaml
+results/**/*.log
+results/**/*.csv
+results/**/*.txt
