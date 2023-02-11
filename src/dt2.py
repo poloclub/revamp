@@ -85,7 +85,7 @@ MOTORCYCLE = 3
 #     """Returns DT2 formatted model inputs for a COCO image path"""
 #     img_names = [c['file_name'] for c in coco_train_dataset_dicts]
 #     idx = img_names.index(image_path)
-#     dsm = DatasetMapper(cfg, is_train=True, augmentations=[])
+#     dsm = DatasetMapper(dt2_config, is_train=True, augmentations=[])
 #     input = dsm.__call__(coco_train_dataset_dicts[idx])
 #     print(input['file_name'])
 #     return input
@@ -114,7 +114,7 @@ def dt2_input(image_path:str)->dict:
     input['instances'] = instances
     return input
 
-def save_adv_image_preds(model, cfg, input, instance_mask_thresh=0.7, target:int=None, format="RGB", path:str=None):
+def save_adv_image_preds(model, dt2_config, input, instance_mask_thresh=0.7, target:int=None, format="RGB", path:str=None):
     """
     Helper fn to save the predictions on an adversarial image
     attacked_image:ch.Tensor An attacked image
@@ -131,9 +131,9 @@ def save_adv_image_preds(model, cfg, input, instance_mask_thresh=0.7, target:int
         pbi = ch.tensor(perturbed_image, requires_grad=False).detach().cpu().numpy()
         if format=="BGR":
             pbi = pbi[:, :, ::-1]
-        v = Visualizer(pbi, MetadataCatalog.get(cfg.DATASETS.TRAIN[0]),scale=1.0)
+        v = Visualizer(pbi, MetadataCatalog.get(dt2_config.DATASETS.TRAIN[0]),scale=1.0)
         instances = adv_outputs[0]['instances']
-        things = np.array(MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).thing_classes) # holds class labels
+        things = np.array(MetadataCatalog.get(dt2_config.DATASETS.TRAIN[0]).thing_classes) # holds class labels
         predicted_classes = things[instances.pred_classes.cpu().numpy().tolist()] 
         print(f'Predicted Class: {predicted_classes}')        
         mask = instances.scores > instance_mask_thresh
@@ -446,15 +446,15 @@ def attack_dt2(cfg:DictConfig) -> None:
     #     mi.util.write_bitmap("renders/render.png", data=img)
 
     # load pre-trained robust faster-rcnn model
-    cfg = get_cfg()
-    cfg.merge_from_file(model_config)
-    cfg.MODEL.WEIGHTS = weights_file
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
+    dt2_config = get_cfg()
+    dt2_config.merge_from_file(model_config)
+    dt2_config.MODEL.WEIGHTS = weights_file
+    dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
     # FIXME - Get GPU Device form environment variable.
-    cfg.MODEL.DEVICE=DEVICE
-    model = build_model(cfg)
+    dt2_config.MODEL.DEVICE=DEVICE
+    model = build_model(dt2_config)
     checkpointer = DetectionCheckpointer(model)
-    checkpointer.load(cfg.MODEL.WEIGHTS)
+    checkpointer.load(dt2_config.MODEL.WEIGHTS)
     model.train = True
     model.training = True
     model.proposal_generator.training = True
@@ -542,8 +542,8 @@ def attack_dt2(cfg:DictConfig) -> None:
         
         cam_idx = 0
         for it in range(iters):
-            print(f'iter {it}')
-            logger.info(f"iter {it}")
+            # print(f'iter {it}')
+            # logger.info(f"iter {it}")
             # keep 2 sets of parameters because we only need to differentiate wrt texture
             diff_params = mi.traverse(scene)
             non_diff_params = mi.traverse(scene)
@@ -600,8 +600,8 @@ def attack_dt2(cfg:DictConfig) -> None:
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
                 success = save_adv_image_preds(model \
-                    , cfg, input=rendered_img_input \
-                    , instance_mask_thresh=cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST \
+                    , dt2_config, input=rendered_img_input \
+                    , instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST \
                     , target = label
                     , path=f'preds/render_b{it}_s{b}.png')
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
@@ -610,7 +610,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             if (dr.grad_enabled(imgs)==False):
                 dr.enable_grad(imgs)
             loss = model_input(imgs, target)
-            sensor_loss = f"sensor: {str(camera_idx[it])}, loss: {str(loss.array[0])[0:7]}"
+            sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
             print(sensor_loss)
             logger.info(sensor_loss)
             # model.train = False
@@ -763,7 +763,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             time.sleep(1.0)
             # Get and Vizualize DT2 Predictions from rendered image
             rendered_img_input = dt2_input(rendered_img_path)
-            success = save_adv_image_preds(model, cfg, rendered_img_input, path=f'preds/render_{it}_s{camera_idx[it]}.png')
+            success = save_adv_image_preds(model, dt2_config, rendered_img_input, path=f'preds/render_{it}_s{camera_idx[it]}.png')
             target = dr.cuda.ad.TensorXf([label], shape=(1,))
             loss = model_input(img, target)
             print(f"sensor: {str(camera_idx[it])}, loss: {str(loss.array[0])[0:7]}")

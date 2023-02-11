@@ -4,7 +4,7 @@ defaults:
   - scenario: scenario
   - scenario/sensor_positions: generate_cube_scene_orbit_cam_positions
   - _self_
-  
+
 attack: 
   passes: 7
   passes_names: null
@@ -23,3 +23,8 @@ dataset:
 
 sysconfig:
   output_path: results/${attack.target}
+  pass_idx: null
+
+hydra:
+  run:
+    dir: ./outputs/${attack.target}/${now:%Y-%m-%d}/${now:%H-%M-%S}  

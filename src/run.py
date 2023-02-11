@@ -45,9 +45,8 @@ def run(cfg: DictConfig) -> None:
 
     for i in range(len(passes)):
         fn = f"{passes[i]}.txt"
-        # opts[-1] = f"> {os.path.join(output_path, fn)}"
-        # command = "python src/dt2.py" + " ".join(opts)
-
+        cfg.sysconfig.output_path = os.path.join(cfg.sysconfig.output_path, fn)
+        cfg.sysconfig.pass_idx = passes[i]
         attack_dt2(cfg)
 
         # copy last texture perturbation to use for next perturbation
