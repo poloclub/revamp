@@ -34,7 +34,8 @@ Run a texture attack on Detectron2 and log the results to a file.  We use Hydra 
 
 `python src/run.py attack.target=cat scenario.randomize_positions=true`
 
-Continue an experiment by adding extra passes with explicit pass names:
+Sometimes Mitsuba crashes or you want to add additional passes to an perturbed texture.  To resume / add on to an experiment, follow these steps:
+Continue an experiment by adding extra passes with explicit pass names.
 1. Set the texture:
 ` make TARGET=truck TARGET_TEX=truck_tex scenes/cube_scene/textures/truck_tex/tex_6.png.set_tex`
 2. run: `python src/run.py attack.target=truck attack.passes=1 attack.passes_names=[7]`
@@ -46,17 +47,16 @@ Continue an experiment by adding extra passes with explicit pass names:
 
 ## Pipeline to use an attacked texture, render a batch of images, and predict results. 
 Here `TEX_NUM=0` refers to the index of the texture
-
-`make TEX_NUM=0 render_predict` 
+ 
+`make TARGET=traffic_light RESULTS_DIR=results/traffic_light TEX_NUM=0 render_predict`
 
 Other params
 `TARGET_SCENE = cube_scene
-TARGET_TEX  = traffic_light_tex
 ORIG_TEX = red_tex.png 
 TEX_NUM = 0`
 
-e.g., Use the file `tex_0.png` for the `PERSON` class and render/predict a batch of images.
-`make TARGET_TEX = person TEX_NUM=0 render_predict`
+e.g., This uses the file `tex_2.png` for the `PERSON` class and render/predict a batch of images.
+`make TARGET_TEX=person TEX_NUM=2 render_predict`
 
 
 ### Proccess output logs into loss results - outputs `{filename}.csv` for each unique pass found in the log file.
@@ -83,16 +83,10 @@ This generates 264 sensor positions at vertices of 3 concentric half-icospheres
 
 `generate_cube_scene_orbit_cam_positions` 
 
-generate_cube_scene_cam_positions
-
-### Prep batch for detection
-
-`make img_to_pred`
-
 ### Predict on a batch of images
 
 `python src/predict_objdet_batch.py -d red_cube -st 0.3 > results/tf0_scores.txt`
 
-### Unset a texture and use original tex
+### Unset a texture and use original tex (cube scene)
 
-`make scenes/cube_scene/textures/traffic_light_tex/tex_2.png.unset_tex`
+`make unset_tex`
