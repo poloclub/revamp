@@ -21,6 +21,12 @@ This project uses configurable scenarios that can be used to create experiments 
 For example, one scenario uses a "cube scene" consisting of a single cube mesh and some lights.  The attackable parameter is the cube's texture in bitmap format. The victim model is a 2-stage object detector (faster-rcnn).  The rendering settings specify that the scene be rendered 48 different sensor positions during the attack.  
 
 
+## Getting Started
+
+`conda create --name <env_name> --file requirements.txt`
+
+
+
 ### Examples
 Run a texture attack on Detectron2 and log the results to a file
 
