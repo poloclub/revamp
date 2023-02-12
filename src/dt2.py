@@ -15,7 +15,6 @@ import torch.nn as nn
 from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
-import graphviz
 import json
 import time
 import copy

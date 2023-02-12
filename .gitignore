@@ -129,10 +129,15 @@ dmypy.json
 .pyre/
 
 *.png
+!/scenes/cube_scene/textures/orig_tex/red_tex.png
+!/scenes/cube_scene/textures/red_tex.png
 *.jpg
 *.jpeg
 *.exr
+# mesh files can be large - ignore them in general
 *.ply
+# exception, include meshes with the cube scene
+!/scenes/cube_scene/meshes/*.ply
 *.obj
 *.stl
 *.mtl
