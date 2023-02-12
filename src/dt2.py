@@ -578,7 +578,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 if cam_idx > len(sampled_camera_positions)-1:
                     print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
                     logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
-                    sys.exit(0)
+                    return
                 if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
                     non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
                 else:
