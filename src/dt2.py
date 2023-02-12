@@ -306,6 +306,82 @@ def generate_cube_scene_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = np.repeat(positions, reps_per_position)
     return positions
 
+def generate_cube_scene_32_orbit_cam_positions(reps_per_position=1) -> np.array:
+    """
+    Load a mesh and use its vertices as camera positions
+    e.g.,  Load a half-icosphere and separate the vertices by their height above target object
+    each strata of vertices forms a 'ring' around the object. place cameras in a ring around the object
+    and return camera positions (world_transform())
+    """
+    from mitsuba import ScalarTransform4f as T    
+    def load_sensor_at_position(x,y,z):  
+        origin = mi.ScalarPoint3f([x,y,z])
+
+        return mi.load_dict({
+            'type': 'perspective',
+            'fov': 39.3077,
+            'to_world': T.look_at(
+                origin=origin,
+                target=[0, -0.5, 0],
+                up=[0, 1, 0]
+            ),
+            'sampler': {
+                'type': 'independent',
+                'sample_count': 16
+            },
+            'film': {
+                'type': 'hdrfilm',
+                'width': 512,
+                'height': 512,
+                'rfilter': {
+                    'type': 'tent',
+                },
+                'pixel_format': 'rgb',
+            },
+        })
+    sphere = mi.load_dict({
+        'type': 'scene',
+        'sphere': {
+            'type': 'ply',
+            'filename': "scenes/cube_scene/meshes/sphere_32_low.ply"
+        },
+    })
+
+    sphere_1 = mi.load_dict({
+        'type': 'scene',
+        'sphere': {
+            'type': 'ply',
+            'filename': "scenes/cube_scene/meshes/sphere_32_mid.ply"
+        },
+    })  
+    sphere_2 = mi.load_dict({
+        'type': 'scene',
+        'sphere': {
+            'type': 'ply',
+            'filename': "scenes/cube_scene/meshes/sphere_32_high.ply"
+        },
+    })        
+    ip = mi.traverse(sphere)
+    ipv = np.array(ip["sphere.vertex_positions"])
+    ipv  = np.reshape(ipv,(int(len(ipv)/3),3))    
+
+    sphere_1_ip = mi.traverse(sphere_1)
+    sphere_1_ipv = np.array(sphere_1_ip["sphere.vertex_positions"])
+    sphere_1_ipv = np.reshape(sphere_1_ipv,(int(len(sphere_1_ipv)/3),3))    
+
+    sphere_2_ip = mi.traverse(sphere_2)
+    sphere_2_ipv = np.array(sphere_2_ip["sphere.vertex_positions"])    
+    sphere_2_ipv = np.reshape(sphere_2_ipv,(int(len(sphere_2_ipv)/3),3))   
+
+    ip = mi.traverse(sphere)
+    ipv = np.array(ip["sphere.vertex_positions"])
+    ipv  = np.reshape(ipv,(int(len(ipv)/3),3))    
+
+    cam_pos_ring = np.concatenate((ipv, sphere_1_ipv, sphere_2_ipv))
+    positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in cam_pos_ring])
+    positions = np.repeat(positions, reps_per_position)
+    return positions
+
 def generate_cube_scene_cam_positions() -> np.array:
     """
     Load a mesh and use its vertices as camera positions
