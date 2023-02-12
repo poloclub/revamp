@@ -23,7 +23,11 @@ For example, one scenario uses a "cube scene" consisting of a single cube mesh a
 
 ## Getting Started
 
-`conda create --name <env_name> --file requirements.txt`
+`conda env create -f environment.yml`
+
+Install Detectron2
+
+`python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'`
 
 ### Model Weights
 We use [Robust ImageNet Models](https://github.com/microsoft/robust-models-transfer). You'll need to choose an appropriate model for your experiment. Currently we use this ResNet-50 [L2-Robust Model](https://robustnessws4285631339.blob.core.windows.net/public-models/robust_imagenet/resnet50_l2_eps0.03.ckpt?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2051-10-06T07:09:59Z&st=2021-10-05T23:09:59Z&spr=https,http&sig=U69sEOSMlliobiw8OgiZpLTaYyOA5yt5pHHH5%2FKUYgI%3D) for object detection with Detectron2. You can specify the weights file path and model config path in `configs/model/{model}.yaml`.

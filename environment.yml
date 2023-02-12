@@ -70,7 +70,6 @@ dependencies:
     - contourpy==1.0.6
     - cox==0.1.post3
     - cycler==0.11.0
-    - detectron2==0.6
     - dill==0.3.6
     - drjit==0.3.2
     - fairscale==0.4.12
@@ -116,7 +115,6 @@ dependencies:
     - pycocotools==2.0.6
     - pydantic==1.10.4
     - pydot==1.4.2
-    - python-graphviz==0.20.1
     - pytz==2022.7
     - pyyaml==6.0
     - regex==2022.10.31
@@ -134,8 +132,8 @@ dependencies:
     - timm==0.6.12
     - toml==0.10.2
     - tomli==2.0.1
-    - torch==1.12.1+cu113
-    - torchvision==0.13.1+cu113
+    - torch
+    - torchvision
     - tqdm==4.64.1
     - typing-extensions==4.4.0
     - urllib3==1.26.13
