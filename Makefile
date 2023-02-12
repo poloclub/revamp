@@ -15,6 +15,8 @@ TXT_PREFIX = $(TARGET) # goes ahead of a output text file e.g., "person_scores.t
 SCENARIOS = scenario_configs
 JQ = jq --indent 4 -r
 RESULTS_DIR = $(RESULTS)/$(TARGET)
+SENSOR_POS_FN = generate_cube_scene_orbit_cam_positions
+# generate_cube_scene_32_orbit_cam_positions
 
 # Taken from https://tech.davis-hansson.com/p/make/
 ifeq ($(origin .RECIPEPREFIX), undefined)
@@ -24,7 +26,7 @@ endif
 
 render_predict: clean
 > $(MAKE) $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/tex_$(TEX_NUM).png.set_tex
-> python src/render_batch.py -s scenes/cube_scene/cube_scene.xml -cm generate_cube_scene_orbit_cam_positions
+> python src/render_batch.py -s scenes/cube_scene/cube_scene.xml -cm $(SENSOR_POS_FN)
 > $(MAKE) img_to_pred
 > python src/predict_objdet_batch.py -d red_cube -st 0.3 > $(RESULTS_DIR)/$(TEX_NUM)_scores.txt
 > $(MAKE) unset_tex
@@ -78,3 +80,72 @@ $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/%.png.set_tex:
 unset_tex: 
 > rm -f $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
 > cp $(SCENES)/$(TARGET_SCENE)/textures/orig_tex/$(ORIG_TEX) $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
+
+.PHONY: stop_sign_results
+stop_sign_results:
+> $(MAKE) TARGET=stop_sign RESULTS_DIR=results/stop_sign/non_rand_sensor_pos TEX_NUM=0 render_predict
+> $(MAKE) TARGET=stop_sign RESULTS_DIR=results/stop_sign/non_rand_sensor_pos TEX_NUM=1 render_predict
+> $(MAKE) TARGET=stop_sign RESULTS_DIR=results/stop_sign/non_rand_sensor_pos TEX_NUM=2 render_predict
+> $(MAKE) TARGET=stop_sign RESULTS_DIR=results/stop_sign/non_rand_sensor_pos TEX_NUM=3 render_predict
+> $(MAKE) TARGET=stop_sign RESULTS_DIR=results/stop_sign/non_rand_sensor_pos TEX_NUM=4 render_predict
+> $(MAKE) TARGET=stop_sign RESULTS_DIR=results/stop_sign/non_rand_sensor_pos TEX_NUM=5 render_predict
+> $(MAKE) TARGET=stop_sign RESULTS_DIR=results/stop_sign/non_rand_sensor_pos TEX_NUM=6 render_predict
+> python src/scores.py -i results/stop_sign/non_rand_sensor_pos/0_scores.txt -t stop\ sign
+> python src/scores.py -i results/stop_sign/non_rand_sensor_pos/1_scores.txt -t stop\ sign
+> python src/scores.py -i results/stop_sign/non_rand_sensor_pos/2_scores.txt -t stop\ sign
+> python src/scores.py -i results/stop_sign/non_rand_sensor_pos/3_scores.txt -t stop\ sign
+> python src/scores.py -i results/stop_sign/non_rand_sensor_pos/4_scores.txt -t stop\ sign
+> python src/scores.py -i results/stop_sign/non_rand_sensor_pos/5_scores.txt -t stop\ sign
+> python src/scores.py -i results/stop_sign/non_rand_sensor_pos/6_scores.txt -t stop\ sign
+
+.PHONY: person_results
+person_results:
+> $(MAKE) TARGET=person RESULTS_DIR=results/person TEX_NUM=0 render_predict
+> $(MAKE) TARGET=person RESULTS_DIR=results/person TEX_NUM=1 render_predict
+> $(MAKE) TARGET=person RESULTS_DIR=results/person TEX_NUM=2 render_predict
+> $(MAKE) TARGET=person RESULTS_DIR=results/person TEX_NUM=3 render_predict
+> $(MAKE) TARGET=person RESULTS_DIR=results/person TEX_NUM=4 render_predict
+> $(MAKE) TARGET=person RESULTS_DIR=results/person TEX_NUM=5 render_predict
+> $(MAKE) TARGET=person RESULTS_DIR=results/person TEX_NUM=6 render_predict
+> python src/scores.py -i results/person/0_scores.txt -t person
+> python src/scores.py -i results/person/1_scores.txt -t person
+> python src/scores.py -i results/person/2_scores.txt -t person
+> python src/scores.py -i results/person/3_scores.txt -t person
+> python src/scores.py -i results/person/4_scores.txt -t person
+> python src/scores.py -i results/person/5_scores.txt -t person
+> python src/scores.py -i results/person/6_scores.txt -t person
+
+
+
+
+.PHONY: bicycle_results
+bicycle_results:
+> python src/scores.py -i results/bicycle/rand_sensor_pos/2023-02-11/18-52-39/0_scores.txt -t bicycle
+> python src/scores.py -i results/bicycle/rand_sensor_pos/2023-02-11/18-52-39/1_scores.txt -t bicycle
+> python src/scores.py -i results/bicycle/rand_sensor_pos/2023-02-11/18-52-39/2_scores.txt -t bicycle
+> python src/scores.py -i results/bicycle/rand_sensor_pos/2023-02-11/18-52-39/3_scores.txt -t bicycle
+> python src/scores.py -i results/bicycle/rand_sensor_pos/2023-02-11/18-52-39/4_scores.txt -t bicycle
+> python src/scores.py -i results/bicycle/rand_sensor_pos/2023-02-11/18-52-39/5_scores.txt -t bicycle
+> python src/scores.py -i results/bicycle/rand_sensor_pos/2023-02-11/18-52-39/6_scores.txt -t bicycle
+
+
+.PHONY: traffic_light_results
+traffic_light_results:
+> python src/scores.py -i results/traffic_light/rand_sensor_pos/2023-02-11/17-51-05/0_scores.txt -t traffic\ light
+> python src/scores.py -i results/traffic_light/rand_sensor_pos/2023-02-11/17-51-05/1_scores.txt -t traffic\ light
+> python src/scores.py -i results/traffic_light/rand_sensor_pos/2023-02-11/17-51-05/2_scores.txt -t traffic\ light
+> python src/scores.py -i results/traffic_light/rand_sensor_pos/2023-02-11/17-51-05/3_scores.txt -t traffic\ light
+> python src/scores.py -i results/traffic_light/rand_sensor_pos/2023-02-11/17-51-05/4_scores.txt -t traffic\ light
+> python src/scores.py -i results/traffic_light/rand_sensor_pos/2023-02-11/17-51-05/5_scores.txt -t traffic\ light
+> python src/scores.py -i results/traffic_light/rand_sensor_pos/2023-02-11/17-51-05/6_scores.txt -t traffic\ light
+
+
+.PHONY: car_results
+car_results:
+> python src/scores.py -i results/car/rand_sensor_pos/2023-02-11/16-45-49/0_scores.txt -t car
+> python src/scores.py -i results/car/rand_sensor_pos/2023-02-11/16-45-49/1_scores.txt -t car
+> python src/scores.py -i results/car/rand_sensor_pos/2023-02-11/16-45-49/2_scores.txt -t car
+> python src/scores.py -i results/car/rand_sensor_pos/2023-02-11/16-45-49/3_scores.txt -t car
+> python src/scores.py -i results/car/rand_sensor_pos/2023-02-11/16-45-49/4_scores.txt -t car
+> python src/scores.py -i results/car/rand_sensor_pos/2023-02-11/16-45-49/5_scores.txt -t car
+> python src/scores.py -i results/car/rand_sensor_pos/2023-02-11/16-45-49/6_scores.txt -t car
