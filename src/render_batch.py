@@ -11,7 +11,7 @@ import argparse
 import time
 
 from dt2 import (generate_sunset_taxi_cam_positions
-,generate_cube_scene_orbit_cam_positions
+,generate_cube_scene_16_orbit_cam_positions
 ,generate_cube_scene_32_orbit_cam_positions
 ,generate_stop_sign_approach_cam_moves
 ,generate_taxi_cam_positions
