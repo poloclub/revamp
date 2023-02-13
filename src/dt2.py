@@ -306,7 +306,7 @@ def generate_cube_scene_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = np.repeat(positions, reps_per_position)
     return positions
 
-def generate_cube_scene_32_orbit_cam_positions(reps_per_position=1) -> np.array:
+def _generate_cube_scene_32_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Load a mesh and use its vertices as camera positions
     e.g.,  Load a half-icosphere and separate the vertices by their height above target object
@@ -531,6 +531,56 @@ def generate_cube_scene_cam_positions() -> np.array:
     inner_sphere_ipv_f = inner_sphere_ipv[np.where(inner_sphere_ipv[:,0] > 0)]
     cam_pos_ring = np.concatenate((ipv_f, outer_sphere_ipv_f, inner_sphere_ipv_f))
     positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in cam_pos_ring])
+    return positions
+
+def gen_cam_positions(z,r,size) -> np.ndarray:
+    lat_r = np.sqrt(r**2 - z**2)  # find latitude circle radius
+    num_points = np.arange(1,size+1)
+    angles = np.array([(2 * np.pi * p / size) for p in num_points])
+    vertices = np.array([np.array([np.cos(a)*lat_r, z, np.sin(a)*lat_r]) for a in angles])
+    return vertices
+
+def load_sensor_at_position(x,y,z):  
+    from mitsuba import ScalarTransform4f as T        
+    origin = mi.ScalarPoint3f([x,y,z])
+
+    return mi.load_dict({
+        'type': 'perspective',
+        'fov': 39.3077,
+        'to_world': T.look_at(
+            origin=origin,
+            target=[0, -0.5, 0],
+            up=[0, 1, 0]
+        ),
+        'sampler': {
+            'type': 'independent',
+            'sample_count': 16
+        },
+        'film': {
+            'type': 'hdrfilm',
+            'width': 512,
+            'height': 512,
+            'rfilter': {
+                'type': 'tent',
+            },
+            'pixel_format': 'rgb',
+        },
+    })
+
+def generate_cube_scene_32_orbit_cam_positions(reps_per_position=1) -> np.array:
+        
+    # generate camera positions at 3 latitudes
+    r = 11
+    size=32 # desired # pts on the latitude circle
+    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
+    low = gen_cam_positions(z_lats[0], r, size)    
+    mid = gen_cam_positions(z_lats[1], r, size)    
+    high = gen_cam_positions(z_lats[2], r, size)    
+    # concatenate all of the camera positions
+    all_pos = np.concatenate((low, mid, high))
+    # load a camera position with a transform
+    positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in all_pos])
+    positions = np.repeat(positions, reps_per_position)
     return positions
 
 def attack_dt2(cfg:DictConfig) -> None:
