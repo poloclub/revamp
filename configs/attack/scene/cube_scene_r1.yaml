@@ -1,0 +1,3 @@
+path: "scenes/cube_scene/cube_scene_r1.xml"
+target_param_key: "mat-Material.brdf_0.base_color.data"
+sensor_key: "PerspectiveCamera"
