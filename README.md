@@ -94,3 +94,6 @@ This generates 264 sensor positions at vertices of 3 concentric half-icospheres
 ### Unset a texture and use original tex (cube scene)
 
 `make unset_tex`
+
+### Make a movie with `ffmpeg`
+ffmpeg -framerate 30 -i preds/red_cube/render_%d.png -c:v libx264 -preset slow -pix_fmt yuv420p -crf 18 <movie name>.mp4

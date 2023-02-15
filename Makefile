@@ -15,6 +15,8 @@ TXT_PREFIX = $(TARGET) # goes ahead of a output text file e.g., "person_scores.t
 SCENARIOS = scenario_configs
 JQ = jq --indent 4 -r
 RESULTS_DIR = $(RESULTS)/$(TARGET)
+SENSOR_POS_FN = generate_cube_scene_orbit_cam_positions
+# generate_cube_scene_32_orbit_cam_positions
 
 # Taken from https://tech.davis-hansson.com/p/make/
 ifeq ($(origin .RECIPEPREFIX), undefined)
@@ -24,7 +26,7 @@ endif
 
 render_predict: clean
 > $(MAKE) $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/tex_$(TEX_NUM).png.set_tex
-> python src/render_batch.py -s scenes/cube_scene/cube_scene.xml -cm generate_cube_scene_orbit_cam_positions
+> python src/render_batch.py -s scenes/cube_scene/cube_scene.xml -cm $(SENSOR_POS_FN)
 > $(MAKE) img_to_pred
 > python src/predict_objdet_batch.py -d red_cube -st 0.3 > $(RESULTS_DIR)/$(TEX_NUM)_scores.txt
 > $(MAKE) unset_tex

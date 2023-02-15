@@ -156,3 +156,4 @@ results/**/*.yaml
 results/**/*.log
 results/**/*.csv
 results/**/*.txt
+scenes/**/*.txt
