@@ -97,3 +97,9 @@ This generates 264 sensor positions at vertices of 3 concentric half-icospheres
 
 ### Make a movie with `ffmpeg`
 ffmpeg -framerate 30 -i preds/red_cube/render_%d.png -c:v libx264 -preset slow -pix_fmt yuv420p -crf 18 <movie name>.mp4
+
+## Conventions
+Any scene added should at least have the following naming structure:
+`<scene name>/<scene name>.xml` e.g., `cube_scene/cube_scene.xml` 
+
+Any texture used should be named as one of `tex_0.png`, `tex_1.png`, etc.
