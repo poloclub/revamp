@@ -26,7 +26,7 @@ endif
 
 render_predict: clean
 > $(MAKE) $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/tex_$(TEX_NUM).png.set_tex
-> python src/render_batch.py -s scenes/cube_scene/cube_scene.xml -cm $(SENSOR_POS_FN)
+> python src/render_batch.py -s $(SCENES)/$(TARGET_SCENE)/$(TARGET_SCENE).xml -cm $(SENSOR_POS_FN)
 > $(MAKE) img_to_pred
 > python src/predict_objdet_batch.py -d red_cube -st 0.3 > $(RESULTS_DIR)/$(TEX_NUM)_scores.txt
 > $(MAKE) unset_tex
