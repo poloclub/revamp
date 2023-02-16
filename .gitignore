@@ -136,6 +136,7 @@ dmypy.json
 *.jpg
 *.jpeg
 *.exr
+*.mp4
 # mesh files can be large - ignore them in general
 *.ply
 # exception, include meshes with the cube scene
