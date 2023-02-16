@@ -362,6 +362,26 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     positions = np.repeat(positions, reps_per_position)
     return positions    
 
+def generate_cube_scene_4_orbit_cam_positions(reps_per_position=1) -> np.array:
+    """
+    Wrapper function to generate 4 cam positions @ 3 latitutdes
+    """
+    r = 11
+    size=4 # desired # pts on the latitude circle
+    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
+def generate_cube_scene_8_orbit_cam_positions(reps_per_position=1) -> np.array:
+    """
+    Wrapper function to generate 8 cam positions @ 3 latitutdes
+    """
+    r = 11
+    size=8 # desired # pts on the latitude circle
+    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
 def generate_cube_scene_16_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 32 cam positions @ 3 latitutdes
