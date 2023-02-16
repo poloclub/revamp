@@ -105,7 +105,8 @@ def dt2_input(image_path:str)->dict:
     # taxi bbox
     # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
     # stop sign bbox
-    instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, height, width]]))
+    # instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, height, width]]))
+    instances.gt_boxes = Boxes(ch.tensor([[ 162.0, 145.0, 364.0, 324.0]])) # for 512x512 img
     input['image'] = adv_image_tensor    
     input['filename'] = filename
     input['height'] = height
@@ -639,8 +640,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             # tex = orig_tex + eta
             # tex = dr.clamp(tex, 0, 1)
             #########################################################################
-            # FIXME - Determine the dimensions of the target texture being perturbed
-            HH, WW  = 256, 256
+            HH, WW  = dr.shape(dr.grad(opt[k]))[0], dr.shape(dr.grad(opt[k]))[1]
             grad = ch.Tensor(dr.grad(opt[k]).array).view((HH, WW, C))
             tex = ch.Tensor(opt[k].array).view((HH, WW, C))
             _orig_tex = ch.Tensor(orig_tex.array).view((HH, WW, C))
