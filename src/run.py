@@ -71,7 +71,7 @@ def run(cfg: DictConfig) -> None:
         subprocess.run(render_predict, shell=True, check=True)
 
         next_tex = os.path.join(tex_dir, f"tex_{passes[i]}.png")
-        set_tex = f"make TARGET={target} {next_tex}.set_tex"
+        set_tex = f"make TARGET={target} TARGET_SCENE={cfg.attack.scene.name} {next_tex}.set_tex"
         subprocess.run(set_tex, shell=True, check=True)
 
     # process logfile
