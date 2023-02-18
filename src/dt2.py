@@ -22,8 +22,6 @@ import argparse
 import hydra
 from omegaconf import DictConfig
 import logging
-
-
 # from detectron2.utils.logger import setup_logger
 # setup_logger()
 
@@ -52,12 +50,6 @@ from detectron2.data.detection_utils import *
 from fvcore.transforms.transform import NoOpTransform
 from detectron2.utils.file_io import PathManager
 
-
-
-cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=0)
-# gpu_devices = cuda_visible_devices.split(',')
-# If the list is not empty, get the first device in the list
-DEVICE = int(cuda_visible_devices)
 
 # COCO Labels
 BUS = 5
@@ -105,7 +97,8 @@ def dt2_input(image_path:str)->dict:
     # taxi bbox
     # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
     # stop sign bbox
-    instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, height, width]]))
+    # instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, height, width]]))
+    instances.gt_boxes = Boxes(ch.tensor([[ 162.0, 145.0, 364.0, 324.0]])) # for 512x512 img
     input['image'] = adv_image_tensor    
     input['filename'] = filename
     input['height'] = height
@@ -361,6 +354,26 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     positions = np.repeat(positions, reps_per_position)
     return positions    
 
+def generate_cube_scene_4_orbit_cam_positions(reps_per_position=1) -> np.array:
+    """
+    Wrapper function to generate 4 cam positions @ 3 latitutdes
+    """
+    r = 11
+    size=4 # desired # pts on the latitude circle
+    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
+def generate_cube_scene_8_orbit_cam_positions(reps_per_position=1) -> np.array:
+    """
+    Wrapper function to generate 8 cam positions @ 3 latitutdes
+    """
+    r = 11
+    size=8 # desired # pts on the latitude circle
+    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
 def generate_cube_scene_16_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 32 cam positions @ 3 latitutdes
@@ -392,6 +405,9 @@ def generate_cube_scene_64_orbit_cam_positions(reps_per_position=1) -> np.array:
     return positions
 
 def attack_dt2(cfg:DictConfig) -> None:
+
+    cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
+    DEVICE = "cuda:0"
 
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("dt2")
@@ -461,7 +477,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     dt2_config.MODEL.WEIGHTS = weights_file
     dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
     # FIXME - Get GPU Device form environment variable.
-    dt2_config.MODEL.DEVICE=DEVICE
+    dt2_config.MODEL.DEVICE = DEVICE
     model = build_model(dt2_config)
     checkpointer = DetectionCheckpointer(model)
     checkpointer.load(dt2_config.MODEL.WEIGHTS)
@@ -639,8 +655,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             # tex = orig_tex + eta
             # tex = dr.clamp(tex, 0, 1)
             #########################################################################
-            # FIXME - Determine the dimensions of the target texture being perturbed
-            HH, WW  = 256, 256
+            HH, WW  = dr.shape(dr.grad(opt[k]))[0], dr.shape(dr.grad(opt[k]))[1]
             grad = ch.Tensor(dr.grad(opt[k]).array).view((HH, WW, C))
             tex = ch.Tensor(opt[k].array).view((HH, WW, C))
             _orig_tex = ch.Tensor(orig_tex.array).view((HH, WW, C))

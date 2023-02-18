@@ -67,11 +67,21 @@ def run(cfg: DictConfig) -> None:
         os.chdir(original_cwd)
         
         # make predictions using the same camera angles utilized for producing perturbation
-        render_predict = f"make TARGET={target} RESULTS_DIR={cfg.sysconfig.log_dir} TEX_NUM={passes[i]} SENSOR_POS_FN={cfg.scenario.sensor_positions.function} render_predict"
+        render_predict = f"make TARGET={target} \
+            TARGET_SCENE={cfg.attack.scene.name} \
+                RESULTS_DIR={cfg.sysconfig.log_dir} \
+                    TEX_NUM={passes[i]} \
+                        SENSOR_POS_FN={cfg.scenario.sensor_positions.function} \
+                            SCORE_TEST_THRESH={cfg.model.score_thresh_test} \
+                            render_predict"
         subprocess.run(render_predict, shell=True, check=True)
 
+        escaped_tgt = target.replace(" ", "\ ")
+        get_scores = f"python src/scores.py -i {cfg.sysconfig.log_dir}/{passes[i]}_scores.txt -t {escaped_tgt}"
+        subprocess.run(get_scores, shell=True, check=True)
+
         next_tex = os.path.join(tex_dir, f"tex_{passes[i]}.png")
-        set_tex = f"make TARGET={target} {next_tex}.set_tex"
+        set_tex = f"make TARGET={target} TARGET_SCENE={cfg.attack.scene.name} {next_tex}.set_tex"
         subprocess.run(set_tex, shell=True, check=True)
 
     # process logfile

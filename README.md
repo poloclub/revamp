@@ -36,12 +36,17 @@ We use [Robust ImageNet Models](https://github.com/microsoft/robust-models-trans
 ### Examples
 Run a texture attack on Detectron2 and log the results to a file.  We use Hydra for configuring experiments and you can easily supply your own Hydra-style config arguments. See this [Hydra tutorial](https://hydra.cc/docs/tutorials/basic/your_first_app/simple_cli/)
 
-`python src/run.py attack.target=cat scenario.randomize_positions=true`
+#### Specify Target Class and Camera Positioning
+`CUDA_VISIBLE_DEVICES=0 python src/run.py attack.target=cat scenario.randomize_positions=true`
+
+#### Specify Target Class and Use a Different Scene
+`CUDA_VISIBLE_DEVICES=0 python src/run.py attack.target=cat attack.passes=1 attack/scene=cube_scene_r1`
+
 
 Sometimes Mitsuba crashes or you want to add additional passes to an perturbed texture.  To resume / add on to an experiment, follow these steps:
 Continue an experiment by adding extra passes with explicit pass names.
 1. Set the texture:
-` make TARGET=truck TARGET_TEX=truck_tex scenes/cube_scene/textures/truck_tex/tex_6.png.set_tex`
+` make TARGET=truck TARGET_SCENE=cube_scene scenes/cube_scene/textures/truck_tex/tex_6.png.set_tex`
 2. run: `python src/run.py attack.target=truck attack.passes=1 attack.passes_names=[7]`
 
 
@@ -96,4 +101,10 @@ This generates 264 sensor positions at vertices of 3 concentric half-icospheres
 `make unset_tex`
 
 ### Make a movie with `ffmpeg`
-ffmpeg -framerate 30 -i preds/red_cube/render_%d.png -c:v libx264 -preset slow -pix_fmt yuv420p -crf 18 <movie name>.mp4
+`ffmpeg -framerate 30 -i preds/red_cube/render_%d.png -c:v libx264 -preset slow -pix_fmt yuv420p -crf 18 <movie name>.mp4`
+
+## Conventions
+Any scene added should at least have the following naming structure:
+`<scene name>/<scene name>.xml` e.g., `cube_scene/cube_scene.xml` 
+
+Any texture used should be named as one of `tex_0.png`, `tex_1.png`, etc.
