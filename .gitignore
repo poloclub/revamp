@@ -135,6 +135,9 @@ dmypy.json
 !/scenes/sphere_scene*/textures/orig_tex/*.png
 !/scenes/sphere_scene*/textures/red_tex.png
 !/scenes/sphere_scene*/textures/noise_tex.png
+!/scenes/cylinder_scene*/textures/orig_tex/*.png
+!/scenes/cylinder_scene*/textures/red_tex.png
+!/scenes/cylinder_scene*/textures/noise_tex.png
 *.jpg
 *.jpeg
 *.exr
@@ -144,6 +147,7 @@ dmypy.json
 # exception, include meshes with the cube scene
 !/scenes/cube_scene*/meshes/*.ply
 !/scenes/sphere_scene*/meshes/*.ply
+!/scenes/cylinder_scene*/meshes/*.ply
 *.obj
 *.stl
 *.mtl
