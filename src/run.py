@@ -45,6 +45,10 @@ def run(cfg: DictConfig) -> None:
         passes = [int(p) for p in passes_names]
 
     for i in range(len(passes)):
+
+        clean_renders_preds = f"make TARGET={cfg.attack.target} clean"
+        subprocess.run(clean_renders_preds, shell=True, check=True)
+
         fn = f"{passes[i]}.txt"
         cfg.sysconfig.output_path = os.path.join(cfg.sysconfig.output_path, fn)
         cfg.sysconfig.pass_idx = passes[i]
