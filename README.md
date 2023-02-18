@@ -37,10 +37,10 @@ We use [Robust ImageNet Models](https://github.com/microsoft/robust-models-trans
 Run a texture attack on Detectron2 and log the results to a file.  We use Hydra for configuring experiments and you can easily supply your own Hydra-style config arguments. See this [Hydra tutorial](https://hydra.cc/docs/tutorials/basic/your_first_app/simple_cli/)
 
 #### Specify Target Class and Camera Positioning
-`python src/run.py attack.target=cat scenario.randomize_positions=true`
+`CUDA_VISIBLE_DEVICES=0 python src/run.py attack.target=cat scenario.randomize_positions=true`
 
 #### Specify Target Class and Use a Different Scene
-`python src/run.py attack.target=cat attack.passes=1 attack/scene=cube_scene_r1`
+`CUDA_VISIBLE_DEVICES=0 python src/run.py attack.target=cat attack.passes=1 attack/scene=cube_scene_r1`
 
 
 Sometimes Mitsuba crashes or you want to add additional passes to an perturbed texture.  To resume / add on to an experiment, follow these steps:
