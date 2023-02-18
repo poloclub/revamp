@@ -1,11 +1,11 @@
 RENDERS = renders
 PREDS = preds
-PRED_DIR = red_cube
 PREDS_PREP_DIR = $(RENDERS)/$(PRED_DIR)
 RESULTS = results
 SCENES = scenes
 TARGET_SCENE = cube_scene
 TARGET = truck
+PRED_DIR = $(TARGET)
 TARGET_TEX  = $(TARGET)_tex
 ORIG_TEX = noise_tex.png
 TEX_NUM = 0
@@ -25,41 +25,21 @@ endif
 
 render_predict: clean
 > $(MAKE) $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/tex_$(TEX_NUM).png.set_tex
-> python src/render_batch.py -s $(SCENES)/$(TARGET_SCENE)/$(TARGET_SCENE).xml -cm $(SENSOR_POS_FN)
-> $(MAKE) img_to_pred
-> python src/predict_objdet_batch.py -d red_cube -st $(SCORE_TEST_THRESH) > $(RESULTS_DIR)/$(TEX_NUM)_scores.txt
+> python src/render_batch.py -s $(SCENES)/$(TARGET_SCENE)/$(TARGET_SCENE).xml -cm $(SENSOR_POS_FN) -od $(RENDERS)/$(TARGET)
+> python src/predict_objdet_batch.py -d $(TARGET) -st $(SCORE_TEST_THRESH) > $(RESULTS_DIR)/$(TEX_NUM)_scores.txt
 > $(MAKE) TARGET_SCENE=$(TARGET_SCENE) unset_tex
-
-
-.PHONY: img_to_pred
-img_to_pred: clean_renders_prep_dir mv_img clean_renders
+> $(MAKE) clean_renders
 
 .PHONY: clean
-clean: clean_renders clean_preds clean_tex_maps clean_renders_prep_dir clean_preds_prep_dir
+clean: clean_renders clean_preds
 
 .PHONY: clean_renders
 clean_renders:
-> rm -f $(RENDERS)/*.png
+> rm -f $(RENDERS)/$(TARGET)/*.png
 
 .PHONY: clean_preds
 clean_preds:
-> rm -f $(PREDS)/*.png
-
-.PHONY: clean_tex_maps
-clean_tex_maps:
-> rm -f perturbed_tex_map_b*.png
-
-.PHONY: clean_renders_prep_dir
-clean_renders_prep_dir:
-> rm -f $(PREDS_PREP_DIR)/*.png
-
-.PHONY: clean_preds_prep_dir
-clean_preds_prep_dir:
->  rm -f $(PREDS)/$(PRED_DIR)/*.png
-
-.PHONY: mv_img
-mv_img:
-> cp $(RENDERS)/*.png $(PREDS_PREP_DIR)/
+>  rm -f $(PREDS)/$(TARGET)/*.png
 
 .PHONY: attack_dt2
 attack_dt2:

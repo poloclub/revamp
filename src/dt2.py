@@ -427,11 +427,18 @@ def attack_dt2(cfg:DictConfig) -> None:
     weights_file = cfg.model.weights_file 
     model_config = cfg.model.config
     sensor_positions = cfg.scenario.sensor_positions.function
-    randomize_sensors = cfg.scenario.randomize_positions # NOT IMPLEMENTED
+    randomize_sensors = cfg.scenario.randomize_positions 
     scene_file_dir = os.path.dirname(scene_file)
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
         os.makedirs(tmp_perturbation_path)
+    render_path = os.path.join(f"renders",f"{target_string}")
+    if os.path.exists(render_path) == False:
+        os.makedirs(render_path)
+    preds_path = os.path.join("preds",f"{target_string}")
+    if os.path.exists(preds_path) == False:
+        os.makedirs(preds_path)    
+    
     # img_name = 'render_39_s3'
     # adv_path = f'/nvmescratch/mhull32/robust-models-transfer/renders/{img_name}.jpg'
     
@@ -613,7 +620,7 @@ def attack_dt2(cfg:DictConfig) -> None:
 
                 img =  mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
                 img.set_label_(f"image_b{it}_s{b}")
-                rendered_img_path = f"renders/render_b{it}_s{b}.png"
+                rendered_img_path = os.path.join(render_path,f"render_b{it}_s{b}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img)
                 img = dr.ravel(img)
                 # dr.disable_grad(img)
@@ -629,7 +636,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                     , dt2_config, input=rendered_img_input \
                     , instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST \
                     , target = label
-                    , path=f'preds/render_b{it}_s{b}.png')
+                    , path=os.path.join(preds_path,f'render_b{it}_s{b}.png'))
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
 
             imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(imgs),shape=(N, H, H, C))
