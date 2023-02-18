@@ -22,8 +22,6 @@ import argparse
 import hydra
 from omegaconf import DictConfig
 import logging
-
-
 # from detectron2.utils.logger import setup_logger
 # setup_logger()
 
@@ -52,12 +50,6 @@ from detectron2.data.detection_utils import *
 from fvcore.transforms.transform import NoOpTransform
 from detectron2.utils.file_io import PathManager
 
-
-
-cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=0)
-# gpu_devices = cuda_visible_devices.split(',')
-# If the list is not empty, get the first device in the list
-DEVICE = int(cuda_visible_devices)
 
 # COCO Labels
 BUS = 5
@@ -414,6 +406,9 @@ def generate_cube_scene_64_orbit_cam_positions(reps_per_position=1) -> np.array:
 
 def attack_dt2(cfg:DictConfig) -> None:
 
+    cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
+    DEVICE = "cuda:0"
+
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("dt2")
 
@@ -482,7 +477,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     dt2_config.MODEL.WEIGHTS = weights_file
     dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
     # FIXME - Get GPU Device form environment variable.
-    dt2_config.MODEL.DEVICE=DEVICE
+    dt2_config.MODEL.DEVICE = DEVICE
     model = build_model(dt2_config)
     checkpointer = DetectionCheckpointer(model)
     checkpointer.load(dt2_config.MODEL.WEIGHTS)
