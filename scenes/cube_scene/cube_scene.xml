@@ -38,7 +38,8 @@
 	<bsdf type="twosided" id="mat-Material">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/red_tex.png"/>
+				<!-- <string name="filename" value="textures/red_tex.png"/> -->
+				<string name="filename" value="textures/noise_tex.png"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
