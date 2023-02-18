@@ -85,8 +85,9 @@ def run(cfg: DictConfig) -> None:
         subprocess.run(get_scores, shell=True, check=True)
 
         next_tex = os.path.join(tex_dir, f"tex_{passes[i]}.png")
-        set_tex = f"make TARGET={target} TARGET_SCENE={cfg.attack.scene.name} {next_tex}.set_tex"
-        subprocess.run(set_tex, shell=True, check=True)
+        # set_tex = f"make TARGET={target} TARGET_SCENE={cfg.attack.scene.name} {next_tex}.set_tex"
+        cfg.attack.scene.tex = next_tex
+        # subprocess.run(set_tex, shell=True, check=True)
 
     # process logfile
     process_logs = f"python src/results.py -i {cfg.sysconfig.log_dir}/run.log"

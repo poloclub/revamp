@@ -429,6 +429,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     sensor_positions = cfg.scenario.sensor_positions.function
     randomize_sensors = cfg.scenario.randomize_positions 
     scene_file_dir = os.path.dirname(scene_file)
+    tex_path = cfg.attack.scene.tex
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
         os.makedirs(tmp_perturbation_path)
@@ -441,9 +442,15 @@ def attack_dt2(cfg:DictConfig) -> None:
     
     # img_name = 'render_39_s3'
     # adv_path = f'/nvmescratch/mhull32/robust-models-transfer/renders/{img_name}.jpg'
-    
-    # FIXME - allow variant to be set in the configuration.
     mi.set_variant('cuda_ad_rgb')
+    mitsuba_tex = mi.load_dict({
+        'type': 'bitmap',
+        'id': 'heightmap_texture',
+        'filename': tex_path,
+        'raw': True
+    })
+    mt = mi.traverse(mitsuba_tex)
+    # FIXME - allow variant to be set in the configuration.
     # scene = mi.load_file("scenes/street_sunset/street_sunset.xml")    
     scene = mi.load_file(scene_file)
     p = mi.traverse(scene)    
@@ -453,7 +460,9 @@ def attack_dt2(cfg:DictConfig) -> None:
     # k = 'mat-Material.brdf_0.base_color.data'
     # sunset street taxi texture map
     # k = 'mat-Material.brdf_0.base_color.data' 
-    k = param_key    
+    k = param_key
+    # set the texture with the bitmap from config
+    p[k] = mt['data']
     # Stop Sign Texture Map
     # k = 'mat-Material.005.brdf_0.base_color.data'
     # Camera that we want to transform

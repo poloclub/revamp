@@ -1,4 +1,5 @@
 name: cube_scene
-path: "scenes/cube_scene/cube_scene.xml"
+path: "scenes/${attack.scene.name}/${attack.scene.name}.xml"
+tex: "scenes/${attack.scene.name}/textures/noise_tex.png"
 target_param_key: "mat-Material.brdf_0.base_color.data"
 sensor_key: "PerspectiveCamera"
