@@ -18,7 +18,7 @@ attack:
   targeted: true
   target: null
   target_idx: null
-  iters: 1000
+  iters: 10000
   samples_per_pixel: 256
       
 dataset:
