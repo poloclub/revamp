@@ -63,12 +63,6 @@ def run(cfg: DictConfig) -> None:
         last_tex = max(texs, key=lambda x: os.path.getmtime(x))
         os.chdir(original_cwd)
         shutil.copy(os.path.join(tex_dir,tmp_dir, last_tex),os.path.join(tex_dir, f"tex_{passes[i]}.png"))
-        os.chdir(os.path.join(tex_dir, tmp_dir))
-        # rm tmp perturbations
-        png_files = glob.glob("*.png")
-        for file in png_files:
-            os.remove(file)
-        os.chdir(original_cwd)
         
         # make predictions using the same camera angles utilized for producing perturbation
         render_predict = f"make TARGET={target} \
@@ -80,13 +74,20 @@ def run(cfg: DictConfig) -> None:
                             render_predict"
         subprocess.run(render_predict, shell=True, check=True)
 
+        os.chdir(os.path.join(tex_dir, tmp_dir))
+        # rm tmp perturbations
+        png_files = glob.glob("*.png")
+        for file in png_files:
+            os.remove(file)
+        os.chdir(original_cwd)
         escaped_tgt = target.replace(" ", "\ ")
         get_scores = f"python src/scores.py -i {cfg.sysconfig.log_dir}/{passes[i]}_scores.txt -t {escaped_tgt}"
         subprocess.run(get_scores, shell=True, check=True)
 
         next_tex = os.path.join(tex_dir, f"tex_{passes[i]}.png")
-        set_tex = f"make TARGET={target} TARGET_SCENE={cfg.attack.scene.name} {next_tex}.set_tex"
-        subprocess.run(set_tex, shell=True, check=True)
+        # set_tex = f"make TARGET={target} TARGET_SCENE={cfg.attack.scene.name} {next_tex}.set_tex"
+        cfg.attack.scene.tex = next_tex
+        # subprocess.run(set_tex, shell=True, check=True)
 
     # process logfile
     process_logs = f"python src/results.py -i {cfg.sysconfig.log_dir}/run.log"

@@ -1,5 +1,5 @@
-name: cube_scene_r2
+name: banana_scene_r1
 path: "scenes/${attack.scene.name}/${attack.scene.name}.xml"
-tex: "scenes/${attack.scene.name}/textures/noise_tex.png"
+tex: "scenes/${attack.scene.name}/textures/banana_tex.png"
 target_param_key: "mat-Material.brdf_0.base_color.data"
 sensor_key: "PerspectiveCamera"
