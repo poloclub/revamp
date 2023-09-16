@@ -1,0 +1,467 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="512"/>
+	<default name="resx" value="1024"/>
+	<default name="resy" value="1024"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="prb">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="100.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-165.22462560768292"/>
+			<rotate y="1" angle="-0.06870604679992186"/>
+			<rotate z="1" angle="-180.00000500895632"/>
+			<translate value="0.003606 0.793120 3.007070"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-Skin">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/skin.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.735425"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.931468"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Trousers">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/camouflage_basecolor.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.755051"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="1.000000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Eye Reflections">
+		<bsdf type="principled">
+			<rgb value="1.000000 1.000000 1.000000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.691779"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="1.000000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Boots">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/boots.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.755051"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.715033"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material-patch">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/noise_tex.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material-bird-patch">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/bird_tex/tex_2.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>	
+	<bsdf type="twosided" id="mat-Material-cat-patch">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/cat_tex/tex_1.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>		
+	<bsdf type="twosided" id="mat-helmet">
+		<bsdf type="principled">
+			<rgb value="0.396755 0.401978 0.417885" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material">
+		<bsdf type="diffuse">
+			<rgb value="0.587232 0.587232 0.587232" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="5.380389 0.000000 0.000000 0.022794 0.000000 0.000000 5.380389 14.743757 0.000000 -5.380389 0.000000 14.011853 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="5.380389 0.000000 0.000000 0.022794 0.000000 0.000000 5.380389 14.743757 0.000000 -5.380389 0.000000 -9.378905 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.019051 -5.380355 0.000000 -11.672512 0.000000 0.000000 5.380389 14.743757 -5.380355 -0.019051 0.000000 2.275063 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.019051 -5.380355 0.000000 11.718100 0.000000 0.000000 5.380389 14.743757 -5.380355 -0.019051 0.000000 2.357885 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="5.380389 0.000000 0.000000 0.009688 0.000000 5.055912 1.840201 5.466380 0.000000 -1.840201 5.055912 13.051998 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="5.380389 0.000000 0.000000 0.022794 0.000000 -5.055912 1.840201 5.466380 0.000000 -1.840201 -5.055912 -13.052000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="-0.003380 1.840201 5.055911 13.074791 0.000000 -5.055912 1.840201 5.466380 5.380388 0.001156 0.003177 0.008200 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="-0.003380 1.840201 -5.055911 -13.029203 0.000000 5.055912 1.840201 5.466380 5.380388 0.001156 -0.003177 -0.008202 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="1.295400 1.295400 1.295400" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/Head_Dressed.ply"/>
+		<ref id="mat-Skin" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Head___Arms.ply"/>
+		<ref id="mat-Skin" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Trousers_Straight_001.ply"/>
+		<ref id="mat-Trousers" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Shirt_001.ply"/>
+		<ref id="mat-Trousers" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Tongue_Dressed_001.ply"/>
+		<ref id="mat-Skin" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lower_Teeth_Dressed.ply"/>
+		<ref id="mat-Skin" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Upper_Teeth_Dressed_001.ply"/>
+		<ref id="mat-Skin" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Left_Eye_Transparency.ply"/>
+		<ref id="mat-Eye Reflections" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Right_Eye_Transparency_001.ply"/>
+		<ref id="mat-Eye Reflections" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Eyes_Dressed.ply"/>
+		<ref id="mat-Skin" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Boots.ply"/>
+		<ref id="mat-Boots" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Laces.ply"/>
+		<ref id="mat-Boots" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Belt.ply"/>
+		<ref id="mat-Trousers" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_front_torso_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-bird-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_front_torso_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_arm_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-cat-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch-right_arm_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_front_torso_4.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_front_torso_3.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-bird-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_front_torso_5.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_front_torso_6.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-cat-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_leg_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_leg_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-bird-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_leg2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_leg_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-cat-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_leg_3.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch-right_leg_3.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-bird-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_leg_4.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_leg_4.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-cat-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_torso_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_torso_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-bird-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_torso_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_torso_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-cat-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_torso_3.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_torso_4.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-bird-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_arm_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left_arm_3.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-cat-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_left-arm_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_right_arm_3.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-bird-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/helmet.ply"/>
+		<ref id="mat-helmet" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_helmet_front.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_helmet_right.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-cat-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/patch_helmet_left.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material-patch" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Cube_001.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+</scene>
