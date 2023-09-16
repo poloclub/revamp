@@ -18,7 +18,8 @@ from dt2 import (generate_sunset_taxi_cam_positions
 ,generate_cube_scene_64_orbit_cam_positions
 ,generate_stop_sign_approach_cam_moves
 ,generate_taxi_cam_positions
-,generate_cube_scene_cam_positions)
+,generate_cube_scene_cam_positions
+,use_provided_cam_position)
 
 if __name__  == "__main__":
     parser = argparse.ArgumentParser( \

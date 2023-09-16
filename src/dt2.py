@@ -223,6 +223,14 @@ def generate_sunset_taxi_cam_positions() -> np.array:
     sensors = np.array([p[k] for k in cam_keys])
     return sensors
 
+def use_provided_cam_position() -> np.array:
+    #     from mitsuba import ScalarTransform4f as T  
+    scene = mi.load_file("scenes/water_scene/water_scene.xml")
+    p = mi.traverse(scene)
+    cam_key = 'PerspectiveCamera.to_world'
+    sensor = np.array([p[cam_key]])
+    return sensor
+
 def generate_cube_scene_cam_positions() -> np.array:
     """
     Load a mesh and use its vertices as camera positions
@@ -306,6 +314,8 @@ def gen_cam_positions(z,r,size) -> np.ndarray:
 
     The sphere is centered at the origin (0,0,0) in the scene.  
     """
+    if z > r:
+        raise Exception("z value must be less than or equal to the radius of the sphere")
     lat_r = np.sqrt(r**2 - z**2)  # find latitude circle radius
     num_points = np.arange(1,size+1)
     angles = np.array([(2 * np.pi * p / size) for p in num_points])
@@ -321,7 +331,8 @@ def load_sensor_at_position(x,y,z):
         'fov': 39.3077,
         'to_world': T.look_at(
             origin=origin,
-            target=[0, -0.5, 0],
+            #target=[0, -0.5, 0],
+            target=[0, 0, 0],
             up=[0, 1, 0]
         ),
         'sampler': {
@@ -354,13 +365,27 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     positions = np.repeat(positions, reps_per_position)
     return positions    
 
+def generate_cube_scene_1_orbit_cam_positions(reps_per_position=1) -> np.array:
+    """
+    Wrapper function to generate 4 cam positions @ 3 latitutdes
+    """
+    # r = 14
+    r = 3
+    size = 4 # desired # pts on the latitude circle
+    # z_lats = [8.0,10.0,12.0] # values derived from Blender
+    z_lats = [1.5,2,2.5] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
 def generate_cube_scene_4_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 4 cam positions @ 3 latitutdes
     """
-    r = 11
-    size=4 # desired # pts on the latitude circle
-    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
+    # r = 14
+    r = 3
+    size = 4 # desired # pts on the latitude circle
+    # z_lats = [8.0,10.0,12.0] # values derived from Blender
+    z_lats = [1.5,2,2.5] # values derived from Blender
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
