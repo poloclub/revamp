@@ -1,0 +1,148 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="1"/>
+	<default name="resx" value="1024"/>
+	<default name="resy" value="1024"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path">
+		<integer name="max_depth" value="8"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="19.500001"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.010000"/>
+		<float name="far_clip" value="10000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-159.06490146697698"/>
+			<rotate y="1" angle="1.7436902813257906e-05"/>
+			<rotate z="1" angle="-179.999991348578"/>
+			<translate value="-0.000001 2.285978 3.449882"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-Floor">
+		<bsdf type="diffuse">
+			<rgb value="0.725000 0.710000 0.680000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Ceiling">
+		<bsdf type="diffuse">
+			<rgb value="0.725000 0.710000 0.680000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-BackWall">
+		<bsdf type="diffuse">
+			<rgb value="0.725000 0.710000 0.680000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-RightWall">
+		<bsdf type="diffuse">
+			<rgb value="0.140000 0.450000 0.091000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-LeftWall">
+		<bsdf type="diffuse">
+			<rgb value="0.630000 0.065000 0.050000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-ShortBox">
+		<bsdf type="diffuse">
+			<rgb value="0.725000 0.710000 0.680000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Light.001">
+		<bsdf type="diffuse">
+			<rgb value="0.000000 0.000000 0.000000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="dielectric" id="mat-Material">
+		<float name="int_ior" value="1.300000"/>
+		<rgb value="1.000000 1.000000 1.000000" name="specular_transmittance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-tall_box_mat">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/tall_box.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/light.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Light.001" name="bsdf"/>
+		<emitter type="area">
+			<rgb value="541127.000000 381972.009486 127324.000474" name="radiance"/>
+		</emitter>
+	</shape>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/floor.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Floor" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/ceiling.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Ceiling" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/back_wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-BackWall" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/right_wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-RightWall" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/left_wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-LeftWall" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/short_box.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-ShortBox" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/water_surface.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tall_box.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-tall_box_mat" name="bsdf"/>
+	</shape>
+</scene>
