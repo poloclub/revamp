@@ -2,16 +2,16 @@
 
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
-	<default name="spp" value="128"/>
-	<default name="resx" value="1920"/>
-	<default name="resy" value="1080"/>
+	<default name="spp" value="16"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
 
 <!-- Camera and Rendering Parameters -->
 
 	<integrator type="path">
 		<integer name="max_depth" value="12"/>
 	</integrator>
-	<sensor type="perspective">
+	<!-- <sensor type="perspective">
 		<string name="fov_axis" value="x"/>
 		<float name="fov" value="54.432226"/>
 		<float name="principal_point_offset_x" value="0.000000"/>
@@ -220,7 +220,7 @@
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
 		</film>
-	</sensor>
+	</sensor> -->
 	<sensor type="perspective">
 		<string name="fov_axis" value="x"/>
 		<float name="fov" value="61.927515"/>
@@ -242,7 +242,7 @@
 			<integer name="height" value="$resy"/>
 		</film>
 	</sensor>
-	<sensor type="perspective">
+	<!-- <sensor type="perspective">
 		<string name="fov_axis" value="x"/>
 		<float name="fov" value="61.927515"/>
 		<float name="principal_point_offset_x" value="0.000000"/>
@@ -262,21 +262,62 @@
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
 		</film>
-	</sensor>
+	</sensor> -->
 
 <!-- Materials -->
 
-	<bsdf type="diffuse" id="mat-Building 3">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	<bsdf type="twosided" id="mat-Building 3">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Building 2_color.001.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Building 4">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
-	</bsdf>
+	<bsdf type="twosided" id="mat-Building 4">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Building 4_color.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>		</bsdf>
 	<bsdf type="diffuse" id="mat-Building 5">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Building 1">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	<bsdf type="twosided" id="mat-Building 1">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Building brick cornor_Color.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
 	<bsdf type="twosided" id="mat-Building 6">
 		<bsdf type="principled">
@@ -294,8 +335,22 @@
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
 		</bsdf>		</bsdf>
-	<bsdf type="diffuse" id="mat-Building 7">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	<bsdf type="twosided" id="mat-Building 7">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Building 7_color.002.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Building 8">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
@@ -306,8 +361,22 @@
 	<bsdf type="diffuse" id="mat-Building 9 v2">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Building 10">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	<bsdf type="twosided" id="mat-Building 10">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Brick Building_Color.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Building 11">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
@@ -368,8 +437,22 @@
 	<bsdf type="diffuse" id="mat-sedan col ">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
 	</bsdf>
-	<bsdf type="diffuse" id="mat-sedan col .2">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	<bsdf type="twosided" id="mat-sedan col .2">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/sedan_Colorv5.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Truck col.001">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
@@ -403,11 +486,39 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Center road">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	<bsdf type="twosided" id="mat-Center road">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Center road.png"/>
+			</texture>			
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Road">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	<bsdf type="twosided" id="mat-Road">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Road.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
 	<bsdf type="twosided" id="mat-Mail box">
 		<bsdf type="principled">
@@ -424,9 +535,41 @@
 			<float name="clearcoat" value="0.000000"/>
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
-		</bsdf>	</bsdf>
-	<bsdf type="diffuse" id="mat-Ad stand">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+		</bsdf>	
+	</bsdf>
+	<bsdf type="twosided" id="mat-Mail box-perturb">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/noise_tex.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
+	</bsdf>	
+	<bsdf type="twosided" id="mat-Ad stand">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/ad stand.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
 	</bsdf>
 	<bsdf type="twosided" id="mat-Street sing">
 		<bsdf type="principled">
@@ -602,21 +745,21 @@
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 4" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Building_5.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 5" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Building_1.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 1" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/2Building_3.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 3" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Building_6.ply"/>
 		<boolean name="face_normals" value="true"/>
@@ -627,7 +770,7 @@
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 7" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Building_8.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 8" name="bsdf"/>
@@ -651,12 +794,12 @@
 		<string name="filename" value="meshes/2Building_9-Building 9 v2.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 9 v2" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Building_10.ply"/>
 		<ref id="mat-Building 10" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Building_11.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Building 11" name="bsdf"/>
@@ -754,8 +897,8 @@
 	<shape type="ply">
 		<string name="filename" value="meshes/Car3.ply"/>
 		<ref id="mat-sedan col .2" name="bsdf"/>
-	</shape>
-	<shape type="ply">
+	</shape> -->
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Car7.ply"/>
 		<ref id="mat-Truck col.001" name="bsdf"/>
 	</shape>
@@ -794,7 +937,7 @@
 	<shape type="ply">
 		<string name="filename" value="meshes/Car5_002.ply"/>
 		<ref id="mat-sedan col1" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Road-Sidewalk.ply"/>
 		<boolean name="face_normals" value="true"/>
@@ -810,7 +953,7 @@
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Road" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Cube_029.ply"/>
 		<ref id="mat-Mail box" name="bsdf"/>
 	</shape>
@@ -864,12 +1007,12 @@
 		<string name="filename" value="meshes/Cube_035.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Ad stand" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Cube_040.ply"/>
 		<ref id="mat-Ad stand" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Cube_042.ply"/>
 		<ref id="mat-Mail box" name="bsdf"/>
 	</shape>
@@ -902,12 +1045,12 @@
 	<shape type="ply">
 		<string name="filename" value="meshes/fire_hydrant_002.ply"/>
 		<ref id="mat-Fire Hydrant" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Cube_045.ply"/>
-		<ref id="mat-Mail box" name="bsdf"/>
+		<ref id="mat-Mail box-perturb" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/fire_hydrant_003.ply"/>
 		<ref id="mat-Fire Hydrant" name="bsdf"/>
 	</shape>
@@ -919,11 +1062,12 @@
 	<shape type="ply">
 		<string name="filename" value="meshes/fire_hydrant_004.ply"/>
 		<ref id="mat-Fire Hydrant" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Cube_052.ply"/>
 		<ref id="mat-Mail box" name="bsdf"/>
 	</shape>
+	<!--
 	<shape type="ply">
 		<string name="filename" value="meshes/Cube_053.ply"/>
 		<ref id="mat-Mail box" name="bsdf"/>
@@ -935,12 +1079,12 @@
 	<shape type="ply">
 		<string name="filename" value="meshes/Cylinder.ply"/>
 		<ref id="mat-Stop light" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Cylinder_001.ply"/>
 		<ref id="mat-Stop light" name="bsdf"/>
 	</shape>
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Cylinder_002.ply"/>
 		<ref id="mat-Stop light" name="bsdf"/>
 	</shape>
@@ -996,5 +1140,5 @@
 	<shape type="ply">
 		<string name="filename" value="meshes/Building_2.ply"/>
 		<ref id="mat-Building 2" name="bsdf"/>
-	</shape>
+	</shape> -->
 </scene>
