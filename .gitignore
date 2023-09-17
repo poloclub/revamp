@@ -150,6 +150,11 @@ dmypy.json
 *.hdr
 *.DS_Store
 *.code-workspace
+ProjectSettings.json
+slnx.sqlite
+VSWorkspaceState.json
+*.vsidx
+*.wsuo
 events.out.tfevents.*
 
 *.lprof
