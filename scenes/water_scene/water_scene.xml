@@ -3,12 +3,12 @@
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
 	<default name="spp" value="1"/>
-	<default name="resx" value="1024"/>
-	<default name="resy" value="1024"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
 
 <!-- Camera and Rendering Parameters -->
 
-	<integrator type="path">
+	<integrator type="ptracer">
 		<integer name="max_depth" value="8"/>
 	</integrator>
 	<sensor type="perspective">
@@ -77,7 +77,7 @@
 	<bsdf type="twosided" id="mat-tall_box_mat">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/tall_box.png"/>
+				<string name="filename" value="textures/noise_tex.png"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
