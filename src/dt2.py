@@ -848,6 +848,8 @@ def attack_dt2(cfg:DictConfig) -> None:
             eta = dr.clamp(tex - orig_tex, -epsilon, epsilon)
             tex = orig_tex + eta
             tex = dr.clamp(tex, 0, 1)
+            # divide by average brightness
+            tex = tex / dr.mean(dr.detach(img))
             params[k] = tex
             dr.enable_grad(params[k])
             params.update()
