@@ -19,6 +19,27 @@
 		<float name="near_clip" value="0.010000"/>
 		<float name="far_clip" value="10000.000000"/>
 		<transform name="to_world">
+			<rotate x="1" angle="179.999991348578"/>
+			<rotate y="1" angle="1.8669348312774806e-05"/>
+			<rotate z="1" angle="180.00000500895632"/>
+			<translate value="-0.000001 0.990944 6.838790"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="19.500001"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.010000"/>
+		<float name="far_clip" value="10000.000000"/>
+		<transform name="to_world">
 			<rotate x="1" angle="-159.06490146697698"/>
 			<rotate y="1" angle="1.7436902813257906e-05"/>
 			<rotate z="1" angle="-179.999991348578"/>
@@ -70,10 +91,6 @@
 			<rgb value="0.000000 0.000000 0.000000" name="reflectance"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="dielectric" id="mat-Material">
-		<float name="int_ior" value="1.300000"/>
-		<rgb value="1.000000 1.000000 1.000000" name="specular_transmittance"/>
-	</bsdf>
 	<bsdf type="twosided" id="mat-tall_box_mat">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -90,6 +107,11 @@
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
 		</bsdf>
+	</bsdf>
+	<bsdf type="roughdielectric" id="mat-water">
+		<float name="int_ior" value="1.300000"/>
+		<float name="ext_ior" value="1.000000"/>
+		<rgb value="1.000000 1.000000 1.000000" name="specular_transmittance"/>
 	</bsdf>
 
 <!-- Emitters -->
@@ -136,13 +158,12 @@
 		<ref id="mat-ShortBox" name="bsdf"/>
 	</shape>
 	<shape type="ply">
-		<string name="filename" value="meshes/water_surface.ply"/>
-		<boolean name="face_normals" value="true"/>
-		<ref id="mat-Material" name="bsdf"/>
-	</shape>
-	<shape type="ply">
 		<string name="filename" value="meshes/tall_box.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-tall_box_mat" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/water_surface.ply"/>
+		<ref id="mat-water" name="bsdf"/>
 	</shape>
 </scene>

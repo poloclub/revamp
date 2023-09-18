@@ -225,7 +225,7 @@ def generate_sunset_taxi_cam_positions() -> np.array:
 
 def use_provided_cam_position() -> np.array:
     #     from mitsuba import ScalarTransform4f as T  
-    scene = mi.load_file("scenes/nyc_scene/nyc_scene.xml")
+    scene = mi.load_file("scenes/water_scene/water_scene.xml")
     p = mi.traverse(scene)
     cam_key = 'PerspectiveCamera.to_world'
     sensor = np.array([p[cam_key]])
