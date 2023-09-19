@@ -51,20 +51,6 @@ from fvcore.transforms.transform import NoOpTransform
 from detectron2.utils.file_io import PathManager
 
 
-# COCO Labels
-BUS = 5
-STOP_SIGN = 11
-SPORTS_BALL = 32
-TRAFFIC_LIGHT = 9
-TV = 62
-PERSON = 00
-CAR = 2
-TRUCK = 7
-MOTORCYCLE = 3
-
-
-
-
 # created symlink in /nvmescratch/mhull32/robust-models-transfer dir for datasets: ln -s /nvmescratch/mhull32/datasets datasets
 
 # coco_train_metadata = MetadataCatalog.get("coco_2017_train")
@@ -225,7 +211,7 @@ def generate_sunset_taxi_cam_positions() -> np.array:
 
 def use_provided_cam_position() -> np.array:
     #     from mitsuba import ScalarTransform4f as T  
-    scene = mi.load_file("scenes/water_scene/water_scene.xml")
+    scene = mi.load_file("scenes/nyc_scene/nyc_scene.xml")
     p = mi.traverse(scene)
     cam_key = 'PerspectiveCamera.to_world'
     sensor = np.array([p[cam_key]])
@@ -445,6 +431,8 @@ def attack_dt2(cfg:DictConfig) -> None:
     target_string = cfg.attack.target
     iters = cfg.attack.iters
     spp = cfg.attack.samples_per_pixel
+    multi_pass_rendering = cfg.attack.multi_pass_rendering
+    multi_pass_spp_divisor = cfg.attack.multi_pass_spp_divisor
     scene_file = cfg.attack.scene.path
     param_key = cfg.attack.scene.target_param_key
     sensor_key = cfg.attack.scene.sensor_key
@@ -464,6 +452,9 @@ def attack_dt2(cfg:DictConfig) -> None:
     preds_path = os.path.join("preds",f"{target_string}")
     if os.path.exists(preds_path) == False:
         os.makedirs(preds_path)    
+    
+    if multi_pass_rendering:
+        logger.info(f"Using multi-pass rendering with {spp//multi_pass_spp_divisor} passes")
     
     # img_name = 'render_39_s3'
     # adv_path = f'/nvmescratch/mhull32/robust-models-transfer/renders/{img_name}.jpg'
@@ -651,7 +642,30 @@ def attack_dt2(cfg:DictConfig) -> None:
                     non_diff_params[k1].matrix = mi.cuda_ad_rgb.Matrix4f(sampled_camera_positions[cam_idx])
                 non_diff_params.update()
                 params.update(opt)            
+                
+                if multi_pass_rendering:
+                    # achieve the affect of rendering at a high sample-per-pixel (spp) value 
+                    # by rendering multiple times at a lower spp and averaging the results
+                    render_passes = 16 # TODO - make this a config param
+                    mini_pass_spp = spp//render_passes
+                    mini_pass_renders = dr.empty(dr.cuda.ad.Float, render_passes * H * W * C)
+                    for i in range(render_passes):
+                        seed = np.random.randint(0,1000)+i
+                        img_i =  mi.render(scene, params=params, spp=mini_pass_spp, sensor=camera_idx[it], seed=seed)
+                        s_index = i * (H * W * C)
+                        e_index = (i+1) * (H * W * C)
+                        mini_pass_index = dr.arange(dr.cuda.ad.UInt, s_index, e_index)
+                        img_i = dr.ravel(img_i)
+                        dr.scatter(mini_pass_renders, img_i, mini_pass_index)
+                        
+                    @dr.wrap_ad(source='drjit', target='torch')
+                    def stack_imgs(imgs):
+                        imgs = imgs.reshape((render_passes, H, W, C))
+                        imgs = ch.mean(imgs,axis=0)
+                        return imgs
 
+                    mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, dr.shape(mini_pass_renders))
+                    img = stack_imgs(mini_pass_renders)
                 img =  mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
                 img.set_label_(f"image_b{it}_s{b}")
                 rendered_img_path = os.path.join(render_path,f"render_b{it}_s{b}.png")
@@ -714,8 +728,10 @@ def attack_dt2(cfg:DictConfig) -> None:
 
             # convert back to mitsuba dtypes            
             tex = dr.cuda.ad.TensorXf(tex.to(DEVICE))
+            # divide by average brightness
+            scaled_img = img / dr.mean(dr.detach(img))
+            tex = tex / dr.mean(scaled_img)         
             tex = dr.clamp(tex, 0, 1)
-            
             params[k] = tex     
             dr.enable_grad(params[k])
             params.update()
@@ -765,6 +781,8 @@ def attack_dt2(cfg:DictConfig) -> None:
             # taxi bbox
             # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
             # stop sign bbox
+            # tv bbox underwater
+            # instances.gt_boxes = Boxes(ch.tensor([[45.0, 298.0, 322.0,480.0]]))
             instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, float(height), float(width)]]))
             input['image']  = x    
             input['filename'] = ''
@@ -823,7 +841,14 @@ def attack_dt2(cfg:DictConfig) -> None:
             params.update(opt)            
 
             # TODO  1 - render from each camera viewport
-            img =  mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
+            mini_pass_spp = spp//multi_pass_spp_divisor
+            mini_pass_renders = []
+            for i in range(multi_pass_spp_divisor):
+                seed = np.random.randint(0,1000)
+                print(f"rendering mini-pass {i} with spp {mini_pass_spp}")
+                img_i =  mi.render(scene, params=params, spp=mini_pass_spp, sensor=camera_idx[it], seed=seed)
+                mini_pass_renders.append(img_i)
+            img = dr.mean(dr.stack(mini_pass_renders, axis=0), axis=0)
             img.set_label_("image")
             dr.enable_grad(img)
             rendered_img_path = f"renders/render_{it}_s{camera_idx[it]}.png"
@@ -847,9 +872,10 @@ def attack_dt2(cfg:DictConfig) -> None:
             tex = tex + eta
             eta = dr.clamp(tex - orig_tex, -epsilon, epsilon)
             tex = orig_tex + eta
-            tex = dr.clamp(tex, 0, 1)
             # divide by average brightness
-            tex = tex / dr.mean(dr.detach(img))
+            scaled_img = img / dr.mean(dr.detach(img))
+            tex = tex / dr.mean(scaled_img)         
+            tex = dr.clamp(tex, 0, 1)
             params[k] = tex
             dr.enable_grad(params[k])
             params.update()
