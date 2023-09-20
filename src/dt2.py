@@ -646,8 +646,9 @@ def attack_dt2(cfg:DictConfig) -> None:
                 if multi_pass_rendering:
                     # achieve the affect of rendering at a high sample-per-pixel (spp) value 
                     # by rendering multiple times at a lower spp and averaging the results
-                    render_passes = 16 # TODO - make this a config param
-                    mini_pass_spp = spp//render_passes
+                    # render_passes = 16 # TODO - make this a config param
+                    mini_pass_spp = spp//multi_pass_spp_divisor
+                    render_passes = mini_pass_spp
                     mini_pass_renders = dr.empty(dr.cuda.ad.Float, render_passes * H * W * C)
                     for i in range(render_passes):
                         seed = np.random.randint(0,1000)+i
