@@ -2,9 +2,9 @@
 
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
-	<default name="spp" value="16"/>
-	<default name="resx" value="512"/>
-	<default name="resy" value="512"/>
+	<default name="spp" value="2048"/>
+	<default name="resx" value="1024"/>
+	<default name="resy" value="1024"/>
 
 <!-- Camera and Rendering Parameters -->
 
@@ -298,10 +298,11 @@
 			<float name="clearcoat" value="0.000000"/>
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
-		</bsdf>		</bsdf>
-	<bsdf type="diffuse" id="mat-Building 5">
-		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+		</bsdf>		
 	</bsdf>
+	<!-- <bsdf type="diffuse" id="mat-Building 5">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf> -->
 	<bsdf type="twosided" id="mat-Building 1">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -352,7 +353,7 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>	
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Building 8">
+	<!-- <bsdf type="diffuse" id="mat-Building 8">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Building 9">
@@ -360,7 +361,7 @@
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Building 9 v2">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
-	</bsdf>
+	</bsdf> -->
 	<bsdf type="twosided" id="mat-Building 10">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -378,7 +379,7 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>	
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Building 11">
+	<!-- <bsdf type="diffuse" id="mat-Building 11">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Building 12">
@@ -395,7 +396,7 @@
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Building 17">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
-	</bsdf>
+	</bsdf> -->
 	<bsdf type="twosided" id="mat-Building 15">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -416,7 +417,7 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Building 19">
+	<!-- <bsdf type="diffuse" id="mat-Building 19">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
 	</bsdf>
 	<bsdf type="diffuse" id="mat-Material.001">
@@ -436,7 +437,7 @@
 	</bsdf>
 	<bsdf type="diffuse" id="mat-sedan col ">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
-	</bsdf>
+	</bsdf> -->
 	<bsdf type="twosided" id="mat-sedan col .2">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -454,7 +455,7 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>	
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Truck col.001">
+	<!-- <bsdf type="diffuse" id="mat-Truck col.001">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
 	</bsdf>
 	<bsdf type="diffuse" id="mat-sedan col1">
@@ -465,7 +466,7 @@
 	</bsdf>
 	<bsdf type="diffuse" id="mat-sedan col 3">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
-	</bsdf>
+	</bsdf> -->
 	<bsdf type="twosided" id="mat-Sidewalk">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -540,7 +541,7 @@
 	<bsdf type="twosided" id="mat-Mail box-perturb">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/noise_tex.png"/>
+				<string name="filename" value="textures/Mail box_Color.png"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
@@ -551,7 +552,7 @@
 			<float name="sheen_tint" value="0.500000"/>
 			<float name="clearcoat" value="0.000000"/>
 			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.500000"/>
+			<float name="specular" value="0.000000"/>
 		</bsdf>	
 	</bsdf>	
 	<bsdf type="twosided" id="mat-Ad stand">
@@ -588,9 +589,9 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Mail box Color v2">
+	<!-- <bsdf type="diffuse" id="mat-Mail box Color v2">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
-	</bsdf>
+	</bsdf> -->
 	<bsdf type="twosided" id="mat-Fire Hydrant">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -634,7 +635,7 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="twosided" id="mat-Tree bark">
+	<!-- <bsdf type="twosided" id="mat-Tree bark">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
 				<string name="filename" value="textures/Bark.png"/>
@@ -650,8 +651,8 @@
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
 		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-Tree Leaf 1">
+	</bsdf> -->
+	<!-- <bsdf type="twosided" id="mat-Tree Leaf 1">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
 				<string name="filename" value="textures/Leaf 1_Color.png"/>
@@ -667,8 +668,8 @@
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
 		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-Tree leaf 2">
+	</bsdf> -->
+	<!-- <bsdf type="twosided" id="mat-Tree leaf 2">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
 				<string name="filename" value="textures/leaf2_Color.png"/>
@@ -684,8 +685,8 @@
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
 		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-Dirt">
+	</bsdf> -->
+	<!-- <bsdf type="twosided" id="mat-Dirt">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
 				<string name="filename" value="textures/Dirt.png"/>
@@ -701,7 +702,7 @@
 			<float name="clearcoat_gloss" value="0.173205"/>
 			<float name="specular" value="0.500000"/>
 		</bsdf>
-	</bsdf>
+	</bsdf> -->
 	<bsdf type="twosided" id="mat-Material">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
@@ -719,9 +720,9 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="diffuse" id="mat-Building 2">
+	<!-- <bsdf type="diffuse" id="mat-Building 2">
 		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
-	</bsdf>
+	</bsdf> -->
 
 <!-- Emitters -->
 
