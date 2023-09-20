@@ -20,6 +20,8 @@ attack:
   target_idx: null
   iters: 100
   samples_per_pixel: 256
+  multi_pass_rendering: false
+  multi_pass_spp_divisor: 16
       
 dataset:
   name: coco_2017_train

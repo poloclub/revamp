@@ -2,7 +2,7 @@
 
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
-	<default name="spp" value="1"/>
+	<default name="spp" value="1024"/>
 	<default name="resx" value="512"/>
 	<default name="resy" value="512"/>
 
@@ -28,6 +28,7 @@
 			<integer name="sample_count" value="$spp"/>
 		</sampler>
 		<film type="hdrfilm">
+		 	<string name="file_format" value="openexr"/>
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
 		</film>
