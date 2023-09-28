@@ -6,14 +6,14 @@ import shutil
 import glob
 import numpy as np
 from detectron2.data import MetadataCatalog
-from dt2 import attack_dt2
+from src.dt2 import attack_dt2
 from omegaconf import DictConfig, OmegaConf
 import hydra
 import logging
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
-@hydra.main(version_base=None, config_path="../configs", config_name="config")
+@hydra.main(version_base=None, config_path="configs", config_name="config")
 def run(cfg: DictConfig) -> None:
 
     print(OmegaConf.to_yaml(cfg))

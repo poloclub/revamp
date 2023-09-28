@@ -139,10 +139,6 @@ dmypy.json
 *.mp4
 # mesh files can be large - ignore them in general
 scenes/**/meshes/*.ply
-# scenes/cube_r1/meshes/*.ply
-# scenes/cube_r2/meshes/*.ply
-# scenes/underwater/meshes/*.ply
-# scenes/soldier/meshes/*.ply
 # exception, include meshes with the cube scene
 # !/scenes/cube/meshes/*.ply
 *.blend
