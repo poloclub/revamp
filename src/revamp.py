@@ -21,7 +21,7 @@ def run(cfg: DictConfig) -> None:
     passes = cfg.attack.passes
     passes_names = cfg.attack.passes_names
     target = cfg.attack.target
-    scene_file = cfg.attack.scene.path
+    scene_file = cfg.scene.path
 
     dataset = cfg.dataset.name 
     library = cfg.dataset.library
@@ -66,7 +66,7 @@ def run(cfg: DictConfig) -> None:
         
         # make predictions using the same camera angles utilized for producing perturbation
         render_predict = f"make TARGET={target} \
-            TARGET_SCENE={cfg.attack.scene.name} \
+            TARGET_SCENE={cfg.scene.name} \
                 RESULTS_DIR={cfg.sysconfig.log_dir} \
                     TEX_NUM={passes[i]} \
                         SENSOR_POS_FN={cfg.scenario.sensor_positions.function} \
@@ -85,8 +85,8 @@ def run(cfg: DictConfig) -> None:
         subprocess.run(get_scores, shell=True, check=True)
 
         next_tex = os.path.join(tex_dir, f"tex_{passes[i]}.png")
-        # set_tex = f"make TARGET={target} TARGET_SCENE={cfg.attack.scene.name} {next_tex}.set_tex"
-        cfg.attack.scene.tex = next_tex
+        # set_tex = f"make TARGET={target} TARGET_SCENE={cfg.scene.name} {next_tex}.set_tex"
+        cfg.scene.tex = next_tex
         # subprocess.run(set_tex, shell=True, check=True)
 
     # process logfile

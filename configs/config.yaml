@@ -1,5 +1,5 @@
 defaults:
-  - attack/scene: cube_scene
+  - scene: cube_scene
   - model: faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x
   - scenario: scenario
   - scenario/sensor_positions: generate_cube_scene_orbit_cam_positions

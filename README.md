@@ -40,19 +40,19 @@ Run a texture attack on Detectron2 and log the results to a file.  We use Hydra 
 `CUDA_VISIBLE_DEVICES=0 python src/revamp.py attack.target=cat scenario.randomize_positions=true`
 
 #### Specify Target Class and Use a Different Scene
-`CUDA_VISIBLE_DEVICES=0 python src/revamp.py attack.target=cat attack.passes=1 attack/scene=cube_scene_r1`
+`CUDA_VISIBLE_DEVICES=0 python src/revamp.py attack.target=cat attack.passes=1 scene=cube_r1`
 
 #### Resuming Experiments and Handling Out-of-Memory
 Sometimes Mitsuba crashes or you want to add additional passes to an perturbed texture.  To resume / add on to an experiment, follow these steps:
 Continue an experiment by adding extra passes with explicit pass names.
 1. Set the texture:
-` make TARGET=truck TARGET_SCENE=cube_scene scenes/cube_scene/textures/truck_tex/tex_6.png.set_tex`
+` make TARGET=truck TARGET_SCENE=cube scenes/cube/textures/truck_tex/tex_6.png.set_tex`
 2. run: `python src/revamp.py attack.target=truck attack.passes=1 attack.passes_names=[7]`
 
 
 Rendering large scenes that contain a high number of meshes, it is possible to exhaust the memory of the GPU, resulting in out-of-memory errors.  To solve this problem, you can choose to render at a lower number of samples per pixel (SPP) or lower the resolution of the sensor.  Alternatively, you can render a sequence of images at a lower SPP value while varying the seed of each render and then average the resulting images to compose a lower noise image.  The following command uses `attack.multi_pass_rendering=true`, `attack.samples_per_pixel=64`, and `attack.multi_pass_spp_divisor=8` to use render `64/8=8` images and then averages them together.
 
-`CUDA_VISIBLE_DEVICES=0 python src/revamp.py attack.target=stop_sign scenario.sensor_positions.function=use_provided_cam_position attack.iters=100 attack.passes=10 attack.multi_pass_rendering=true attack.samples_per_pixel=64 attack.multi_pass_spp_divisor=8 attack/scene=nyc_scene`
+`CUDA_VISIBLE_DEVICES=0 python src/revamp.py attack.target=stop_sign scenario.sensor_positions.function=use_provided_cam_position attack.iters=100 attack.passes=10 attack.multi_pass_rendering=true attack.samples_per_pixel=64 attack.multi_pass_spp_divisor=8 scene=city`
 
 ### Clean-up renders/ predicted renders images
 
@@ -64,7 +64,7 @@ Here `TEX_NUM=0` refers to the index of the texture
 `make TARGET=traffic_light RESULTS_DIR=results/traffic_light TEX_NUM=0 render_predict`
 
 Other params
-`TARGET_SCENE = cube_scene
+`TARGET_SCENE = cube
 ORIG_TEX = red_tex.png 
 TEX_NUM = 0`
 
@@ -82,11 +82,11 @@ e.g., This uses the file `tex_2.png` for the `PERSON` class and render/predict a
 
 ### Set an (optional alternate) texture before rendering
 
-`make scenes/cube_scene/textures/traffic_light_tex/tex_2.png.set_tex`
+`make scenes/cube/textures/traffic_light_tex/tex_2.png.set_tex`
 
 or 
 
-`make TARGET_TEX=stop_sign_tex scenes/cube_scene/textures/stop_sign_tex/tex_0.png.set_tex`
+`make TARGET_TEX=stop_sign_tex scenes/cube/textures/stop_sign_tex/tex_0.png.set_tex`
 
 ### Render batch of images
 This command generates renders from 48 sensor positions. See `dt2.py` for details.
@@ -109,6 +109,6 @@ This generates 264 sensor positions at vertices of 3 concentric half-icospheres
 
 ## Conventions
 Any scene added should at least have the following naming structure:
-`<scene name>/<scene name>.xml` e.g., `cube_scene/cube_scene.xml` 
+`<scene name>/<scene name>.xml` e.g., `cube/cube.xml` 
 
 Any texture used should be named as one of `tex_0.png`, `tex_1.png`, etc.
