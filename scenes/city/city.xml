@@ -541,7 +541,7 @@
 	<bsdf type="twosided" id="mat-Mail box-perturb">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/Mail box_Color.png"/>
+				<string name="filename" value="textures/Mail box_Color_v2_256.png"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
@@ -894,11 +894,11 @@
 	<shape type="ply">
 		<string name="filename" value="meshes/Car6.ply"/>
 		<ref id="mat-sedan col " name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply">
 		<string name="filename" value="meshes/Car3.ply"/>
 		<ref id="mat-sedan col .2" name="bsdf"/>
-	</shape> -->
+	</shape>
 	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Car7.ply"/>
 		<ref id="mat-Truck col.001" name="bsdf"/>

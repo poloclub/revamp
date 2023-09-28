@@ -2,7 +2,7 @@
 
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
-	<default name="spp" value="512"/>
+	<default name="spp" value="1024"/>
 	<default name="resx" value="512"/>
 	<default name="resy" value="512"/>
 
@@ -35,10 +35,10 @@
 
 <!-- Materials -->
 
-	<bsdf type="twosided" id="mat-Material.002">
+	<bsdf type="twosided" id="mat-Material.004">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/Texture.001.jpg"/>
+				<string name="filename" value="textures/Texture.003.jpg"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
@@ -52,10 +52,10 @@
 			<float name="specular" value="0.500000"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="twosided" id="mat-Material.003">
+	<bsdf type="twosided" id="mat-Material.005">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/Texture.002.jpg"/>
+				<string name="filename" value="textures/Texture.004.jpg"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
@@ -83,11 +83,11 @@
 <!-- Shapes -->
 
 	<shape type="ply">
-		<string name="filename" value="meshes/mesa_patch.ply"/>
-		<ref id="mat-Material.002" name="bsdf"/>
+		<string name="filename" value="meshes/mesa_base.ply"/>
+		<ref id="mat-Material.004" name="bsdf"/>
 	</shape>
 	<shape type="ply">
-		<string name="filename" value="meshes/mesa_minus_patch.ply"/>
-		<ref id="mat-Material.003" name="bsdf"/>
+		<string name="filename" value="meshes/mesa_top.ply"/>
+		<ref id="mat-Material.005" name="bsdf"/>
 	</shape>
 </scene>
