@@ -1,5 +1,0 @@
-name: mesa_scene
-path: "scenes/${attack.scene.name}/${attack.scene.name}.xml"
-tex: "scenes/${attack.scene.name}/textures/noise_tex.png"
-target_param_key: "mat-Material.005.brdf_0.base_color.data"
-sensor_key: "PerspectiveCamera"
