@@ -20,7 +20,7 @@ def run(cfg: DictConfig) -> None:
     original_cwd = os.getcwd()
     passes = cfg.attack.passes
     passes_names = cfg.attack.passes_names
-    target = cfg.attack.target
+    target = cfg.attack_class
     scene_file = cfg.scene.path
 
     dataset = cfg.dataset.name 
@@ -30,7 +30,7 @@ def run(cfg: DictConfig) -> None:
         # TODO - raise exception if target class is not found in DT2
         # handle 2-word classes e.g., : "sports_ball" --> "sports ball"
         target = target.lower()
-        cfg.attack.target = target
+        cfg.attack_class = target
         formatted_target = target.replace("_", " ")
         classes = MetadataCatalog.get(dataset).thing_classes
         target_index = classes.index(formatted_target)
@@ -46,7 +46,7 @@ def run(cfg: DictConfig) -> None:
 
     for i in range(len(passes)):
 
-        clean_renders_preds = f"make TARGET={cfg.attack.target} clean"
+        clean_renders_preds = f"make TARGET={cfg.attack_class} clean"
         subprocess.run(clean_renders_preds, shell=True, check=True)
 
         fn = f"{passes[i]}.txt"

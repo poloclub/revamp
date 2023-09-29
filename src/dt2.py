@@ -429,7 +429,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     eps_step =  cfg.attack.eps_step
     targeted =  cfg.attack.targeted
     target_class = cfg.attack.target_idx
-    target_string = cfg.attack.target
+    target_string = cfg.attack_class
     iters = cfg.attack.iters
     spp = cfg.attack.samples_per_pixel
     multi_pass_rendering = cfg.attack.multi_pass_rendering

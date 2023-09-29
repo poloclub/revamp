@@ -7,9 +7,11 @@ defaults:
 
 texture: noise_tex
 
+attack_class: stop_sign
+
 hydra:
   run:
-    dir: ./results/${attack.target}/${now:%Y-%m-%d}/${now:%H-%M-%S}  
+    dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}  
 
 attack: 
   passes: 7
@@ -30,6 +32,6 @@ dataset:
   library: detectron2
 
 sysconfig:
-  output_path: results/${attack.target}
+  output_path: results/${attack_class}
   pass_idx: null
-  log_dir: ./results/${attack.target}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  log_dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}
