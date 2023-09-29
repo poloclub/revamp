@@ -1,4 +1,6 @@
 # REVAMP: Automated Simulations of Adversarial Attacks on Arbitrary Objects in Realistic Scenes
+[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+<!-- [![arXiv](https://img.shields.io/badge/arXiv-2110.11227-b3131b.svg)](https://arxiv.org/abs/2110.11227) -->
 ![pipeline](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/54d44775-15ae-4d0b-804e-0fe13a2d94fe)
 
 Deep Learning models, such as those used in an autonomous vehicle are vulnerable to adversarial attacks where an attacker could place an adversarial object in the environment, leading to mis-classification. Generating these adversarial objects in the digital space has been extensively studied, however successfully transferring these attacks from the digital real to the physical real has proven challenging when controlling for real-world environmental factors. In response to these limitations, we introduce REVAMP, an easy to use python library that is the first-of-its-kind tool for creating attack scenarios with arbitrary objects and simulating realistic lighting and environmental factors, lighting, reflection, and refraction. REVAMP enables researchers and practitioners to swiftly explore various scenarios within the digital realm by offering a wide range of configurable options for designing experiments and using differentiable rendering to reproduce physically plausible adversarial objects.
@@ -61,3 +63,18 @@ Continue an experiment by adding extra passes with explicit pass names.
 1. Set the texture:
 ` make TARGET=truck TARGET_SCENE=cube scenes/cube/textures/truck_tex/tex_6.png.set_tex`
 2. run: `python revamp.py attack_class=truck attack.passes=1 attack.passes_names=[7]`
+
+
+# Credits
+Led by [Matthew Hull](https://matthewdhull.github.io), REVAMP was created in a collaboaration with  [Zijie J. Wang](https://zijie.wang) and [Duen Horng Chau](https://poloclub.github.io/polochau/).
+
+<!-- # Citation
+To learn more about REVAMP, please read our preliminary two-page [demo paper](https://arxiv.org/abs/2110.11227). Thanks!
+
+```latex
+@inproceedings{hull2021autogradeviz,
+      title={Towards Automatic Grading of D3.js Visualizations},
+      author={Matthew Hull, Connor Guerin, Justin Chen, Susanta Routray, Duen Horng (Polo) Chau},
+      booktitle = {IEEE Visualization Conference (VIS), Poster},
+      year={2021}}
+``` -->
