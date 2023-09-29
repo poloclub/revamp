@@ -3,8 +3,11 @@
 
 Deep Learning models, such as those used in an autonomous vehicle are vulnerable to adversarial attacks where an attacker could place an adversarial object in the environment, leading to mis-classification. Generating these adversarial objects in the digital space has been extensively studied, however successfully transferring these attacks from the digital real to the physical real has proven challenging when controlling for real-world environmental factors. In response to these limitations, we introduce REVAMP, an easy to use python library that is the first-of-its-kind tool for creating attack scenarios with arbitrary objects and simulating realistic lighting and environmental factors, lighting, reflection, and refraction. REVAMP enables researchers and practitioners to swiftly explore various scenarios within the digital realm by offering a wide range of configurable options for designing experiments and using differentiable rendering to reproduce physically plausible adversarial objects.
 
-## REVAMP is easy to use!
+## REVAMP is easy to use!  
 `python revamp.py scene=city texture=mail_box attack_class=stop_sign multicam=64`
+
+Running this command chooses the "city" scene from the library of scenes, designates the texture on the mailbox as the attackable parameter, and sets the desired attack class to "stop sign" and uses 64 unique camera positions for rendering.
+
 
 ![crown_jewel](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/95dc6b8e-a948-4989-b3da-951e94ad4c72)
 
