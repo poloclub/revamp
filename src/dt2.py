@@ -209,13 +209,13 @@ def generate_sunset_taxi_cam_positions() -> np.array:
     sensors = np.array([p[k] for k in cam_keys])
     return sensors
 
-def use_provided_cam_position() -> np.array:
+def use_provided_cam_position(scene_file:str,sensor_key:str) -> np.array:
     #     from mitsuba import ScalarTransform4f as T  
     # scene = mi.load_file("scenes/water_scene/water_scene.xml")
-    scene = mi.load_file("scenes/mesa/mesa.xml")
+    scene = mi.load_file(scene_file)
     p = mi.traverse(scene)
-    cam_key = 'PerspectiveCamera.to_world'
-    sensor = np.array([p[cam_key]])
+    sensor_key_tansform_key = f'{sensor_key}.to_world'
+    sensor = np.array([p[sensor_key_tansform_key]])
     return sensor
 
 def generate_cube_scene_cam_positions() -> np.array:
@@ -352,7 +352,7 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     positions = np.repeat(positions, reps_per_position)
     return positions    
 
-def generate_cube_scene_1_orbit_cam_positions(reps_per_position=1) -> np.array:
+def generate_1_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 4 cam positions @ 3 latitutdes
     """
@@ -364,7 +364,7 @@ def generate_cube_scene_1_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_cube_scene_4_orbit_cam_positions(reps_per_position=1) -> np.array:
+def generate_4_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 4 cam positions @ 3 latitutdes
     """
@@ -376,7 +376,7 @@ def generate_cube_scene_4_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_cube_scene_8_orbit_cam_positions(reps_per_position=1) -> np.array:
+def generate_8_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 8 cam positions @ 3 latitutdes
     """
@@ -386,7 +386,7 @@ def generate_cube_scene_8_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_cube_scene_16_orbit_cam_positions(reps_per_position=1) -> np.array:
+def generate_16_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 32 cam positions @ 3 latitutdes
     """
@@ -396,7 +396,7 @@ def generate_cube_scene_16_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_cube_scene_32_orbit_cam_positions(reps_per_position=1) -> np.array:
+def generate_32_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 32 cam positions @ 3 latitutdes
     """
@@ -406,7 +406,7 @@ def generate_cube_scene_32_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_cube_scene_64_orbit_cam_positions(reps_per_position=1) -> np.array:
+def generate_64_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 64 cam positions @ 3 latitutdes
     """
@@ -444,6 +444,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     randomize_sensors = cfg.scenario.randomize_positions 
     scene_file_dir = os.path.dirname(scene_file)
     tex_path = cfg.scene.tex
+    multicam = cfg.multicam
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
         os.makedirs(tmp_perturbation_path)
@@ -493,9 +494,12 @@ def attack_dt2(cfg:DictConfig) -> None:
     # moves_matrices = generate_taxi_cam_positions()
     # moves_matrices = generate_sunset_taxi_cam_positions()
     # moves_matrices = np.tile(p[k1],1)
-    # moves_matrices = generate_cube_scene_cam_positions()
-    # moves_matrices = generate_cube_scene_orbit_cam_positions()
-    moves_matrices = eval(sensor_positions + "()")
+    # moves_matrices = generate_cam_positions()
+    # moves_matrices = generate_orbit_cam_positions()
+    if multicam == 1:
+        moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
+    else:
+        moves_matrices = eval("generate_"+ sensor_positions +"_orbit_cam_positions()")
     if randomize_sensors:
         np.random.shuffle(moves_matrices)
 
