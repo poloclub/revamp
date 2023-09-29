@@ -2,9 +2,9 @@
 
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
-	<default name="spp" value="2048"/>
-	<default name="resx" value="1024"/>
-	<default name="resy" value="1024"/>
+	<default name="spp" value="32"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
 
 <!-- Camera and Rendering Parameters -->
 
@@ -541,7 +541,7 @@
 	<bsdf type="twosided" id="mat-Mail box-perturb">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/Mail box_Color_v2_256.png"/>
+				<string name="filename" value="textures/mail_box.png"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
