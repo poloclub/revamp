@@ -59,6 +59,15 @@ Any scene added should at least have the following naming structure:
 Any texture used should be named as one of `tex_0.png`, `tex_1.png`, etc.
 
 ### Troubleshooting
+
+#### Resuming Experiments and Handling Out-of-Memory
+Sometimes Mitsuba crashes or you want to add additional passes to an perturbed texture.  To resume / add on to an experiment, follow these steps:
+Continue an experiment by adding extra passes with explicit pass names.
+1. Set the texture:
+` make TARGET=truck TARGET_SCENE=cube scenes/cube/textures/truck_tex/tex_6.png.set_tex`
+2. run: `python revamp.py attack_class=truck attack.passes=1 attack.passes_names=[7]`
+
+
 Rendering large scenes that contain a high number of meshes, it is possible to exhaust the memory of the GPU, resulting in out-of-memory errors.  To solve this problem, you can choose to render at a lower number of samples per pixel (SPP) or lower the resolution of the sensor.  Alternatively, you can render a sequence of images at a lower SPP value while varying the seed of each render and then average the resulting images to compose a lower noise image.  The following command uses `attack.multi_pass_rendering=true`, `attack.samples_per_pixel=64`, and `attack.multi_pass_spp_divisor=8` to use render `64/8=8` images and then averages them together.
 
 `CUDA_VISIBLE_DEVICES=0 python revamp.py attack_class=stop_sign scenario.sensor_positions.function=use_provided_cam_position attack.iters=100 attack.passes=10 attack.multi_pass_rendering=true attack.samples_per_pixel=64 attack.multi_pass_spp_divisor=8 scene=city`

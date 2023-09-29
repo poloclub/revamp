@@ -13,6 +13,26 @@ Running this command chooses the "city" scene from the library of scenes, design
 
 ![crown_jewel](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/95dc6b8e-a948-4989-b3da-951e94ad4c72)
 
+## Getting Started
+
+`conda env create -f environment.yml`
+
+Install Detectron2
+
+`python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'`
+
+### Model Weights
+We use [Robust ImageNet Models](https://github.com/microsoft/robust-models-transfer). You'll need to choose an appropriate model for your experiment. Currently we use this ResNet-50 [L2-Robust Model](https://robustnessws4285631339.blob.core.windows.net/public-models/robust_imagenet/resnet50_l2_eps0.03.ckpt?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2051-10-06T07:09:59Z&st=2021-10-05T23:09:59Z&spr=https,http&sig=U69sEOSMlliobiw8OgiZpLTaYyOA5yt5pHHH5%2FKUYgI%3D) for object detection with Detectron2. After downloading this model, place it in the `pretrained-models/` directory.  If you want another model, you'll need to create a model config in `configs/model/{model}.yaml`. You may copy the existing configs and use it as a template.
+
+### Examples
+Run a texture attack on Detectron2 and log the results to a file.  We use Hydra for configuring experiments and you can easily supply your own Hydra-style config arguments. See this [Hydra tutorial](https://hydra.cc/docs/tutorials/basic/your_first_app/simple_cli/)
+
+#### Specify Target Class and Camera Positioning
+`python revamp.py scene=city texture=mail_box attack_class=stop_sign multicam=64`
+
+#### Specify Target Class and Use a Different Scene
+`python revamp.py scene=mesa texture=mesa attack_class=bus multicam=1`
+
 # Texture Attacks using Differentiable Rendering
 
 ## What does this project do?  
@@ -35,34 +55,6 @@ This project uses configurable scenarios that can be used to create experiments 
 
 For example, one scenario uses a "cube scene" consisting of a single cube mesh and some lights.  The attackable parameter is the cube's texture in bitmap format. The victim model is a 2-stage object detector (faster-rcnn).  The rendering settings specify that the scene be rendered 48 different sensor positions during the attack.  
 
-
-## Getting Started
-
-`conda env create -f environment.yml`
-
-Install Detectron2
-
-`python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'`
-
-### Model Weights
-We use [Robust ImageNet Models](https://github.com/microsoft/robust-models-transfer). You'll need to choose an appropriate model for your experiment. Currently we use this ResNet-50 [L2-Robust Model](https://robustnessws4285631339.blob.core.windows.net/public-models/robust_imagenet/resnet50_l2_eps0.03.ckpt?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2051-10-06T07:09:59Z&st=2021-10-05T23:09:59Z&spr=https,http&sig=U69sEOSMlliobiw8OgiZpLTaYyOA5yt5pHHH5%2FKUYgI%3D) for object detection with Detectron2. You can specify the weights file path and model config path in `configs/model/{model}.yaml`.
-
-
-### Examples
-Run a texture attack on Detectron2 and log the results to a file.  We use Hydra for configuring experiments and you can easily supply your own Hydra-style config arguments. See this [Hydra tutorial](https://hydra.cc/docs/tutorials/basic/your_first_app/simple_cli/)
-
-#### Specify Target Class and Camera Positioning
-`python revamp.py scene=city texture=mail_box attack_class=stop_sign multicam=64`
-
-#### Specify Target Class and Use a Different Scene
-`python revamp.py scene=mesa texture=mesa attack_class=bus multicam=1`
-
-#### Resuming Experiments and Handling Out-of-Memory
-Sometimes Mitsuba crashes or you want to add additional passes to an perturbed texture.  To resume / add on to an experiment, follow these steps:
-Continue an experiment by adding extra passes with explicit pass names.
-1. Set the texture:
-` make TARGET=truck TARGET_SCENE=cube scenes/cube/textures/truck_tex/tex_6.png.set_tex`
-2. run: `python revamp.py attack_class=truck attack.passes=1 attack.passes_names=[7]`
 
 
 # Credits
