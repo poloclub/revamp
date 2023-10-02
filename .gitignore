@@ -140,7 +140,12 @@ dmypy.json
 # mesh files can be large - ignore them in general
 scenes/**/meshes/*.ply
 # exception, include meshes with the cube scene
-# !/scenes/cube/meshes/*.ply
+!/scenes/cube/meshes/*.ply
+!/scenes/cone_r1/meshes/*.ply
+!/scenes/cone_r2/meshes/*.ply
+!/scenes/cylinder_r1/meshes/*.ply
+!/scenes/pyramid_r1/meshes/*.ply
+!/scenes/sphere_r1/meshes/*.ply
 *.blend
 *.blend1
 *.obj
