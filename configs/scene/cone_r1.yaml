@@ -1,0 +1,5 @@
+name: cone_r1
+path: "scenes/${scene.name}/${scene.name}.xml"
+tex: "scenes/${scene.name}/textures/${texture}.png"
+target_param_key: "mat-Material.brdf_0.base_color.data"
+sensor_key: "PerspectiveCamera"

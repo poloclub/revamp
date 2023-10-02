@@ -1,0 +1,39 @@
+defaults:
+  - scene: cube
+  - model: faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x
+  - scenario: scenario
+  - scenario/sensor_positions: generate_cube_scene_orbit_cam_positions
+  - _self_
+
+texture: noise_tex
+
+attack_class: stop_sign
+
+multicam: 1
+
+hydra:
+  run:
+    dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}  
+
+attack: 
+  passes: 1
+  passes_names: null
+  batch_size: 1
+  eps:  5.0
+  eps_step: 0.312
+  targeted: true
+  target: null
+  target_idx: null
+  iters: 100
+  samples_per_pixel: 32
+  multi_pass_rendering: false
+  multi_pass_spp_divisor: 16
+      
+dataset:
+  name: coco_2017_train
+  library: detectron2
+
+sysconfig:
+  output_path: results/${attack_class}
+  pass_idx: null
+  og_dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}
