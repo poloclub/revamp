@@ -1,3 +1,38 @@
+# REVAMP: Automated Simulations of Adversarial Attacks on Arbitrary Objects in Realistic Scenes
+[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+<!-- [![arXiv](https://img.shields.io/badge/arXiv-2110.11227-b3131b.svg)](https://arxiv.org/abs/2110.11227) -->
+![pipeline](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/54d44775-15ae-4d0b-804e-0fe13a2d94fe)
+
+Deep Learning models, such as those used in an autonomous vehicle are vulnerable to adversarial attacks where an attacker could place an adversarial object in the environment, leading to mis-classification. Generating these adversarial objects in the digital space has been extensively studied, however successfully transferring these attacks from the digital real to the physical real has proven challenging when controlling for real-world environmental factors. In response to these limitations, we introduce REVAMP, an easy to use python library that is the first-of-its-kind tool for creating attack scenarios with arbitrary objects and simulating realistic lighting and environmental factors, lighting, reflection, and refraction. REVAMP enables researchers and practitioners to swiftly explore various scenarios within the digital realm by offering a wide range of configurable options for designing experiments and using differentiable rendering to reproduce physically plausible adversarial objects.
+
+## REVAMP is easy to use!  
+`python revamp.py scene=city texture=mail_box attack_class=stop_sign multicam=64`
+
+Running this command chooses the "city" scene from the library of scenes, designates the texture on the mailbox as the attackable parameter, and sets the desired attack class to "stop sign" and uses 64 unique camera positions for rendering.
+
+
+![crown_jewel](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/95dc6b8e-a948-4989-b3da-951e94ad4c72)
+
+## Getting Started
+
+`conda env create -f environment.yml`
+
+Install Detectron2
+
+`python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'`
+
+### Model Weights
+We use [Robust ImageNet Models](https://huggingface.co/madrylab/robust-imagenet-models). You'll need to choose an appropriate model for your experiment. Currently we use this ResNet-50 [L2-Robust Model](https://huggingface.co/madrylab/robust-imagenet-models/resolve/main/resnet50_l2_eps0.05.ckpt) for object detection with Detectron2. After downloading this model, place it in the `pretrained-models/` directory.  If you want another model, you'll need to create a model config in `configs/model/{model}.yaml`. You may copy the existing configs and use it as a template.
+
+### Examples
+Run a texture attack on Detectron2 and log the results to a file.  We use Hydra for configuring experiments and you can easily supply your own Hydra-style config arguments. See this [Hydra tutorial](https://hydra.cc/docs/tutorials/basic/your_first_app/simple_cli/)
+
+#### Specify Target Class and Camera Positioning
+`python revamp.py scene=city texture=mail_box attack_class=stop_sign multicam=64`
+
+#### Specify Target Class and Use a Different Scene
+`python revamp.py scene=mesa texture=mesa attack_class=bus multicam=1`
+
 # Texture Attacks using Differentiable Rendering
 
 ## What does this project do?  
@@ -21,94 +56,17 @@ This project uses configurable scenarios that can be used to create experiments 
 For example, one scenario uses a "cube scene" consisting of a single cube mesh and some lights.  The attackable parameter is the cube's texture in bitmap format. The victim model is a 2-stage object detector (faster-rcnn).  The rendering settings specify that the scene be rendered 48 different sensor positions during the attack.  
 
 
-## Getting Started
 
-`conda env create -f environment.yml`
+# Credits
+Led by [Matthew Hull](https://matthewdhull.github.io), REVAMP was created in a collaboaration with  [Zijie J. Wang](https://zijie.wang) and [Duen Horng Chau](https://poloclub.github.io/polochau/).
 
-Install Detectron2
+<!-- # Citation
+To learn more about REVAMP, please read our preliminary two-page [demo paper](https://arxiv.org/abs/2110.11227). Thanks!
 
-`python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'`
-
-### Model Weights
-We use [Robust ImageNet Models](https://github.com/microsoft/robust-models-transfer). You'll need to choose an appropriate model for your experiment. Currently we use this ResNet-50 [L2-Robust Model](https://robustnessws4285631339.blob.core.windows.net/public-models/robust_imagenet/resnet50_l2_eps0.03.ckpt?sv=2020-08-04&ss=bfqt&srt=sco&sp=rwdlacupitfx&se=2051-10-06T07:09:59Z&st=2021-10-05T23:09:59Z&spr=https,http&sig=U69sEOSMlliobiw8OgiZpLTaYyOA5yt5pHHH5%2FKUYgI%3D) for object detection with Detectron2. You can specify the weights file path and model config path in `configs/model/{model}.yaml`.
-
-
-### Examples
-Run a texture attack on Detectron2 and log the results to a file.  We use Hydra for configuring experiments and you can easily supply your own Hydra-style config arguments. See this [Hydra tutorial](https://hydra.cc/docs/tutorials/basic/your_first_app/simple_cli/)
-
-#### Specify Target Class and Camera Positioning
-`python revamp.py scene=city texture=mail_box attack_class=stop_sign multicam=64`
-
-#### Specify Target Class and Use a Different Scene
-`python revamp.py scene=mesa texture=mesa attack_class=bus multicam=1`
-
-#### Resuming Experiments and Handling Out-of-Memory
-Sometimes Mitsuba crashes or you want to add additional passes to an perturbed texture.  To resume / add on to an experiment, follow these steps:
-Continue an experiment by adding extra passes with explicit pass names.
-1. Set the texture:
-` make TARGET=truck TARGET_SCENE=cube scenes/cube/textures/truck_tex/tex_6.png.set_tex`
-2. run: `python revamp.py attack_class=truck attack.passes=1 attack.passes_names=[7]`
-
-
-Rendering large scenes that contain a high number of meshes, it is possible to exhaust the memory of the GPU, resulting in out-of-memory errors.  To solve this problem, you can choose to render at a lower number of samples per pixel (SPP) or lower the resolution of the sensor.  Alternatively, you can render a sequence of images at a lower SPP value while varying the seed of each render and then average the resulting images to compose a lower noise image.  The following command uses `attack.multi_pass_rendering=true`, `attack.samples_per_pixel=64`, and `attack.multi_pass_spp_divisor=8` to use render `64/8=8` images and then averages them together.
-
-`CUDA_VISIBLE_DEVICES=0 python revamp.py attack_class=stop_sign scenario.sensor_positions.function=use_provided_cam_position attack.iters=100 attack.passes=10 attack.multi_pass_rendering=true attack.samples_per_pixel=64 attack.multi_pass_spp_divisor=8 scene=city`
-
-### Clean-up renders/ predicted renders images
-
-`make clean`
-
-## Pipeline to use an attacked texture, render a batch of images, and predict results. 
-Here `TEX_NUM=0` refers to the index of the texture
- 
-`make TARGET=traffic_light RESULTS_DIR=results/traffic_light TEX_NUM=0 render_predict`
-
-Other params
-`TARGET_SCENE = cube
-ORIG_TEX = red_tex.png 
-TEX_NUM = 0`
-
-e.g., This uses the file `tex_2.png` for the `PERSON` class and render/predict a batch of images.
-`make TARGET_TEX=person TEX_NUM=2 render_predict`
-
-
-### Proccess output logs into loss results - outputs `{filename}.csv` for each unique pass found in the log file.
-
-`python src/results.py -i results/cat/2023-02-10/21-04-51/run.log`
-
-### Process output scores into score results - outputs `{filename}.csv`
-
-`python src/scores.py -i results/person/0_scores.txt -t person`
-
-### Set an (optional alternate) texture before rendering
-
-`make scenes/cube/textures/traffic_light_tex/tex_2.png.set_tex`
-
-or 
-
-`make TARGET_TEX=stop_sign_tex scenes/cube/textures/stop_sign_tex/tex_0.png.set_tex`
-
-### Render batch of images
-This command generates renders from 48 sensor positions. See `dt2.py` for details.
-
-Other args to `-cm` 
-This generates 264 sensor positions at vertices of 3 concentric half-icospheres
-
-`generate_cube_scene_orbit_cam_positions` 
-
-### Predict on a batch of images
-
-`python src/predict_objdet_batch.py -d red_cube -st 0.3 > results/tf0_scores.txt`
-
-### Unset a texture and use original tex (cube scene)
-
-`make unset_tex`
-
-### Make a movie with `ffmpeg`
-`ffmpeg -framerate 30 -i preds/red_cube/render_%d.png -c:v libx264 -preset slow -pix_fmt yuv420p -crf 18 <movie name>.mp4`
-
-## Conventions
-Any scene added should at least have the following naming structure:
-`<scene name>/<scene name>.xml` e.g., `cube/cube.xml` 
-
-Any texture used should be named as one of `tex_0.png`, `tex_1.png`, etc.
+```latex
+@inproceedings{hull2021autogradeviz,
+      title={Towards Automatic Grading of D3.js Visualizations},
+      author={Matthew Hull, Connor Guerin, Justin Chen, Susanta Routray, Duen Horng (Polo) Chau},
+      booktitle = {IEEE Visualization Conference (VIS), Poster},
+      year={2021}}
+``` -->
