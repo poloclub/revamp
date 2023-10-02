@@ -1,0 +1,95 @@
+<scene version="3.0.0">
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="256"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="prb">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="100.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-172.12252927312718"/>
+			<rotate y="1" angle="-48.563307527140154"/>
+			<rotate z="1" angle="-180.00000500895632"/>
+			<translate value="4.702817 0.867943 4.151447"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+	<bsdf type="twosided" id="MaterialBSDF">
+		<bsdf type="plastic">
+			<float name="int_ior" value="1.5" />
+			<float name="ext_ior" value="1" />
+			<boolean name="nonlinear" value="true" />
+			<rgb name="diffuse_reflectance" value="0.9, 0.9, 0.9" />
+		</bsdf>
+	</bsdf>
+
+	<bsdf type="twosided" id="mat-Material">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<!-- <string name="filename" value="textures/red_tex.png"/> -->
+				<string name="filename" value="textures/noise_tex.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.200000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.000000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.00000"/>
+			<float name="specular" value="0.000000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="default-bsdf">
+		<bsdf type="diffuse"/>
+	</bsdf>	
+	<bsdf type="twosided" id="FloorBSDF">
+		<bsdf type="diffuse">
+			<texture name="reflectance" type="checkerboard">
+				<rgb name="color0" value="0.325, 0.31, 0.25" />
+				<rgb name="color1" value="0.725, 0.71, 0.68" />
+				<transform name="to_uv">
+					<scale x="10.000000" y="10.000000" />
+				</transform>
+			</texture>
+		</bsdf>
+	</bsdf>
+	<shape type="rectangle" id="Floor">
+		<transform name="to_world">
+			<matrix value="-39.9766 39.9766 -1.74743e-006 0 4.94249e-006 2.47125e-006 -56.5355 0 -39.9766 -39.9766 -5.2423e-006 0 0 0 0 1" />
+		</transform>
+		<ref id="FloorBSDF" />
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="models/teapot_lid.ply"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="models/teapot.ply"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<emitter type="envmap">
+		<transform name="to_world">
+			<matrix value="-0.922278 0 0.386527 0 0 1 0 0 -0.386527 0 -0.922278 1.17369 0 0 0 1" />
+		</transform>
+		<string name="filename" value="textures/envmap.hdr" />
+	</emitter>
+</scene>
