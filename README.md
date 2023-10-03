@@ -1,9 +1,9 @@
 # REVAMP
 ### Automated Simulations of Adversarial Attacks on Arbitrary Objects in Realistic Scenes
-[![MIT license](http://img.shields.io/badge/license-BSD--3-brightgreen.svg)](http://opensource.org/licenses/MIT)
+[![BSD-3 license](http://img.shields.io/badge/license-BSD--3-brightgreen.svg)](http://opensource.org/licenses/MIT)
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2110.11227-b3131b.svg)](https://arxiv.org/abs/xxxx.xxxxx) -->
 
-https://github.com/poloclub/revamp/assets/683979/97fb09e2-f672-42fb-ba61-e23f57975ab0
+https://github.com/poloclub/revamp/assets/683979/35df6461-83ae-4189-9c76-f79535dc6010
 
 - REVAMP is an easy-to-use Python library that is the **first-of-its-kind** tool for creating attack scenarios with **arbitrary objects** and simulating **realistic environmental factors, lighting, reflection, and refraction**.
  
