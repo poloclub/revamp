@@ -2,7 +2,7 @@ defaults:
   - scene: cube
   - model: faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x
   - scenario: scenario
-  - scenario/sensor_positions: generate_cube_scene_orbit_cam_positions
+  - scenario/sensor_positions: generate_orbit_cam_positions
   - _self_
 
 texture: noise_tex

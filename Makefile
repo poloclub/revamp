@@ -13,9 +13,9 @@ TXT_PREFIX = $(TARGET) # goes ahead of a output text file e.g., "person_scores.t
 SCENARIOS = scenario_configs
 JQ = jq --indent 4 -r
 RESULTS_DIR = $(RESULTS)/$(TARGET)
-SENSOR_POS_FN = generate_cube_scene_orbit_cam_positions
+SENSOR_POS_FN = generate_orbit_cam_positions
 SCORE_TEST_THRESH=0.3
-# generate_cube_scene_32_orbit_cam_positions
+# generate_32_orbit_cam_positions
 
 # Taken from https://tech.davis-hansson.com/p/make/
 ifeq ($(origin .RECIPEPREFIX), undefined)

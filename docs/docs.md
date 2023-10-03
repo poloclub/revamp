@@ -39,7 +39,7 @@ This command generates renders from 48 sensor positions. See `dt2.py` for detail
 Other args to `-cm` 
 This generates 264 sensor positions at vertices of 3 concentric half-icospheres
 
-`generate_cube_scene_orbit_cam_positions` 
+`generate_orbit_cam_positions` 
 
 ### Predict on a batch of images
 

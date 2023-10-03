@@ -369,7 +369,7 @@ def generate_4_orbit_cam_positions(reps_per_position=1) -> np.array:
     Wrapper function to generate 4 cam positions @ 3 latitutdes
     """
     # r = 14
-    r = 3
+    r = 11
     size = 4 # desired # pts on the latitude circle
     # z_lats = [8.0,10.0,12.0] # values derived from Blender
     z_lats = [1.5,2,2.5] # values derived from Blender
@@ -499,7 +499,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
-        moves_matrices = eval("generate_"+ sensor_positions +"_orbit_cam_positions()")
+        moves_matrices = eval("generate_"+ str(multicam) +"_orbit_cam_positions()")
     if randomize_sensors:
         np.random.shuffle(moves_matrices)
 
