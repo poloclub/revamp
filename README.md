@@ -16,7 +16,7 @@ Running this command uses a "city street" scene, designates the texture on the m
 
 [Scene Documentation](https://github.com/poloclub/revamp/blob/main/docs/scenes.md)
 
-![demo_scene](https://github.com/poloclub/revamp/assets/683979/eb77b520-e45a-4d19-9bf0-693d33190baf)
+![demo_scene](https://github.com/poloclub/revamp/assets/683979/1a991239-bae2-4a5c-b326-e4257b6a2361)
 
 ## Getting Started
 
