@@ -14,7 +14,7 @@ https://github.com/poloclub/revamp/assets/683979/97fb09e2-f672-42fb-ba61-e23f579
 
 Running this command uses a "city street" scene, designates the texture on the mailbox as the attackable parameter, and sets the desired attack class to "stop sign" and uses 64 unique camera positions for rendering.
 
-(Scene Documentation)
+[Scene Documentation](https://github.com/poloclub/revamp/blob/main/docs/scenes.md)
 
 ![crown_jewel](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/95dc6b8e-a948-4989-b3da-951e94ad4c72)
 
