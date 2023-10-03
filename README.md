@@ -16,7 +16,7 @@ Running this command uses a "city street" scene, designates the texture on the m
 
 [Scene Documentation](https://github.com/poloclub/revamp/blob/main/docs/scenes.md)
 
-![crown_jewel](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/95dc6b8e-a948-4989-b3da-951e94ad4c72)
+![demo_scene](https://github.com/poloclub/revamp/assets/683979/eb77b520-e45a-4d19-9bf0-693d33190baf)
 
 ## Getting Started
 
