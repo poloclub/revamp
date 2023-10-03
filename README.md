@@ -9,7 +9,7 @@ https://github.com/poloclub/revamp/assets/683979/97fb09e2-f672-42fb-ba61-e23f579
  
 - REVAMP enables researchers and practitioners to swiftly explore various scenarios within the digital realm by offering a wide range of configurable options for designing experiments and using differentiable rendering to reproduce physically plausible adversarial objects.
 
-## REVAMP is easy to use!  
+## REVAMP is Easy to Use!  
 `python revamp.py scene=city texture=mail_box attack_class=stop_sign multicam=64`
 
 Running this command uses a "city street" scene, designates the texture on the mailbox as the attackable parameter, and sets the desired attack class to "stop sign" and uses 64 unique camera positions for rendering.
@@ -38,25 +38,19 @@ Run a texture attack on Detectron2 and log the results to a file.  We use Hydra 
 #### Specify Target Class and Use a Different Scene
 `python revamp.py scene=mesa texture=mesa attack_class=bus multicam=1`
 
-# Texture Attacks using Differentiable Rendering
-
-## What does this project do?  
-Generate physically realizable, robust adversarial textures for 3D objects using photorealistic differentiable rendering. 
+# Technical Details: Texture Attacks using Differentiable Rendering
 
 ## Motivation
-Generating adversarial examples in the image space has been widely studied.  However, limited progress has been made toward generating physically realizable adversarial examples where an adversary is constrained to only perturbing a few parameters, such as texture or lighting.  Differentiable rendering permits study of these types of attacks digitally using a photorealistic process.  
+Generating adversarial examples in the image space has been widely studied.  However, limited progress has been made toward generating physically realizable adversarial examples where an adversary is constrained to only perturbing a few parameters, such as texture or lighting.  Differentiable rendering permits study of these types of attacks digitally using a photorealistic process. This tool uses configurable scenarios that can be used to create experiments for a variety of studies.  At the highest level, a scenario generally consists of a 3D scene, an attackable parameter, render settings, and a victim model.  
 
-## What is the threat model?
-The attacker executes a white-box (PGD L2 / Linf) perturbation attack constrained to the texture of an object rendered in a 3D scene that fools an Image Classifer or Object Detector into detecting the target class. 
+## What is the Threat Model?
+The attacker executes a white-box (PGD L2 / Linf) perturbation attack constrained to the texture of an object rendered in a 3D scene that fools an image classifer or object detector into detecting the target class. 
 
 The objective is to find a texture perturbation that is consistently classified / detected as the target class over many transformations of the scene parameters. _i.e.,_ sensor position and lighting. 
 
-## How is differentiable rendering used?
+## How is Differentiable Rendering Used?
 
-A differentiable renderer allows optimization of the underlying 3D scene parameters by obtaining useful gradients of the rendering process. In this project, a rendered image of a scene is passed to the victim model (image classifier / object detector). Next, the model's loss is backpropogated through the differentiable renderer to the scene parameters, _e.g._, object texture, object vertex positions, lighting, _etc._. Finally, the chosen scene parameter is iteratively perturbed to fool the model and the scene is re-rendered until the attack succeeds. 
-
-## How should this project be used?
-This project uses configurable scenarios that can be used to create experiments for a variety of studies.  At the highest level, a scenario generally consists of a 3D scene, an attackable parameter, render settings, and a victim model.  
+A differentiable renderer allows optimization of the underlying 3D scene parameters by obtaining useful gradients of the rendering process. A rendered image of a scene is passed to the victim model (image classifier / object detector). Next, the model's loss is backpropogated through the differentiable renderer to the scene parameters, _e.g._, object texture, object vertex positions, lighting, _etc._. Finally, the chosen scene parameter is iteratively perturbed to fool the model and the scene is re-rendered until the attack succeeds. 
 
 For example, one scenario uses a "cube scene" consisting of a single cube mesh and some lights.  The attackable parameter is the cube's texture in bitmap format. The victim model is a 2-stage object detector (faster-rcnn).  The rendering settings specify that the scene be rendered 48 different sensor positions during the attack.  
 
