@@ -5,7 +5,7 @@
 
 https://github.com/poloclub/revamp/assets/683979/97fb09e2-f672-42fb-ba61-e23f57975ab0
 
-- REVAMP is an easy to use python library that is the first-of-its-kind tool for creating attack scenarios with arbitrary objects and simulating realistic lighting and environmental factors, lighting, reflection, and refraction.
+- REVAMP is an easy-to-use Python library that is the **first-of-its-kind** tool for creating attack scenarios with **arbitrary objects** and simulating **realistic environmental factors, lighting, reflection, and refraction**.
  
 - REVAMP enables researchers and practitioners to swiftly explore various scenarios within the digital realm by offering a wide range of configurable options for designing experiments and using differentiable rendering to reproduce physically plausible adversarial objects.
 
