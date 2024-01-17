@@ -435,7 +435,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     multi_pass_rendering = cfg.attack.multi_pass_rendering
     multi_pass_spp_divisor = cfg.attack.multi_pass_spp_divisor
     scene_file = cfg.scene.path
-    param_key = cfg.scene.target_param_key
+    param_keys = cfg.scene.target_param_keys
     sensor_key = cfg.scene.sensor_key
     score_thresh = cfg.model.score_thresh_test
     weights_file = cfg.model.weights_file 
@@ -443,7 +443,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     sensor_positions = cfg.scenario.sensor_positions.function
     randomize_sensors = cfg.scenario.randomize_positions 
     scene_file_dir = os.path.dirname(scene_file)
-    tex_path = cfg.scene.tex
+    tex_paths = cfg.scene.textures
     multicam = cfg.multicam
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
@@ -461,13 +461,14 @@ def attack_dt2(cfg:DictConfig) -> None:
     # img_name = 'render_39_s3'
     # adv_path = f'/nvmescratch/mhull32/robust-models-transfer/renders/{img_name}.jpg'
     mi.set_variant('cuda_ad_rgb')
-    mitsuba_tex = mi.load_dict({
-        'type': 'bitmap',
-        'id': 'heightmap_texture',
-        'filename': tex_path,
-        'raw': True
-    })
-    mt = mi.traverse(mitsuba_tex)
+    for tex in tex_paths:
+        mitsuba_tex = mi.load_dict({
+            'type': 'bitmap',
+            'id': 'heightmap_texture',
+            'filename': tex,
+            'raw': True
+        })
+        mt = mi.traverse(mitsuba_tex)
     # FIXME - allow variant to be set in the configuration.
     # scene = mi.load_file("scenes/street_sunset/street_sunset.xml")    
     scene = mi.load_file(scene_file)
@@ -478,18 +479,20 @@ def attack_dt2(cfg:DictConfig) -> None:
     # k = 'mat-Material.brdf_0.base_color.data'
     # sunset street taxi texture map
     # k = 'mat-Material.brdf_0.base_color.data' 
-    k = param_key
+    k = param_keys
     # set the texture with the bitmap from config
     # p[k] = mt['data']
     # Stop Sign Texture Map
     # k = 'mat-Material.005.brdf_0.base_color.data'
     # Camera that we want to transform
     # k1 = 'PerspectiveCamera_10.to_world'
+    keep_keys = [k for k in param_keys]
     k1 = f'{sensor_key}.to_world'
     k2 = f'{sensor_key}.film.size'
-    p.keep([k,k1])
+    keep_keys.append(k1)
+    p.keep(keep_keys)
     p.update()
-
+    orig_texs = []
     # moves_matrices = generate_stop_sign_approach_cam_moves()
     # moves_matrices = generate_taxi_cam_positions()
     # moves_matrices = generate_sunset_taxi_cam_positions()
@@ -582,15 +585,17 @@ def attack_dt2(cfg:DictConfig) -> None:
             return loss
 
         params = mi.traverse(scene)
-        if isinstance(params[k], dr.cuda.ad.TensorXf):
-            # use Float if dealing with just texture colors (not a texture map)
-            orig_tex = dr.cuda.ad.TensorXf(params[k])
-        elif isinstance(params[k], dr.cuda.ad.Float):
-            orig_tex = dr.cuda.ad.Float(params[k])        
-        else:
-            raise Exception("Unrecognized Differentiable Parameter Data Type.  Should be one of dr.cuda.ad.Float or dr.cuda.ad.TensorXf")
+        for k in param_keys:
+            if isinstance(params[k], dr.cuda.ad.TensorXf):
+                # use Float if dealing with just texture colors (not a texture map)
+                orig_tex = dr.cuda.ad.TensorXf(params[k])
+            elif isinstance(params[k], dr.cuda.ad.Float):
+                orig_tex = dr.cuda.ad.Float(params[k])        
+            else:
+                raise Exception("Unrecognized Differentiable Parameter Data Type.  Should be one of dr.cuda.ad.Float or dr.cuda.ad.TensorXf")
 
-        orig_tex.set_label_("orig_tex")
+            orig_tex.set_label_(f"{k}_orig_tex")
+            orig_texs.append(orig_tex)
         
         # indicate sensors to use in producing the perturbation
         # e.g., [0,1,2,3] will use sensors 0-3 focus on Taxi/Cement Truck in 'intersection_taxi.xml'
@@ -611,14 +616,14 @@ def attack_dt2(cfg:DictConfig) -> None:
             # keep 2 sets of parameters because we only need to differentiate wrt texture
             diff_params = mi.traverse(scene)
             non_diff_params = mi.traverse(scene)
-            diff_params.keep(k)
+            diff_params.keep([k for k in param_keys])
             non_diff_params.keep([k1,k2])
             # optimizer is not used but necessary to instantiate to get gradients from diff rendering.
             opt = mi.ad.Adam(lr=0.1, params=diff_params)
-            dr.enable_grad(orig_tex)
-            dr.enable_grad(opt[k])
-            opt[k].set_label_("bitmap")
-
+            for i,k in enumerate(param_keys):
+                dr.enable_grad(orig_texs[i])
+                dr.enable_grad(opt[k])
+                opt[k].set_label_(f"{k}_bitmap")
             # sample random camera positions (=batch size) for each batch iteration
             if camera_positions.size > 1:
                 np.random.seed(it+1)
@@ -717,41 +722,42 @@ def attack_dt2(cfg:DictConfig) -> None:
             # tex = orig_tex + eta
             # tex = dr.clamp(tex, 0, 1)
             #########################################################################
-            HH, WW  = dr.shape(dr.grad(opt[k]))[0], dr.shape(dr.grad(opt[k]))[1]
-            grad = ch.Tensor(dr.grad(opt[k]).array).view((HH, WW, C))
-            tex = ch.Tensor(opt[k].array).view((HH, WW, C))
-            _orig_tex = ch.Tensor(orig_tex.array).view((HH, WW, C))
-            l = len(grad.shape) -  1
-            g_norm = ch.norm(grad.view(grad.shape[0], -1), dim=1).view(-1, *([1]*l))
-            scaled_grad = grad / (g_norm  + 1e-10)
-            if targeted:
-                scaled_grad = -scaled_grad
-            # step
-            tex = tex + scaled_grad * alpha
-            delta  = tex - _orig_tex
-            # project
-            delta =  delta.renorm(p=2, dim=0, maxnorm=epsilon)
-            tex = _orig_tex + delta
+            for i, k in enumerate(param_keys):
+                HH, WW  = dr.shape(dr.grad(opt[k]))[0], dr.shape(dr.grad(opt[k]))[1]
+                grad = ch.Tensor(dr.grad(opt[k]).array).view((HH, WW, C))
+                tex = ch.Tensor(opt[k].array).view((HH, WW, C))
+                _orig_tex = ch.Tensor(orig_texs[i].array).view((HH, WW, C))
+                l = len(grad.shape) -  1
+                g_norm = ch.norm(grad.view(grad.shape[0], -1), dim=1).view(-1, *([1]*l))
+                scaled_grad = grad / (g_norm  + 1e-10)
+                if targeted:
+                    scaled_grad = -scaled_grad
+                # step
+                tex = tex + scaled_grad * alpha
+                delta  = tex - _orig_tex
+                # project
+                delta =  delta.renorm(p=2, dim=0, maxnorm=epsilon)
+                tex = _orig_tex + delta
 
-            # convert back to mitsuba dtypes            
-            tex = dr.cuda.ad.TensorXf(tex.to(DEVICE))
-            # divide by average brightness
-            scaled_img = img / dr.mean(dr.detach(img))
-            tex = tex / dr.mean(scaled_img)         
-            tex = dr.clamp(tex, 0, 1)
-            params[k] = tex     
-            dr.enable_grad(params[k])
-            params.update()
-            perturbed_tex = mi.Bitmap(params[k])
-            
-            
-            mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"perturbed_tex_map_b{it}.png"), data=perturbed_tex, write_async=False)
-            time.sleep(0.2)
-            if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
+                # convert back to mitsuba dtypes            
+                tex = dr.cuda.ad.TensorXf(tex.to(DEVICE))
+                # divide by average brightness
+                scaled_img = img / dr.mean(dr.detach(img))
+                tex = tex / dr.mean(scaled_img)         
+                tex = dr.clamp(tex, 0, 1)
+                params[k] = tex     
+                dr.enable_grad(params[k])
+                params.update()
                 perturbed_tex = mi.Bitmap(params[k])
-                mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex, write_async=False)
-                #time.sleep(0.2) 
-            ch.cuda.empty_cache()
+                
+                
+                mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"{k}_{it}.png"), data=perturbed_tex, write_async=False)
+                time.sleep(0.2)
+                if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
+                    perturbed_tex = mi.Bitmap(params[k])
+                    mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex, write_async=False)
+                    #time.sleep(0.2) 
+                ch.cuda.empty_cache()
         return scene
     
     # iters = iters  
@@ -804,15 +810,16 @@ def attack_dt2(cfg:DictConfig) -> None:
             return loss
 
         params = mi.traverse(scene)
-        if isinstance(params[k], dr.cuda.ad.TensorXf):
-            # use Float if dealing with just texture colors (not a texture map)
-            orig_tex = dr.cuda.ad.TensorXf(params[k])
-        elif isinstance(params[k], dr.cuda.ad.Float):
-            orig_tex = dr.cuda.ad.Float(params[k])        
-        else:
-            raise Exception("Unrecognized Differentiable Parameter Data Type.  Should be one of dr.cuda.ad.Float or dr.cuda.ad.TensorXf")
+        for k in param_keys:
+            if isinstance(params[k], dr.cuda.ad.TensorXf):
+                # use Float if dealing with just texture colors (not a texture map)
+                orig_tex = dr.cuda.ad.TensorXf(params[k])
+            elif isinstance(params[k], dr.cuda.ad.Float):
+                orig_tex = dr.cuda.ad.Float(params[k])        
+            else:
+                raise Exception("Unrecognized Differentiable Parameter Data Type.  Should be one of dr.cuda.ad.Float or dr.cuda.ad.TensorXf")
 
-        orig_tex.set_label_("orig_tex")
+            orig_tex.set_label_(f"{k}_orig_tex")
         
         # indicate sensors to use in producing the perturbation
         # e.g., [0,1,2,3] will use sensors 0-3 focus on Taxi/Cement Truck in 'intersection_taxi.xml'
