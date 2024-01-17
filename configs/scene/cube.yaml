@@ -1,5 +1,5 @@
 name: cube
 path: "scenes/${scene.name}/${scene.name}.xml"
-tex: "scenes/${scene.name}/textures/${texture}.png"
-target_param_key: "mat-Material.brdf_0.base_color.data"
+textures: ["scenes/${scene.name}/textures/${texture}.png"]
+target_param_keys: ["mat-Material.brdf_0.base_color.data"]
 sensor_key: "PerspectiveCamera"

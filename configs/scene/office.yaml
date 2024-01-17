@@ -1,5 +1,5 @@
-name: underwater
+name: office
 path: "scenes/${scene.name}/${scene.name}.xml"
 textures: ["scenes/${scene.name}/textures/${texture}.png"]
-target_param_keys: ["mat-tall_box_mat.brdf_0.base_color.data"]
+target_param_keys: ["mat-Material.brdf_0.base_color.data"]
 sensor_key: "PerspectiveCamera"

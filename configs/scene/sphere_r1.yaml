@@ -1,4 +1,4 @@
-name: banana_r1
+name: sphere_r1
 path: "scenes/${scene.name}/${scene.name}.xml"
 textures: ["scenes/${scene.name}/textures/${texture}.png"]
 target_param_keys: ["mat-Material.brdf_0.base_color.data"]

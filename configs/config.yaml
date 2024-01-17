@@ -36,4 +36,4 @@ dataset:
 sysconfig:
   output_path: results/${attack_class}
   pass_idx: null
-  og_dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  log_dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}
