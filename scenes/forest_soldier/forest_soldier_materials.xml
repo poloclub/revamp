@@ -1,0 +1,176 @@
+
+<scene version="2.1.0">
+    <default name="camo_1_blend_weight_data_benign" value="textures/soldier_noise_map_1.png"/>
+    <default name="camo_2_blend_weight_data_benign" value="textures/soldier_noise_map_2.png"/>
+    <default name="camo_1_2_blend_weight_data_benign" value="textures/weight_map_gray.png"/>
+    <default name="camo_3_blend_weight_data_benign" value="textures/soldier_noise_map_3.png"/>
+    <default name="camo_blend_weight_data_benign" value="textures/weight_map_gray.png"/>
+
+	<default name="camo_1_blend_weight_data_2" value="textures/untargeted_success_weight_maps/camo-Blend-1-adv-2.weight.data_325.png"/>
+	<default name="camo_2_blend_weight_data_2" value="textures/untargeted_success_weight_maps/camo-Blend-2-adv-2.weight.data_325.png"/>
+	<default name="camo_1_2_blend_weight_data_2" value="textures/untargeted_success_weight_maps/camo-Blend-1-2-adv-2.weight.data_325.png"/>
+	<default name="camo_3_blend_weight_data_2" value="textures/untargeted_success_weight_maps/camo-Blend-3-adv-2.weight.data_325.png"/>
+	<default name="camo_blend_weight_data_2" value="textures/untargeted_success_weight_maps/camo-Blend-adv-2.weight.data_325.png"/>
+
+	<!--  bright green camouflage benign -->
+	<bsdf type="blendbsdf" id='camo-Blend-1-benign'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.061000 0.307000 0.061000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.599000 1.000000 0.376000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_1_blend_weight_data_benign"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id='camo-Blend-2-benign'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.599000 1.000000 0.376000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.000000 0.000000 0.000000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_2_blend_weight_data_benign"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id='camo-Blend-3-benign'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.599000 1.000000 0.376000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.061000 0.307000 0.061000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_3_blend_weight_data_benign"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id="camo-Blend-1-2-benign">
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_1_2_blend_weight_data_benign"/>
+		</texture>
+		<ref id="camo-Blend-1-benign" />
+		<ref id="camo-Blend-2-benign" />
+	</bsdf>
+
+	<bsdf type="blendbsdf" id="camo-Blend-benign">
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_blend_weight_data_benign"/>
+		</texture>
+		<ref id="camo-Blend-1-2-benign" />
+		<ref id="camo-Blend-3-benign" />
+	</bsdf>
+
+	<!-- darker green camouflage benign -->
+	<bsdf type="blendbsdf" id='camo-Blend-1-benign-2'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.034000 0.100000 0.023000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.223000 0.521000 0.093000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_1_blend_weight_data_benign"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id='camo-Blend-2-benign-2'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.027000 0.051000 0.019000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.000000 0.000000 0.000000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_2_blend_weight_data_benign"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id='camo-Blend-3-benign-2'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.262000 0.171000 0.089000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.061000 0.305000 0.061000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_3_blend_weight_data_benign"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id="camo-Blend-1-2-benign-2">
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_1_2_blend_weight_data_benign"/>
+		</texture>
+		<ref id="camo-Blend-1-benign-2" />
+		<ref id="camo-Blend-2-benign-2" />
+	</bsdf>
+
+	<bsdf type="blendbsdf" id="camo-Blend-benign-2">
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_blend_weight_data_benign"/>
+		</texture>
+		<ref id="camo-Blend-1-2-benign-2" />
+		<ref id="camo-Blend-3-benign-2" />
+	</bsdf>
+
+	<!-- darker green camouflage adv -->
+	<bsdf type="blendbsdf" id='camo-Blend-1-adv-2'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.034000 0.100000 0.023000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.223000 0.521000 0.093000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_1_blend_weight_data_2"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id='camo-Blend-2-adv-2'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.027000 0.051000 0.019000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.000000 0.000000 0.000000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_2_blend_weight_data_2"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id='camo-Blend-3-adv-2'>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.262000 0.171000 0.089000"/>
+		</bsdf>
+		<bsdf type="diffuse">
+			<rgb name="reflectance" value="0.061000 0.305000 0.061000"/>
+		</bsdf>
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_3_blend_weight_data_2"/>
+		</texture>
+	</bsdf>
+
+	<bsdf type="blendbsdf" id="camo-Blend-1-2-adv-2">
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_1_2_blend_weight_data_2"/>
+		</texture>
+		<ref id="camo-Blend-1-adv-2" />
+		<ref id="camo-Blend-2-adv-2" />
+	</bsdf>
+
+	<bsdf type="blendbsdf" id="camo-Blend-adv-2">
+		<texture name="weight" type="bitmap">
+			<string name="filename" value="$camo_blend_weight_data_2"/>
+		</texture>
+		<ref id="camo-Blend-1-2-adv-2" />
+		<ref id="camo-Blend-3-adv-2" />
+	</bsdf>
+
+     
+
+</scene>
