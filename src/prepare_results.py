@@ -15,13 +15,13 @@ the folder structure SHOULD be something like the following:
     |       |   |__0.csv
     |       |   |__0_scores.csv
     |       |   |__0_scores.txt
-    |       |   |__run.log
+    |       |   |__revamp.log
     |       |
     |       |__HH-MM-SS_1/
     |           |__1.csv
     |           |__1_scores.csv
     |           |__1_scores.txt
-    |           |__run.log        
+    |           |__revamp.log        
     |   
     YYYY-MM-DD_1/
             |
@@ -29,7 +29,7 @@ the folder structure SHOULD be something like the following:
                 |__2.csv
                 |__2_scores.csv
                 |__2_scores.txt
-                |__run.log
+                |__revamp.log
 
 It doesn't matter how many result runs are in a particular day, e.g., there could be seven different HH-MM-SS_n folders under one YYYY-MM-DD folder.
 - This script checks for duplicate-named files
@@ -82,8 +82,8 @@ if __name__ == "__main__":
                 shutil.copytree(hydra_folder_path, os.path.join(root_path, ".hydra"))
             
             # Rename the run.log file to run_n.log
-            log_file_path = os.path.join(sub_folder_path, "run.log")
-            new_log_file_path = os.path.join(sub_folder_path, f"run_{i}.log")
+            log_file_path = os.path.join(sub_folder_path, "revamp.log")
+            new_log_file_path = os.path.join(sub_folder_path, f"revamp_{i}.log")
             os.rename(log_file_path, new_log_file_path)
             
             # Copy the files to the root folder
@@ -92,14 +92,14 @@ if __name__ == "__main__":
             shutil.copy(scores_csv_path, root_path)
             shutil.copy(scores_txt_path, root_path)
 
-    # Append the contents of all run_n.log files (where n is not 0) to run_0.log
-    run_n_log_files = glob.glob(os.path.join(root_path, "run_*.log"))
+    # Append the contents of all revamp_n.log files (where n is not 0) to revamp_0.log
+    run_n_log_files = glob.glob(os.path.join(root_path, "revamp_*.log"))
     run_n_log_files.sort()
     for log_file_path in run_n_log_files:
         log_file_name = os.path.basename(log_file_path)
-        if log_file_name.startswith("run_") and log_file_name != "run_0.log":
+        if log_file_name.startswith("run_") and log_file_name != "revamp_0.log":
             with open(log_file_path, "r") as log_file:
-                with open(os.path.join(root_path, "run_0.log"), "a") as run_0_file:
+                with open(os.path.join(root_path, "revamp_0.log"), "a") as run_0_file:
                     run_0_file.write(log_file.read())
             # Remove the copied log file
             os.remove(log_file_path)

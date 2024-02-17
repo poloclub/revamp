@@ -19,7 +19,7 @@ e.g., This uses the file `tex_2.png` for the `PERSON` class and render/predict a
 
 ### Proccess output logs into loss results - outputs `{filename}.csv` for each unique pass found in the log file.
 
-`python src/results.py -i results/cat/2023-02-10/21-04-51/run.log`
+`python src/results.py -i results/cat/2023-02-10/21-04-51/revamp.log`
 
 ### Process output scores into score results - outputs `{filename}.csv`
 
