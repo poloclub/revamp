@@ -1,54 +1,46 @@
-import os, json, random, PIL, csv, sys
-from collections import OrderedDict
+import os, PIL, csv
 import numpy as np
-import matplotlib.pyplot as plt
-# import pandas as pd
-import cv2
-import itertools 
-import copy
 import torch as ch
-from torchvision import datasets, transforms
-from pycocotools.cocoeval import COCOeval
-from random import seed
-import torchvision.transforms as TT
-import torch.nn as nn
+#from torchvision import datasets, transforms
+# from pycocotools.cocoeval import COCOeval
+#from random import seed
+#import torchvision.transforms as TT
+#import torch.nn as nn
 from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
-import json
+#import json
 import time
-import copy
-import argparse
-import hydra
+#import hydra
 from omegaconf import DictConfig
 import logging
 # from detectron2.utils.logger import setup_logger
 # setup_logger()
 
 # detectron2 utilities
-from detectron2 import model_zoo
-from detectron2.engine import DefaultPredictor
+#from detectron2 import model_zoo
+#from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer, VisImage
-from detectron2.data import DatasetMapper
-from detectron2.data import MetadataCatalog, DatasetCatalog
+#from detectron2.data import DatasetMapper
+from detectron2.data import MetadataCatalog#, DatasetCatalog
 from detectron2.modeling import build_model
-from detectron2.modeling.backbone import build_backbone
+#from detectron2.modeling.backbone import build_backbone
 from detectron2.checkpoint import DetectionCheckpointer
-from detectron2.modeling.proposal_generator import RPN, build_proposal_generator
-from detectron2.modeling.proposal_generator.proposal_utils import (
-    add_ground_truth_to_proposals,
-    find_top_rpn_proposals,
-)
-from detectron2.structures import Boxes, ImageList, Instances, RotatedBoxes
+#from detectron2.modeling.proposal_generator import RPN, build_proposal_generator
+#from detectron2.modeling.proposal_generator.proposal_utils import (
+#    add_ground_truth_to_proposals,
+#    find_top_rpn_proposals,
+#)
+from detectron2.structures import Boxes, Instances # RotatedBoxes,  ImageList,
 from detectron2.utils.events import EventStorage
 from detectron2.data.detection_utils import read_image
-from detectron2.evaluation import COCOEvaluator
+#from detectron2.evaluation import COCOEvaluator
 from detectron2.structures import Instances
-import detectron2.data.transforms as T
+#import detectron2.data.transforms as T
 from detectron2.data.detection_utils import *
-from fvcore.transforms.transform import NoOpTransform
-from detectron2.utils.file_io import PathManager
+#from fvcore.transforms.transform import NoOpTransform
+#from detectron2.utils.file_io import PathManager
 
 
 # created symlink in /nvmescratch/mhull32/robust-models-transfer dir for datasets: ln -s /nvmescratch/mhull32/datasets datasets
@@ -92,7 +84,15 @@ def dt2_input(image_path:str)->dict:
     input['instances'] = instances
     return input
 
-def save_adv_image_preds(model, dt2_config, input, instance_mask_thresh=0.7, target:int=None, format="RGB", path:str=None):
+def save_adv_image_preds(model \
+    , dt2_config \
+    , input \
+    , instance_mask_thresh=0.7 \
+    , target:int=None \
+    , untarget:int=None
+    , is_targeted:bool=True \
+    , format="RGB" \
+    , path:str=None):
     """
     Helper fn to save the predictions on an adversarial image
     attacked_image:ch.Tensor An attacked image
@@ -118,13 +118,16 @@ def save_adv_image_preds(model, dt2_config, input, instance_mask_thresh=0.7, tar
         instances = instances[mask]
         out = v.draw_instance_predictions(instances.to("cpu"))
         target_pred_exists = target in instances.pred_classes.cpu().numpy().tolist()
+        untarget_pred_not_exists = untarget not in instances.pred_classes.cpu().numpy().tolist()
         pred = out.get_image()
     model.train = True
     model.training = True
     model.proposal_generator.training = True
     model.roi_heads.training = True  
     PIL.Image.fromarray(pred).save(path)
-    if target_pred_exists:
+    if is_targeted and target_pred_exists:
+        return True
+    elif (not is_targeted) and (untarget_pred_not_exists):
         return True
     return False
 
@@ -376,6 +379,20 @@ def generate_4_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
+def generate_forest_soldier_orbit_cam_positions(reps_per_position=1) -> np.array:
+    r = 30
+    size = 1024
+    z_lats = [2]
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
+def generate_mesa_orbit_cam_positions(reps_per_position=1) -> np.array:
+    r = 400
+    size=1024 # desired # pts on the latitude circle
+    z_lats = [8] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
 def generate_8_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 8 cam positions @ 3 latitutdes
@@ -430,6 +447,8 @@ def attack_dt2(cfg:DictConfig) -> None:
     targeted =  cfg.attack.targeted
     target_class = cfg.attack.target_idx
     target_string = cfg.attack_class
+    untargeted_class = cfg.attack.untarget_idx
+    untargeted_string = cfg.untargeted_class
     iters = cfg.attack.iters
     spp = cfg.attack.samples_per_pixel
     multi_pass_rendering = cfg.attack.multi_pass_rendering
@@ -470,22 +489,12 @@ def attack_dt2(cfg:DictConfig) -> None:
         })
         mt = mi.traverse(mitsuba_tex)
     # FIXME - allow variant to be set in the configuration.
-    # scene = mi.load_file("scenes/street_sunset/street_sunset.xml")    
+   
     scene = mi.load_file(scene_file)
     p = mi.traverse(scene)    
-    # 4-way intersection Taxi Texture Map
-    # k = 'mat-13914_Taxi_car.001.brdf_0.base_color.data'
-    # foldable car texture map
-    # k = 'mat-Material.brdf_0.base_color.data'
-    # sunset street taxi texture map
-    # k = 'mat-Material.brdf_0.base_color.data' 
+
     k = param_keys
-    # set the texture with the bitmap from config
-    # p[k] = mt['data']
-    # Stop Sign Texture Map
-    # k = 'mat-Material.005.brdf_0.base_color.data'
-    # Camera that we want to transform
-    # k1 = 'PerspectiveCamera_10.to_world'
+
     keep_keys = [k for k in param_keys]
     k1 = f'{sensor_key}.to_world'
     k2 = f'{sensor_key}.film.size'
@@ -505,11 +514,6 @@ def attack_dt2(cfg:DictConfig) -> None:
         moves_matrices = eval("generate_"+ sensor_positions +"_orbit_cam_positions()")
     if randomize_sensors:
         np.random.shuffle(moves_matrices)
-
-    # sanity check-render the scene
-    # with dr.suspend_grad():
-    #     img = mi.render(scene, params = p, spp=256)
-    #     mi.util.write_bitmap("renders/render.png", data=img)
 
     # load pre-trained robust faster-rcnn model
     dt2_config = get_cfg()
@@ -536,7 +540,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     # save_adv_image_preds(model=model, input=nput, instance_mask_thresh=0.2, path=f'preds/render_{rn}_s{s}.jpg')
 
 
-    def optim_batch(scene, batch_size, camera_positions, spp, k, label, iters, alpha, epsilon, targeted=False):
+    def optim_batch(scene, batch_size, camera_positions, spp, k, label, unlabel, iters, alpha, epsilon, targeted=False):
         # run attack
         if targeted:
             assert(label is not None)
@@ -678,9 +682,10 @@ def attack_dt2(cfg:DictConfig) -> None:
 
                     mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, dr.shape(mini_pass_renders))
                     img = stack_imgs(mini_pass_renders)
-                img =  mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
+                else: # dont use multi-pass rendering
+                    img =  mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
                 img.set_label_(f"image_b{it}_s{b}")
-                rendered_img_path = os.path.join(render_path,f"render_b{it}_s{b}.png")
+                rendered_img_path = os.path.join(render_path,f"render_b{it}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
                 img = dr.ravel(img)
                 # dr.disable_grad(img)
@@ -696,7 +701,9 @@ def attack_dt2(cfg:DictConfig) -> None:
                     , dt2_config, input=rendered_img_input \
                     , instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST \
                     , target = label
-                    , path=os.path.join(preds_path,f'render_b{it}_s{b}.png'))
+                    , untarget = unlabel
+                    , is_targeted = targeted
+                    , path=os.path.join(preds_path,f'render_b{it}_s{cam_idx}.png'))
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
 
             imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(imgs),shape=(N, H, H, C))
@@ -730,8 +737,8 @@ def attack_dt2(cfg:DictConfig) -> None:
                 l = len(grad.shape) -  1
                 g_norm = ch.norm(grad.view(grad.shape[0], -1), dim=1).view(-1, *([1]*l))
                 scaled_grad = grad / (g_norm  + 1e-10)
-                if targeted:
-                    scaled_grad = -scaled_grad
+                #if targeted:
+                scaled_grad = -scaled_grad
                 # step
                 tex = tex + scaled_grad * alpha
                 delta  = tex - _orig_tex
@@ -752,7 +759,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 
                 
                 mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"{k}_{it}.png"), data=perturbed_tex, write_async=False)
-                time.sleep(0.2)
+                # time.sleep(0.2)
                 if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
                     perturbed_tex = mi.Bitmap(params[k])
                     mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex, write_async=False)
@@ -765,137 +772,6 @@ def attack_dt2(cfg:DictConfig) -> None:
     epsilon = eps
     alpha = eps_step #(epsilon / (iters/50))
     label = target_class
-    img = optim_batch(scene, batch_size=1, camera_positions =  moves_matrices, spp=samples_per_pixel, k=k, label = label, iters=iters, alpha=alpha, epsilon=epsilon, targeted=True)
-
-    def optim(scene, spp, k, label, iters, alpha, epsilon, targeted=False):
-        # run attack
-        if targeted:
-            assert(label is not None)
-        
-        # wrapper function that models the input image and returns the loss
-        @dr.wrap_ad(source='drjit', target='torch')
-        def model_input(x, target):
-            """
-            To get the losses using DT2, we must supply the Ground Truth w/ the input dict
-            as an Instances object. This includes the ground truth boxes (gt_boxes)
-            and ground truth classes (gt_classes).  There should be a class & box for 
-            each GT object in the scene.
-            """
-            input = {}
-            losses_name = ["loss_cls", "loss_box_reg", "loss_rpn_cls", "loss_rpn_loc"]            
-            target_loss_idx = [0] # this targets only `loss_cls` loss
-            # detectron2 wants images as RGB 0-255 range
-            x = ch.clip(x * 255 + 0.5, 0, 255).requires_grad_()
-            x = ch.permute(x, (2,0,1)).requires_grad_()
-            x.retain_grad()
-            height = x.shape[1]
-            width = x.shape[2]
-            instances = Instances(image_size=(height,width))
-            instances.gt_classes = target.long()
-            # taxi bbox
-            # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
-            # stop sign bbox
-            # tv bbox underwater
-            # instances.gt_boxes = Boxes(ch.tensor([[45.0, 298.0, 322.0,480.0]]))
-            instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, float(height), float(width)]]))
-            input['image']  = x    
-            input['filename'] = ''
-            input['height'] = height
-            input['width'] = width
-            input['instances'] = instances            
-            with EventStorage(0) as storage:            
-                # loss = model([input])[losses_name[target_loss_idx[0]]].requires_grad_()
-                losses = model([input])
-                loss = sum([losses[losses_name[tgt_idx]] for tgt_idx in target_loss_idx]).requires_grad_()
-            return loss
-
-        params = mi.traverse(scene)
-        for k in param_keys:
-            if isinstance(params[k], dr.cuda.ad.TensorXf):
-                # use Float if dealing with just texture colors (not a texture map)
-                orig_tex = dr.cuda.ad.TensorXf(params[k])
-            elif isinstance(params[k], dr.cuda.ad.Float):
-                orig_tex = dr.cuda.ad.Float(params[k])        
-            else:
-                raise Exception("Unrecognized Differentiable Parameter Data Type.  Should be one of dr.cuda.ad.Float or dr.cuda.ad.TensorXf")
-
-            orig_tex.set_label_(f"{k}_orig_tex")
-        
-        # indicate sensors to use in producing the perturbation
-        # e.g., [0,1,2,3] will use sensors 0-3 focus on Taxi/Cement Truck in 'intersection_taxi.xml'
-        # sensor 10 is focused on stop sign.
-        sensors = [0]
-        if iters % len(sensors) != 0:
-            print("uneven amount of iterations provided for sensors! Some sensors will be used more than others\
-                during attack")
-        camera_idx = ch.Tensor(np.array(sensors)).repeat(int(iters/len(sensors))).to(dtype=ch.uint8).numpy().tolist()
-        # repeat the camera position matrices for the nubmer of desired renders per camera position. 
-        # e.g., 50 iters / 10 sampled positions  = 5 renders per position
-        camera_positions = np.tile(moves_matrices, int(iters/len(moves_matrices)))
-        
-        for it in range(iters):
-            print(f'iter {it}')
-            # keep 2 sets of parameters because we only need to differentiate wrt texture
-            diff_params = mi.traverse(scene)
-            non_diff_params = mi.traverse(scene)
-            diff_params.keep(k)
-            non_diff_params.keep(k1)
-            # optimizer is not used but necessary to instantiate to get gradients from diff rendering.
-            opt = mi.ad.Adam(lr=0.1, params=diff_params)
-            dr.enable_grad(orig_tex)
-            dr.enable_grad(opt[k])
-            opt[k].set_label_("bitmap")
-            
-            # EOT Strategy
-            # set the camera position to sampled position, render & attack
-            if isinstance(camera_positions[it], mi.cuda_ad_rgb.Transform4f):
-                non_diff_params[k1].matrix = camera_positions[it].matrix
-            else:
-                non_diff_params[k1].matrix = mi.cuda_ad_rgb.Matrix4f(camera_positions[it])
-            non_diff_params.update()
-            params.update(opt)            
-
-            # TODO  1 - render from each camera viewport
-            mini_pass_spp = spp//multi_pass_spp_divisor
-            mini_pass_renders = []
-            for i in range(multi_pass_spp_divisor):
-                seed = np.random.randint(0,1000)
-                print(f"rendering mini-pass {i} with spp {mini_pass_spp}")
-                img_i =  mi.render(scene, params=params, spp=mini_pass_spp, sensor=camera_idx[it], seed=seed)
-                mini_pass_renders.append(img_i)
-            img = dr.mean(dr.stack(mini_pass_renders, axis=0), axis=0)
-            img.set_label_("image")
-            dr.enable_grad(img)
-            rendered_img_path = f"renders/render_{it}_s{camera_idx[it]}.png"
-            mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
-            time.sleep(1.0)
-            # Get and Vizualize DT2 Predictions from rendered image
-            rendered_img_input = dt2_input(rendered_img_path)
-            success = save_adv_image_preds(model, dt2_config, rendered_img_input, path=f'preds/render_{it}_s{camera_idx[it]}.png')
-            target = dr.cuda.ad.TensorXf([label], shape=(1,))
-            loss = model_input(img, target)
-            print(f"sensor: {str(camera_idx[it])}, loss: {str(loss.array[0])[0:7]}")
-            # model.train = False
-            dr.enable_grad(loss)
-            dr.backward(loss)
-            
-            grad = dr.grad(opt[k])
-            tex = opt[k]
-            eta = alpha * dr.sign(grad)
-            if targeted:
-                eta = -eta
-            tex = tex + eta
-            eta = dr.clamp(tex - orig_tex, -epsilon, epsilon)
-            tex = orig_tex + eta
-            # divide by average brightness
-            scaled_img = img / dr.mean(dr.detach(img))
-            tex = tex / dr.mean(scaled_img)         
-            tex = dr.clamp(tex, 0, 1)
-            params[k] = tex
-            dr.enable_grad(params[k])
-            params.update()
-            if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
-                perturbed_tex = mi.Bitmap(params[k])
-                mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex, write_async=False)
-                time.sleep(0.2)
-        return scene
+    unlabel = untargeted_class
+    img = optim_batch(scene, batch_size=1, camera_positions =  moves_matrices, spp=samples_per_pixel, k=k, label = label, unlabel=unlabel, iters=iters, alpha=alpha, epsilon=epsilon, targeted=targeted)
+    
