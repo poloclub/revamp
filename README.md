@@ -3,7 +3,7 @@
 [![BSD-3 license](http://img.shields.io/badge/license-BSD--3-brightgreen.svg)](http://opensource.org/licenses/MIT)
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2110.11227-b3131b.svg)](https://arxiv.org/abs/xxxx.xxxxx) -->
 
-https://github.com/poloclub/revamp/assets/683979/35df6461-83ae-4189-9c76-f79535dc6010
+https://github.com/poloclub/revamp/assets/683979/48a1e85b-3eee-4d6a-94a8-fb6731e0d88e
 
 - REVAMP is an easy-to-use Python library that is the **first-of-its-kind** tool for creating attack scenarios with **arbitrary objects** and simulating **realistic environmental factors, lighting, reflection, and refraction**.
  
@@ -16,12 +16,12 @@ Running this command uses a "city street" scene, designates the texture on the m
 
 [Scene Documentation](https://github.com/poloclub/revamp/blob/main/docs/scenes.md)
 
-![demo_scene](https://github.com/poloclub/revamp/assets/683979/1a991239-bae2-4a5c-b326-e4257b6a2361)
+![demo_scene](https://github.com/poloclub/revamp/assets/683979/71119934-e8fb-444c-9fb0-f57e2205c183)
 
 ## Getting Started
 
 `conda env create -f environment.yml`
-
+ 
 Install Detectron2
 
 `python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'`
