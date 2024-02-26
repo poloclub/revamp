@@ -1,46 +1,24 @@
 import os, PIL, csv
 import numpy as np
 import torch as ch
-#from torchvision import datasets, transforms
-# from pycocotools.cocoeval import COCOeval
-#from random import seed
-#import torchvision.transforms as TT
-#import torch.nn as nn
 from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
-#import json
 import time
-#import hydra
 from omegaconf import DictConfig
 import logging
-# from detectron2.utils.logger import setup_logger
-# setup_logger()
 
-# detectron2 utilities
-#from detectron2 import model_zoo
-#from detectron2.engine import DefaultPredictor
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer, VisImage
-#from detectron2.data import DatasetMapper
-from detectron2.data import MetadataCatalog#, DatasetCatalog
+from detectron2.data import MetadataCatalog
 from detectron2.modeling import build_model
-#from detectron2.modeling.backbone import build_backbone
 from detectron2.checkpoint import DetectionCheckpointer
-#from detectron2.modeling.proposal_generator import RPN, build_proposal_generator
-#from detectron2.modeling.proposal_generator.proposal_utils import (
-#    add_ground_truth_to_proposals,
-#    find_top_rpn_proposals,
-#)
-from detectron2.structures import Boxes, Instances # RotatedBoxes,  ImageList,
+
+from detectron2.structures import Boxes, Instances
 from detectron2.utils.events import EventStorage
 from detectron2.data.detection_utils import read_image
-#from detectron2.evaluation import COCOEvaluator
 from detectron2.structures import Instances
-#import detectron2.data.transforms as T
 from detectron2.data.detection_utils import *
-#from fvcore.transforms.transform import NoOpTransform
-#from detectron2.utils.file_io import PathManager
 
 
 # created symlink in /nvmescratch/mhull32/robust-models-transfer dir for datasets: ln -s /nvmescratch/mhull32/datasets datasets
@@ -75,8 +53,9 @@ def dt2_input(image_path:str)->dict:
     # taxi bbox
     # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
     # stop sign bbox
+    # instances.gt_boxes = Boxes(ch.tensor([[ 162.0, 145.0, 364.0, 324.0]])) # for 512x512 img
     # instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, height, width]]))
-    instances.gt_boxes = Boxes(ch.tensor([[ 162.0, 145.0, 364.0, 324.0]])) # for 512x512 img
+    instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, float(height), float(width)]]))
     input['image'] = adv_image_tensor    
     input['filename'] = filename
     input['height'] = height
@@ -393,6 +372,21 @@ def generate_mesa_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
+def generate_city_orbit_cam_positions(reps_per_position=1) -> np.array:
+    r = 3.0
+    size=1024 # desired # pts on the latitude circle
+    z_lats = [0.6] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions
+
+def generate_underwater_orbit_cam_positions(reps_per_position=1) -> np.array:
+    r = 8.0
+    size=64 # desired # pts on the latitude circle
+    z_lats = [0.5] # values derived from Blender
+    positions = generate_cam_positions_for_lats(z_lats, r, size)
+    return positions[14:]
+
+
 def generate_8_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 8 cam positions @ 3 latitutdes
@@ -633,8 +627,10 @@ def attack_dt2(cfg:DictConfig) -> None:
                 np.random.seed(it+1)
                 sampled_camera_positions_idx = np.random.randint(low=0, high=len(camera_positions)-1,size=batch_size)
             else: sampled_camera_positions_idx = [0]
-            # sampled_camera_positions = camera_positions[sampled_camera_positions_idx]
-            sampled_camera_positions = camera_positions
+            if batch_size > 1:
+                sampled_camera_positions = camera_positions[sampled_camera_positions_idx]
+            else:
+                sampled_camera_positions = camera_positions
             if success:
                 cam_idx += 1
                 print(f"Successful pred, using camera_idx {cam_idx}")
@@ -651,6 +647,8 @@ def attack_dt2(cfg:DictConfig) -> None:
                     print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
                     logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
                     return
+                if batch_size > 1: # sample from random camera positions
+                    cam_idx = b
                 if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
                     non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
                 else:
@@ -685,7 +683,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 else: # dont use multi-pass rendering
                     img =  mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
                 img.set_label_(f"image_b{it}_s{b}")
-                rendered_img_path = os.path.join(render_path,f"render_b{it}_s{cam_idx}.png")
+                rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
                 img = dr.ravel(img)
                 # dr.disable_grad(img)
@@ -773,5 +771,14 @@ def attack_dt2(cfg:DictConfig) -> None:
     alpha = eps_step #(epsilon / (iters/50))
     label = target_class
     unlabel = untargeted_class
-    img = optim_batch(scene, batch_size=1, camera_positions =  moves_matrices, spp=samples_per_pixel, k=k, label = label, unlabel=unlabel, iters=iters, alpha=alpha, epsilon=epsilon, targeted=targeted)
+    img = optim_batch(scene\
+                      , batch_size=batch_size\
+                      , camera_positions =  moves_matrices\
+                      , spp=samples_per_pixel\
+                      , k=k, label = label\
+                      , unlabel=unlabel\
+                      , iters=iters\
+                      , alpha=alpha\
+                      , epsilon=epsilon\
+                      , targeted=targeted)
     
