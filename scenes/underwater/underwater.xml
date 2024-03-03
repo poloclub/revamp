@@ -2,16 +2,16 @@
 
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
-	<default name="spp" value="2048"/>
-	<default name="resx" value="512"/>
-	<default name="resy" value="512"/>
+	<default name="spp" value="1024"/>
+	<default name="resx" value="256"/>
+	<default name="resy" value="256"/>
 
 <!-- Camera and Rendering Parameters -->
 
 	<integrator type="ptracer">
 		<integer name="max_depth" value="8"/>
 	</integrator>
-	<sensor type="perspective">
+	<sensor type="perspective" id="PerspectiveCamera" name="PerspectiveCamera">
 		<string name="fov_axis" value="x"/>
 		<float name="fov" value="19.500001"/>
 		<float name="principal_point_offset_x" value="0.000000"/>
@@ -22,18 +22,17 @@
 			<rotate x="1" angle="179.999991348578"/>
 			<rotate y="1" angle="1.8669348312774806e-05"/>
 			<rotate z="1" angle="180.00000500895632"/>
-			<translate value="-0.000001 0.990944 6.838790"/>
+			<translate value="-0.000001 0.499597 6.838790"/>
 		</transform>
-		<sampler type="independent">
+		<sampler type="independent" name="sampler">
 			<integer name="sample_count" value="$spp"/>
 		</sampler>
-		<film type="hdrfilm">
-		 	<string name="file_format" value="openexr"/>
+		<film type="hdrfilm" name="film">
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
 		</film>
 	</sensor>
-	<sensor type="perspective">
+	<sensor type="perspective" id="elm__22" name="elm__22">
 		<string name="fov_axis" value="x"/>
 		<float name="fov" value="19.500001"/>
 		<float name="principal_point_offset_x" value="0.000000"/>
@@ -44,12 +43,12 @@
 			<rotate x="1" angle="-159.06490146697698"/>
 			<rotate y="1" angle="1.7436902813257906e-05"/>
 			<rotate z="1" angle="-179.999991348578"/>
-			<translate value="-0.000001 2.285978 3.449882"/>
+			<translate value="-0.000001 1.794631 4.701440"/>
 		</transform>
-		<sampler type="independent">
+		<sampler type="independent" name="sampler">
 			<integer name="sample_count" value="$spp"/>
 		</sampler>
-		<film type="hdrfilm">
+		<film type="hdrfilm" name="film">
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
 		</film>
@@ -159,7 +158,7 @@
 		<ref id="mat-ShortBox" name="bsdf"/>
 	</shape>
 	<shape type="ply">
-		<string name="filename" value="meshes/tall_box.ply"/>
+		<string name="filename" value="meshes/tall_box-Material.001.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-tall_box_mat" name="bsdf"/>
 	</shape>
