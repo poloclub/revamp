@@ -365,13 +365,6 @@ def generate_forest_soldier_orbit_cam_positions(reps_per_position=1) -> np.array
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_city_orbit_cam_positions(reps_per_position=1) -> np.array:
-    r = 3.0
-    size=1024 # desired # pts on the latitude circle
-    z_lats = [0.6] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
 def generate_8_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 8 cam positions @ 3 latitutdes
