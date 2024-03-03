@@ -365,13 +365,6 @@ def generate_forest_soldier_orbit_cam_positions(reps_per_position=1) -> np.array
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_mesa_orbit_cam_positions(reps_per_position=1) -> np.array:
-    r = 400
-    size=1024 # desired # pts on the latitude circle
-    z_lats = [8] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
 def generate_city_orbit_cam_positions(reps_per_position=1) -> np.array:
     r = 3.0
     size=1024 # desired # pts on the latitude circle
@@ -505,7 +498,9 @@ def attack_dt2(cfg:DictConfig) -> None:
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
-        moves_matrices = eval("generate_"+ sensor_positions +"_orbit_cam_positions()")
+        moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
+                                                        ,cfg.scene.sensor_radius \
+                                                        , cfg.scene.sensor_count)
     if randomize_sensors:
         np.random.shuffle(moves_matrices)
 
