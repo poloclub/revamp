@@ -372,14 +372,6 @@ def generate_city_orbit_cam_positions(reps_per_position=1) -> np.array:
     positions = generate_cam_positions_for_lats(z_lats, r, size)
     return positions
 
-def generate_underwater_orbit_cam_positions(reps_per_position=1) -> np.array:
-    r = 8.0
-    size=64 # desired # pts on the latitude circle
-    z_lats = [0.5] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions[14:]
-
-
 def generate_8_orbit_cam_positions(reps_per_position=1) -> np.array:
     """
     Wrapper function to generate 8 cam positions @ 3 latitutdes
