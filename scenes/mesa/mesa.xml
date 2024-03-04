@@ -11,34 +11,34 @@
 	<integrator type="path">
 		<integer name="max_depth" value="12"/>
 	</integrator>
-	<sensor type="perspective">
-		<string name="fov_axis" value="x"/>
-		<float name="fov" value="61.693171"/>
-		<float name="principal_point_offset_x" value="0.000000"/>
-		<float name="principal_point_offset_y" value="-0.000000"/>
-		<float name="near_clip" value="0.100000"/>
-		<float name="far_clip" value="70000.000000"/>
-		<transform name="to_world">
-			<rotate x="1" angle="-176.5740367627913"/>
-			<rotate y="1" angle="-58.357225061048155"/>
-			<rotate z="1" angle="178.98930093633453"/>
-			<translate value="94.664482 85.159462 114.001869"/>
-		</transform>
-		<sampler type="independent">
-			<integer name="sample_count" value="$spp"/>
-		</sampler>
-		<film type="hdrfilm">
-			<integer name="width" value="$resx"/>
-			<integer name="height" value="$resy"/>
-		</film>
-	</sensor>
+	<sensor type="perspective" id="PerspectiveCamera" name="PerspectiveCamera">
+			<string name="fov_axis" value="x"/>
+			<float name="fov" value="39.597755"/>
+			<float name="principal_point_offset_x" value="0.000000"/>
+			<float name="principal_point_offset_y" value="-0.000000"/>
+			<float name="near_clip" value="0.100000"/>
+			<float name="far_clip" value="1000.000000"/>
+			<transform name="to_world">
+				<rotate x="1" angle="-180.00000500895632"/>
+				<rotate y="1" angle="-58.33301204044046"/>
+				<rotate z="1" angle="179.999991348578"/>
+				<translate value="258.561615 15.000000 170.957550"/>
+			</transform>
+			<sampler type="independent" name="sampler">
+				<integer name="sample_count" value="$spp"/>
+			</sampler>
+			<film type="hdrfilm" name="film">
+				<integer name="width" value="$resx"/>
+				<integer name="height" value="$resy"/>
+			</film>
+		</sensor>	
 
 <!-- Materials -->
 
 	<bsdf type="twosided" id="mat-Material.004">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/Texture.003.jpg"/>
+				<string name="filename" value="textures/Texture.003_ds.png"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
@@ -55,7 +55,7 @@
 	<bsdf type="twosided" id="mat-Material.005">
 		<bsdf type="principled">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/Texture.004.jpg"/>
+				<string name="filename" value="textures/noise_tex.png"/>
 			</texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
@@ -73,8 +73,9 @@
 <!-- Emitters -->
 
 	<emitter type="envmap">
-		<string name="filename" value="textures/lenong_2_4k.exr"/>
-		<float name="scale" value="1.000000"/>
+		<!-- <string name="filename" value="textures/lenong_2_4k.exr"/> -->
+		<string name="filename" value="textures/syferfontein_18d_clear_puresky_4k.exr"/>
+		<float name="scale" value="0.55"/>
 		<transform name="to_world">
 			<matrix value="-0.927898 -0.231351 0.292372 0.000000 -0.241922 0.970296 0.000000 0.000000 -0.283687 -0.070731 -0.956305 0.000000 0.000000 0.000000 0.000000 1.000000"/>
 		</transform>

@@ -8,6 +8,7 @@ defaults:
 texture: noise_tex
 
 attack_class: stop_sign
+untargeted_class: null
 
 multicam: 1
 
@@ -24,6 +25,8 @@ attack:
   targeted: true
   target: null
   target_idx: null
+  untarget: null
+  untarget_idx: null
   iters: 100
   samples_per_pixel: 32
   multi_pass_rendering: false
@@ -36,4 +39,4 @@ dataset:
 sysconfig:
   output_path: results/${attack_class}
   pass_idx: null
-  og_dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  log_dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}
