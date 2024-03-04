@@ -13,7 +13,10 @@ TXT_PREFIX = $(TARGET) # goes ahead of a output text file e.g., "person_scores.t
 SCENARIOS = scenario_configs
 JQ = jq --indent 4 -r
 RESULTS_DIR = $(RESULTS)/$(TARGET)
-SENSOR_POS_FN = generate_cube_scene_orbit_cam_positions
+# SENSOR_POS_FN = generate_cube_scene_orbit_cam_positions
+SENSOR_RADIUS = 10
+SENSOR_COUNT = 32
+SENSOR_Z_LATS = 1
 SCORE_TEST_THRESH=0.3
 # generate_cube_scene_32_orbit_cam_positions
 
@@ -23,11 +26,7 @@ ifeq ($(origin .RECIPEPREFIX), undefined)
 endif
 .RECIPEPREFIX = >
 
-render_predict: clean
-> $(MAKE) $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/tex_$(TEX_NUM).png.set_tex
-> python src/render_batch.py -s $(SCENES)/$(TARGET_SCENE)/$(TARGET_SCENE).xml -cm $(SENSOR_POS_FN) -od $(RENDERS)/$(TARGET)
-> python src/predict_objdet_batch.py -d $(TARGET) -st $(SCORE_TEST_THRESH) > $(RESULTS_DIR)/$(TEX_NUM)_scores.txt
-> $(MAKE) TARGET_SCENE=$(TARGET_SCENE) unset_tex
+clean_render_predict: clean
 > $(MAKE) clean_renders
 
 .PHONY: clean
@@ -49,11 +48,11 @@ attack_dt2:
 # e.g., `make scenes/cube_scene_c/textures/traffic_light_tex/tex_2.png.set_tex`
 # modify directories vars as needed
 # this was written to quickly set a texture in a scene
-
-$(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/%.png.set_tex:
+.PHONY: set_tex
+set_tex:
 > rm -f $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
-> cp $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/$*.png $(SCENES)/$(TARGET_SCENE)/textures/
-> mv $(SCENES)/$(TARGET_SCENE)/textures/$*.png $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
+> cp $(SCENES)/$(TARGET_SCENE)/textures/$(TARGET_TEX)/tex_$(TEX_NUM).png $(SCENES)/$(TARGET_SCENE)/textures/
+> mv $(SCENES)/$(TARGET_SCENE)/textures/tex_$(TEX_NUM).png $(SCENES)/$(TARGET_SCENE)/textures/$(ORIG_TEX)
 
 .PHONY: unset_tex
 unset_tex: 

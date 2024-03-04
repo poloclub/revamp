@@ -360,7 +360,6 @@ def attack_dt2(cfg:DictConfig) -> None:
     score_thresh = cfg.model.score_thresh_test
     weights_file = cfg.model.weights_file 
     model_config = cfg.model.config
-    sensor_positions = cfg.scenario.sensor_positions.function
     randomize_sensors = cfg.scenario.randomize_positions 
     scene_file_dir = os.path.dirname(scene_file)
     tex_paths = cfg.scene.textures

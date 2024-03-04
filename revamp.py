@@ -73,17 +73,35 @@ def run(cfg: DictConfig) -> None:
         shutil.copy(os.path.join(tex_dir,tmp_dir, last_tex),os.path.join(tex_dir, f"tex_{passes[i]}.png"))
         
         # make predictions using the same camera angles utilized for producing perturbation
-        render_predict = f"make TARGET={target} \
+        set_tex = f"make TARGET={target} \
             TARGET_SCENE={cfg.scene.name} \
-            RESULTS_DIR={cfg.sysconfig.log_dir} \
             TEX_NUM={passes[i]} \
-            SENSOR_POS_FN={cfg.scenario.sensor_positions.function} \
-            SCORE_TEST_THRESH={cfg.model.score_thresh_test} \
-            render_predict"
-                            
+            set_tex"
+                
+        subprocess.run(set_tex, shell=True, check=True)
+                
+        render_batch = f'python src/render_batch.py \
+                    -s scenes/{cfg.scene.name}/{cfg.scene.name}.xml \
+                    -sr {cfg.scene.sensor_radius} \
+                    -sc {cfg.scene.sensor_count} \
+                    -sz "{cfg.scene.sensor_z_lats}" \
+                    -od renders/{target}'
+        subprocess.run(render_batch, shell=True, check=True)
+        
+        predict_objdet_batch = f"python src/predict_objdet_batch.py \
+                    -d {target} \
+                    -st {cfg.model.score_thresh_test} > {cfg.sysconfig.log_dir}/{passes[i]}_scores.txt"
+        
+        subprocess.run(predict_objdet_batch, shell=True, check=True)
+        
+        unset_tex = f"make TARGET_SCENE={cfg.scene.name} unset_tex"
+        subprocess.run(unset_tex, shell=True, check=True)
+
+        render_predict = f"make clean_render_predict"                        
         subprocess.run(render_predict, shell=True, check=True)
 
         os.chdir(os.path.join(tex_dir, tmp_dir))
+        
         # rm tmp perturbations
         png_files = glob.glob("*.png")
         for file in png_files:
