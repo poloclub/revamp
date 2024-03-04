@@ -334,99 +334,6 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     positions = np.repeat(positions, reps_per_position)
     return positions    
 
-def generate_1_orbit_cam_positions(reps_per_position=1) -> np.array:
-    """
-    Wrapper function to generate 4 cam positions @ 3 latitutdes
-    """
-    # r = 14
-    r = 3
-    size = 4 # desired # pts on the latitude circle
-    # z_lats = [8.0,10.0,12.0] # values derived from Blender
-    z_lats = [1.5,2,2.5] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_4_orbit_cam_positions(reps_per_position=1) -> np.array:
-    """
-    Wrapper function to generate 4 cam positions @ 3 latitutdes
-    """
-    # r = 14
-    r = 3
-    size = 4 # desired # pts on the latitude circle
-    # z_lats = [8.0,10.0,12.0] # values derived from Blender
-    z_lats = [1.5,2,2.5] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_forest_soldier_orbit_cam_positions(reps_per_position=1) -> np.array:
-    r = 30
-    size = 1024
-    z_lats = [2]
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_mesa_orbit_cam_positions(reps_per_position=1) -> np.array:
-    r = 400
-    size=1024 # desired # pts on the latitude circle
-    z_lats = [8] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_city_orbit_cam_positions(reps_per_position=1) -> np.array:
-    r = 3.0
-    size=1024 # desired # pts on the latitude circle
-    z_lats = [0.6] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_underwater_orbit_cam_positions(reps_per_position=1) -> np.array:
-    r = 8.0
-    size=64 # desired # pts on the latitude circle
-    z_lats = [0.5] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions[14:]
-
-
-def generate_8_orbit_cam_positions(reps_per_position=1) -> np.array:
-    """
-    Wrapper function to generate 8 cam positions @ 3 latitutdes
-    """
-    r = 11
-    size=8 # desired # pts on the latitude circle
-    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_16_orbit_cam_positions(reps_per_position=1) -> np.array:
-    """
-    Wrapper function to generate 32 cam positions @ 3 latitutdes
-    """
-    r = 11
-    size=16 # desired # pts on the latitude circle
-    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_32_orbit_cam_positions(reps_per_position=1) -> np.array:
-    """
-    Wrapper function to generate 32 cam positions @ 3 latitutdes
-    """
-    r = 11
-    size=32 # desired # pts on the latitude circle
-    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
-def generate_64_orbit_cam_positions(reps_per_position=1) -> np.array:
-    """
-    Wrapper function to generate 64 cam positions @ 3 latitutdes
-    """
-    r = 11
-    size=64 # desired # pts on the latitude circle
-    z_lats = [2.1381900311, 4.1942100525, 6.0890493393] # values derived from Blender
-    positions = generate_cam_positions_for_lats(z_lats, r, size)
-    return positions
-
 def attack_dt2(cfg:DictConfig) -> None:
 
     cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
@@ -453,7 +360,6 @@ def attack_dt2(cfg:DictConfig) -> None:
     score_thresh = cfg.model.score_thresh_test
     weights_file = cfg.model.weights_file 
     model_config = cfg.model.config
-    sensor_positions = cfg.scenario.sensor_positions.function
     randomize_sensors = cfg.scenario.randomize_positions 
     scene_file_dir = os.path.dirname(scene_file)
     tex_paths = cfg.scene.textures
@@ -505,7 +411,9 @@ def attack_dt2(cfg:DictConfig) -> None:
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
-        moves_matrices = eval("generate_"+ sensor_positions +"_orbit_cam_positions()")
+        moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
+                                                        ,cfg.scene.sensor_radius \
+                                                        , cfg.scene.sensor_count)
     if randomize_sensors:
         np.random.shuffle(moves_matrices)
 

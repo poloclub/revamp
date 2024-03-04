@@ -9,6 +9,7 @@ import drjit as dr
 import os
 import argparse
 import time
+import ast
 
 from dt2 import *
 
@@ -18,17 +19,23 @@ if __name__  == "__main__":
         ,formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     parser.add_argument("-s", "--scene", help="Mitsuba scene file path.", required=True)
-    parser.add_argument("-cm", "--cams", help="Function generating camera position matrices", required=True)
+    parser.add_argument("-sr", "--sensor-radius", type=float, help="sensor radius")
+    parser.add_argument("-sc", "--sensor-count", type=int, help="sensor count")
+    parser.add_argument("-sz", "--sensor-z-lats", type=ast.literal_eval, help="sensor z lats")
     parser.add_argument("-sp", "--spp", type=int, default=256, help="samples per pixel per render")
     parser.add_argument("-od", "--outdir", help="directory for rendered images", default="renders")
     parser.add_argument("-ck", "--cam-key", help="Mitsuba Scene Params Camera Key", default='PerspectiveCamera.to_world')
 
     args = parser.parse_args()
 
+    sensor_z_lats = args.sensor_z_lats    
+    
     mi.set_variant("cuda_ad_rgb")
     scene = mi.load_file(args.scene)
     
-    camera_positions = eval(args.cams + "()")
+    camera_positions = generate_cam_positions_for_lats(sensor_z_lats \
+                                                        ,args.sensor_radius \
+                                                        , args.sensor_count)
     params = mi.traverse(scene)
     cam_key = args.cam_key
     print(f'rendering {len(camera_positions)} imgs...')
