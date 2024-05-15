@@ -60,13 +60,16 @@ For example, one scenario uses a "cube scene" consisting of a single cube mesh a
 # Credits
 Led by [Matthew Hull](https://matthewdhull.github.io), REVAMP was created in a collaboaration with  [Zijie J. Wang](https://zijie.wang) and [Duen Horng Chau](https://poloclub.github.io/polochau/).
 
-<!-- # Citation
-To learn more about REVAMP, please read our preliminary two-page [demo paper](https://arxiv.org/abs/2110.11227). Thanks!
+# Citation
+To learn more about REVAMP, please read our [Tiny Paper](https://openreview.net/pdf?id=XCLrySEUBe) published at ICLR '24. Thanks!
 
 ```latex
-@inproceedings{hull2021autogradeviz,
-      title={Towards Automatic Grading of D3.js Visualizations},
-      author={Matthew Hull, Connor Guerin, Justin Chen, Susanta Routray, Duen Horng (Polo) Chau},
-      booktitle = {IEEE Visualization Conference (VIS), Poster},
-      year={2021}}
-``` -->
+@inproceedings{
+hull2024revamp,
+title={Revamp: Automated Simulations of Adversarial Attacks on Arbitrary Objects in Realistic Scenes},
+author={Matthew Daniel Hull and Zijie J. Wang and Duen Horng Chau},
+booktitle={The Second Tiny Papers Track at ICLR 2024},
+year={2024},
+url={https://openreview.net/forum?id=XCLrySEUBe}
+}
+```
