@@ -1,5 +1,5 @@
 # REVAMP: Automated Simulations of Adversarial Attacks on Arbitrary Objects in Realistic Scenes
-[![MIT license](http://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
+[![BSD-3 license](http://img.shields.io/badge/license-BSD--3-brightgreen.svg)](http://opensource.org/licenses/MIT)
 <!-- [![arXiv](https://img.shields.io/badge/arXiv-2110.11227-b3131b.svg)](https://arxiv.org/abs/2110.11227) -->
 ![pipeline](https://github.com/matthewdhull/diff_rendering_attack/assets/683979/54d44775-15ae-4d0b-804e-0fe13a2d94fe)
 
