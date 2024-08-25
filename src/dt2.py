@@ -414,6 +414,15 @@ def attack_dt2(cfg:DictConfig) -> None:
         moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
                                                         ,cfg.scene.sensor_radius \
                                                         , cfg.scene.sensor_count)
+        
+        
+    #FIXME - truncate some of the camera positions;
+    # moves_matrices = moves_matrices[10:]
+    # reverse moves_matrices
+    moves_matrices = moves_matrices[::-1] 
+    # concat moves_matrices with moves_matrices[24:]
+    moves_matrices = np.concatenate((moves_matrices[0:5], moves_matrices[25:][::-1]), axis=0)
+    
     if randomize_sensors:
         np.random.shuffle(moves_matrices)
 
