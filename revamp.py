@@ -54,8 +54,17 @@ def run(cfg: DictConfig) -> None:
 
     for i in range(len(passes)):
 
-        clean_renders_preds = f"make TARGET={cfg.attack_class} clean"
-        subprocess.run(clean_renders_preds, shell=True, check=True)
+        # clean_renders_preds = f"make TARGET={cfg.attack_class} clean"
+        # subprocess.run(clean_renders_preds, shell=True, check=True)
+        
+        #renders_path = os.path.join("renders", cfg.attack_class)
+        renders_path = f"renders/{cfg.attack_class}"
+        #preds_path = os.path.join("preds", cfg.attack_class)
+        preds_path = f"preds/{cfg.attack_class}"
+        clean_renders_command = f"rm -f {renders_path}/*.png"
+        clean_preds_command = f"rm -f {preds_path}/*.png"
+        subprocess.run(clean_renders_command, shell=True, check=True)
+        subprocess.run(clean_preds_command, shell=True, check=True)        
 
         fn = f"{passes[i]}.txt"
         cfg.sysconfig.output_path = os.path.join(cfg.sysconfig.output_path, fn)

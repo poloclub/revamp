@@ -11,7 +11,7 @@ import argparse
 import time
 import ast
 
-from dt2 import *
+from dt2 import generate_cam_positions_for_lats 
 
 if __name__  == "__main__":
     parser = argparse.ArgumentParser( \
@@ -37,12 +37,13 @@ if __name__  == "__main__":
                                                         ,args.sensor_radius \
                                                         , args.sensor_count)
     params = mi.traverse(scene)
+    spp = args.spp
     cam_key = args.cam_key
     print(f'rendering {len(camera_positions)} imgs...')
     for i in range(0, len(camera_positions)):
         params[cam_key].matrix = camera_positions[i].matrix
         params.update()
-        img =  mi.render(scene, params=params, spp=256, sensor=0, seed=i+1)
+        img =  mi.render(scene, params=params, spp=spp, sensor=0, seed=i+1)
         rendered_img_path = os.path.join(args.outdir,f"render_{i}.png")
         mi.util.write_bitmap(rendered_img_path, data=img)
         time.sleep(0.2)
