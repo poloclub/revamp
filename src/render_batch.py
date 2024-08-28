@@ -10,6 +10,7 @@ import os
 import argparse
 import time
 import ast
+import tqdm
 
 from dt2 import generate_cam_positions_for_lats 
 
@@ -40,7 +41,7 @@ if __name__  == "__main__":
     spp = args.spp
     cam_key = args.cam_key
     print(f'rendering {len(camera_positions)} imgs...')
-    for i in range(0, len(camera_positions)):
+    for i in tqdm(range(0, len(camera_positions))):
         params[cam_key].matrix = camera_positions[i].matrix
         params.update()
         img =  mi.render(scene, params=params, spp=spp, sensor=0, seed=i+1)
