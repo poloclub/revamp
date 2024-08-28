@@ -338,7 +338,7 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     return positions    
 
 
-def generate_batch_sensor(camera_positions=None, r=None, size=None):
+def generate_batch_sensor(camera_positions=None):
     from mitsuba import ScalarTransform4f as T        
     
     # all_pos = gen_cam_positions(lats[0], r, size)

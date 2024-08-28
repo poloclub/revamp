@@ -63,7 +63,7 @@ if __name__  == "__main__":
     num_batches = len(batched_camera_positions)
     for i, b in enumerate(batched_camera_positions):
         print(f'generating batch sensor for batch {i+1} of {num_batches}')
-        batch_sensor_dict = generate_batch_sensor(b, args.sensor_radius, args.sensor_count)
+        batch_sensor_dict = generate_batch_sensor(b)
         batch_sensor = mi.load_dict(batch_sensor_dict)
         batch_sensors.append(batch_sensor)
         
