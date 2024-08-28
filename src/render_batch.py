@@ -45,6 +45,5 @@ if __name__  == "__main__":
         params.update()
         img =  mi.render(scene, params=params, spp=spp, sensor=0, seed=i+1)
         rendered_img_path = os.path.join(args.outdir,f"render_{i}.png")
-        mi.util.write_bitmap(rendered_img_path, data=img)
-        time.sleep(0.2)
+        mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
     print('done')
