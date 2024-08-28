@@ -7,7 +7,7 @@ import drjit as dr
 import time
 from omegaconf import DictConfig
 import logging
-
+from tqdm import tqdm
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer, VisImage
 from detectron2.data import MetadataCatalog
@@ -318,7 +318,7 @@ def load_sensor_at_position(x,y,z):
         },
     })
 
-def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_position=1):
+def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_position=1,world_transformed=True):
     """
     Wrapper function to allow generation of camera angles for any list of arbitrary latitudes
     Note that the latitudes must be some z value within the pos/neg value of the radius in the sphere:
@@ -328,26 +328,31 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     for i in range(1,len(lats)):
         p = gen_cam_positions(lats[i], r, size)
         all_pos = np.concatenate((all_pos, p), axis=0)
-      
+    
+    # return raw positions if world_transformed is False, e.g., if using a batch_sensor
+    if world_transformed == False:
+        return all_pos  
+    
     positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in all_pos])
     positions = np.repeat(positions, reps_per_position)
     return positions    
 
 
-def generate_batch_sensor_for_lats(lats=[], r=None, size=None):
+def generate_batch_sensor(camera_positions=None, r=None, size=None):
     from mitsuba import ScalarTransform4f as T        
     
-    all_pos = gen_cam_positions(lats[0], r, size)
-    for i in range(1,len(lats)):
-        p = gen_cam_positions(lats[i], r, size)
-        all_pos = np.concatenate((all_pos, p), axis=0)
+    # all_pos = gen_cam_positions(lats[0], r, size)
+    
+    # for i in range(1,len(lats)):
+    #     p = gen_cam_positions(lats[i], r, size)
+    #     all_pos = np.concatenate((all_pos, p), axis=0)
 
 
     batch_sensor = {
         'type': 'batch',
         'film': {
             'type': 'hdrfilm',
-            'width': 128 * len(all_pos),
+            'width': 128 * len(camera_positions),
             'height': 128,
             'sample_border': True,
             'filter': { 'type': 'box' }
@@ -358,7 +363,7 @@ def generate_batch_sensor_for_lats(lats=[], r=None, size=None):
         }
     }
     
-    for i,p in enumerate(all_pos):
+    for i,p in enumerate(camera_positions):
         origin = mi.ScalarPoint3f([p[0], p[1], p[2]])
         batch_sensor[f'sensor{i}'] = {
                 'type': 'perspective',
@@ -466,17 +471,16 @@ def attack_dt2(cfg:DictConfig) -> None:
     else:
         moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
                                                         ,cfg.scene.sensor_radius \
-                                                        , cfg.scene.sensor_count)
+                                                        , cfg.scene.sensor_count \
+                                                        , world_transformed=False)
         
-        batch_sensor_dict = generate_batch_sensor_for_lats(cfg.scene.sensor_z_lats \
-                                                        ,cfg.scene.sensor_radius \
-                                                        , cfg.scene.sensor_count)
+        batch_sensor_dict = generate_batch_sensor(moves_matrices)
         
         batch_sensor = mi.load_dict(batch_sensor_dict)
     #FIXME - truncate some of the camera positions;
     # moves_matrices = moves_matrices[10:]
     # reverse moves_matrices
-    moves_matrices = moves_matrices[::-1] 
+    # moves_matrices = moves_matrices[::-1] 
     # concat moves_matrices with moves_matrices[24:]
     # moves_matrices = np.concatenate((moves_matrices[0:5], moves_matrices[25:][::-1]), axis=0)
     
