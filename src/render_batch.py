@@ -20,6 +20,8 @@ if __name__  == "__main__":
         ,formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     
     parser.add_argument("-s", "--scene", help="Mitsuba scene file path.", required=True)
+    parser.add_argument("-rx", "--sensor-width-resolution", type=int, help="resolution for sensor width")
+    parser.add_argument("-ry", "--sensor-height-resolution", type=int, help="resolution for sensor height")
     parser.add_argument("-sr", "--sensor-radius", type=float, help="sensor radius")
     parser.add_argument("-sc", "--sensor-count", type=int, help="sensor count")
     parser.add_argument("-sz", "--sensor-z-lats", type=ast.literal_eval, help="sensor z lats")
@@ -30,6 +32,10 @@ if __name__  == "__main__":
     args = parser.parse_args()
 
     sensor_z_lats = args.sensor_z_lats    
+    
+    W = args.sensor_width_resolution
+    H = args.sensor_height_resolution
+    spp = args.spp
     
     mi.set_variant("cuda_ad_rgb")
     scene = mi.load_file(args.scene)
@@ -63,28 +69,27 @@ if __name__  == "__main__":
     num_batches = len(batched_camera_positions)
     for i, b in enumerate(batched_camera_positions):
         print(f'generating batch sensor for batch {i+1} of {num_batches}')
-        batch_sensor_dict = generate_batch_sensor(b)
+        batch_sensor_dict = generate_batch_sensor(b, 128, 128, args.spp)
         batch_sensor = mi.load_dict(batch_sensor_dict)
         batch_sensors.append(batch_sensor)
         
     params = mi.traverse(scene)
-    spp = args.spp
+
     cam_key = args.cam_key
     print(f'rendering {len(camera_positions)} imgs...')
     for i in tqdm(range(0, len(batch_sensors)), desc='Rendering Batched Images'):
         # params[cam_key].matrix = camera_positions[i].matrix
         # params.update()
-        
-        H = 128 #FIXME: hardcoded
         batch_sensor = batch_sensors[i]
-        num_sensors = batch_sensor.m_film.size()[0]//H
+        
+        num_sensors = batch_sensor.m_film.size()[0]//W
         img =  mi.render(scene, params=params, spp=spp, sensor=batch_sensor, seed=i+1)
         
         # rendered_img_path = os.path.join(args.outdir,f"render_{i}.png")
         # mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
         for j in range(num_sensors):
-            start = j * H
-            end = (j+1) * H
+            start = j * W
+            end = (j+1) * W
             split_img = img[:,start:end,:]
             img_counter = i * batch_size + j
             rendered_img_path = os.path.join(args.outdir,f"render_{img_counter}.png")

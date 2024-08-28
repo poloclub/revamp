@@ -338,7 +338,7 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     return positions    
 
 
-def generate_batch_sensor(camera_positions=None):
+def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None):
     from mitsuba import ScalarTransform4f as T        
     
     # all_pos = gen_cam_positions(lats[0], r, size)
@@ -352,14 +352,14 @@ def generate_batch_sensor(camera_positions=None):
         'type': 'batch',
         'film': {
             'type': 'hdrfilm',
-            'width': 128 * len(camera_positions),
-            'height': 128,
+            'width': resx * len(camera_positions),
+            'height': resy,
             'sample_border': True,
             'filter': { 'type': 'box' }
         },
         'sampler': {
             'type': 'independent',
-            'sample_count': 256
+            'sample_count': spp
         }
     }
     
@@ -375,12 +375,12 @@ def generate_batch_sensor(camera_positions=None):
                 ),
                 'sampler': {
                     'type': 'independent',
-                    'sample_count': 16
+                    'sample_count': spp
                 },
                 'film': {
                     'type': 'hdrfilm',
-                    'width': 512,
-                    'height': 512,
+                    'width': resx,
+                    'height': resy,
                     'rfilter': {
                         'type': 'tent',
                     },
@@ -474,7 +474,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                                                         , cfg.scene.sensor_count \
                                                         , world_transformed=False)
         
-        batch_sensor_dict = generate_batch_sensor(moves_matrices)
+        batch_sensor_dict = generate_batch_sensor(moves_matrices, 128, 128, spp)
         
         batch_sensor = mi.load_dict(batch_sensor_dict)
     #FIXME - truncate some of the camera positions;
