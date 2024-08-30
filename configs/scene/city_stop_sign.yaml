@@ -1,0 +1,10 @@
+name: city_stop_sign
+path: "scenes/${scene.name}/${scene.name}.xml"
+textures: ["scenes/${scene.name}/textures/${texture}.png"]
+target_param_keys: ["mat-Material.004.brdf_0.base_color.data"]
+sensor_key: "PerspectiveCamera"
+sensor_radius: 1.5
+sensor_count: 8
+resx: 256
+resy: 256
+sensor_z_lats: [0.0, 1.5]

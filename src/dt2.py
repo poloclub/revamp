@@ -7,7 +7,7 @@ import drjit as dr
 import time
 from omegaconf import DictConfig
 import logging
-
+from tqdm import tqdm
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer, VisImage
 from detectron2.data import MetadataCatalog
@@ -275,7 +275,7 @@ def generate_cube_scene_cam_positions() -> np.array:
     positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in cam_pos_ring])
     return positions
 
-def gen_cam_positions(z,r,size) -> np.ndarray:
+def gen_cam_positions(z,r,size,randomize_radius=False) -> np.ndarray:
     """
     Generates # cam positions of length (size) in a circle of radius (r) 
     at the given latitude (z) on a sphere.  Think of the z value as the height above/below the object
@@ -283,6 +283,10 @@ def gen_cam_positions(z,r,size) -> np.ndarray:
 
     The sphere is centered at the origin (0,0,0) in the scene.  
     """
+    if randomize_radius:
+        rand_radius = np.random.uniform(z,2.0)
+        r = r*rand_radius
+    
     if z > r:
         raise Exception("z value must be less than or equal to the radius of the sphere")
     lat_r = np.sqrt(r**2 - z**2)  # find latitude circle radius
@@ -300,7 +304,6 @@ def load_sensor_at_position(x,y,z):
         'fov': 39.3077,
         'to_world': T.look_at(
             origin=origin,
-            #target=[0, -0.5, 0],
             target=[0, 0, 0],
             up=[0, 1, 0]
         ),
@@ -319,20 +322,96 @@ def load_sensor_at_position(x,y,z):
         },
     })
 
-def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_position=1):
+def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_position=1,world_transformed=True):
     """
     Wrapper function to allow generation of camera angles for any list of arbitrary latitudes
     Note that the latitudes must be some z value within the pos/neg value of the radius in the sphere:
     so: {z | -r <= z <= r}
     """
+
     all_pos = gen_cam_positions(lats[0], r, size)
     for i in range(1,len(lats)):
         p = gen_cam_positions(lats[i], r, size)
         all_pos = np.concatenate((all_pos, p), axis=0)
-      
+    
+    # return raw positions if world_transformed is False, e.g., if using a batch_sensor
+    if world_transformed == False:
+        return all_pos  
+    
     positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in all_pos])
     positions = np.repeat(positions, reps_per_position)
     return positions    
+
+
+def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None, randomize_sensors=False):
+    from mitsuba import ScalarTransform4f as T        
+    
+    # all_pos = gen_cam_positions(lats[0], r, size)
+    
+    # for i in range(1,len(lats)):
+    #     p = gen_cam_positions(lats[i], r, size)
+    #     all_pos = np.concatenate((all_pos, p), axis=0)
+
+
+    batch_sensor = {
+        'type': 'batch',
+        'film': {
+            'type': 'hdrfilm',
+            'width': resx * len(camera_positions),
+            'height': resy,
+            'sample_border': True,
+            'filter': { 'type': 'box' }
+        },
+        'sampler': {
+            'type': 'independent',
+            'sample_count': spp
+        }
+    }
+    
+    
+    
+    for i,p in enumerate(camera_positions):
+        
+        target_x = 0
+        target_y = 0
+        target_z = 0
+        up_vec_y = 1
+        up_vec_z = 0
+
+        if randomize_sensors:
+            target_x = np.random.uniform(-0.2,0.2)
+            target_y = np.random.uniform(-0.2,0.2)
+            target_z = np.random.uniform(-0.2,0.2)
+            up_vec_z = np.random.uniform(-1,1)
+            up_vec_y = 1- np.abs(up_vec_z)
+        
+        origin = mi.ScalarPoint3f([p[0], p[1], p[2]])
+        batch_sensor[f'sensor{i}'] = {
+                'type': 'perspective',
+                'fov': 39.3077,
+                'to_world': T.look_at(
+                    origin=origin,
+                    target=[target_x, target_y, target_z], # defaults is [0,0,0]
+                    up=[0, up_vec_y, up_vec_z] # defaults is [0,1,0]
+                ),
+                'sampler': {
+                    'type': 'independent',
+                    'sample_count': spp
+                },
+                'film': {
+                    'type': 'hdrfilm',
+                    'width': resx,
+                    'height': resy,
+                    'rfilter': {
+                        'type': 'tent',
+                    },
+                    'pixel_format': 'rgb',
+                },
+            }
+
+    return batch_sensor
+
+         
 
 def attack_dt2(cfg:DictConfig) -> None:
 
@@ -364,6 +443,8 @@ def attack_dt2(cfg:DictConfig) -> None:
     scene_file_dir = os.path.dirname(scene_file)
     tex_paths = cfg.scene.textures
     multicam = cfg.multicam
+    resx = cfg.scene.resx
+    resy = cfg.scene.resy
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
         os.makedirs(tmp_perturbation_path)
@@ -413,17 +494,21 @@ def attack_dt2(cfg:DictConfig) -> None:
     else:
         moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
                                                         ,cfg.scene.sensor_radius \
-                                                        , cfg.scene.sensor_count)
+                                                        , cfg.scene.sensor_count \
+                                                        , world_transformed=False)
         
-        
+        batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
+        batch_sensor = mi.load_dict(batch_sensor_dict)
+        sensor_count =  batch_sensor.m_film.size()[0]//resx #divide by resx to get number of sensors
     #FIXME - truncate some of the camera positions;
     # moves_matrices = moves_matrices[10:]
     # reverse moves_matrices
-    moves_matrices = moves_matrices[::-1] 
+    # moves_matrices = moves_matrices[::-1] 
     # concat moves_matrices with moves_matrices[24:]
-    moves_matrices = np.concatenate((moves_matrices[0:5], moves_matrices[25:][::-1]), axis=0)
+    # moves_matrices = np.concatenate((moves_matrices[0:5], moves_matrices[25:][::-1]), axis=0)
     
     if randomize_sensors:
+        raise(DeprecationWarning("Randomizing camera positions has no effect with batch sensors"))
         np.random.shuffle(moves_matrices)
 
     # load pre-trained robust faster-rcnn model
@@ -456,7 +541,7 @@ def attack_dt2(cfg:DictConfig) -> None:
         if targeted:
             assert(label is not None)
 
-        assert(batch_size <= len(camera_positions))
+        assert(batch_size <= sensor_count)
         success = False
         
         # wrapper function that models the input image and returns the loss
@@ -470,7 +555,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             each GT object in the scene.
             """
             losses_name = ["loss_cls", "loss_box_reg", "loss_rpn_cls", "loss_rpn_loc"]            
-            target_loss_idx = [0] # this targets only `loss_cls` loss
+            target_loss_idx = [0] # this targets es only `loss_cls` loss
             # detectron2 wants images as RGB 0-255 range
             x = ch.clip(x * 255 + 0.5, 0, 255).requires_grad_()
             x = ch.permute(x, (0, 3, 1, 2)).requires_grad_()
@@ -540,9 +625,9 @@ def attack_dt2(cfg:DictConfig) -> None:
                 dr.enable_grad(opt[k])
                 opt[k].set_label_(f"{k}_bitmap")
             # sample random camera positions (=batch size) for each batch iteration
-            if camera_positions.size > 1:
+            if sensor_count > 1:
                 np.random.seed(it+1)
-                sampled_camera_positions_idx = np.random.randint(low=0, high=len(camera_positions)-1,size=batch_size)
+                sampled_camera_positions_idx = np.random.randint(low=0, high=sensor_count-1,size=batch_size)
             else: sampled_camera_positions_idx = [0]
             if batch_size > 1:
                 sampled_camera_positions = camera_positions[sampled_camera_positions_idx]
@@ -552,9 +637,10 @@ def attack_dt2(cfg:DictConfig) -> None:
                 cam_idx += 1
                 print(f"Successful pred, using camera_idx {cam_idx}")
                 logger.info(f"Successful pred, using camera_idx {cam_idx}")
-            N, H, W, C = batch_size, non_diff_params[k2][0], non_diff_params[k2][1], 3
-            imgs = dr.empty(dr.cuda.ad.Float, N * H * W * C)
-
+            # N, H, W, C = batch_size, non_diff_params[k2][0], non_diff_params[k2][1], 3
+            batch_sensor_film_size = mi.traverse(batch_sensor)["film.size"]
+            N, H, W, C = sensor_count, batch_sensor_film_size[1], batch_sensor_film_size[0], 3
+ 
                 
             for b in range(0, batch_size):
 
@@ -564,12 +650,12 @@ def attack_dt2(cfg:DictConfig) -> None:
                     print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
                     logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
                     return
-                if batch_size > 1: # sample from random camera positions
-                    cam_idx = b
-                if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
-                    non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
-                else:
-                    non_diff_params[k1].matrix = mi.cuda_ad_rgb.Matrix4f(sampled_camera_positions[cam_idx])
+                # if batch_size > 1: # sample from random camera positions
+                #     cam_idx = b
+                # if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
+                #     non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
+                # else:
+                #     non_diff_params[k1].matrix = mi.cuda_ad_rgb.Matrix4f(sampled_camera_positions[cam_idx])
                 non_diff_params.update()
                 params.update(opt)            
                 
@@ -582,7 +668,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                     mini_pass_renders = dr.empty(dr.cuda.ad.Float, render_passes * H * W * C)
                     for i in range(render_passes):
                         seed = np.random.randint(0,1000)+i
-                        img_i =  mi.render(scene, params=params, spp=mini_pass_spp, sensor=camera_idx[it], seed=seed)
+                        img_i =  mi.render(scene, params=params, spp=mini_pass_spp, sensor=batch_sensor, seed=seed)
                         s_index = i * (H * W * C)
                         e_index = (i+1) * (H * W * C)
                         mini_pass_index = dr.arange(dr.cuda.ad.UInt, s_index, e_index)
@@ -591,25 +677,37 @@ def attack_dt2(cfg:DictConfig) -> None:
                         
                     @dr.wrap_ad(source='drjit', target='torch')
                     def stack_imgs(imgs):
-                        imgs = imgs.reshape((render_passes, H, W, C))
+                        # imgs = imgs.reshape((render_passes, H, W, C))
                         imgs = ch.mean(imgs,axis=0)
                         return imgs
 
-                    mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, dr.shape(mini_pass_renders))
+                    # mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, dr.shape(mini_pass_renders))
+                    mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, shape=(render_passes, H, W, C))
                     img = stack_imgs(mini_pass_renders)
                 else: # dont use multi-pass rendering
-                    img =  mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
+                    #img = mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
+                    img = mi.render(scene, params=params, spp=spp, sensor=batch_sensor, seed=it+1)
+                
+                # split image into images for number of sensors if needed!
+                # split_imgs = []
+                # for i in range(len(camera_positions)):
+                #     start = i * H
+                #     end = (i+1) * H
+                #     split_img = img[:,start:end,:]
+                #     # mi.util.write_bitmap(f"split_img_{i}.png", data=split_img, write_async=False)   
+                #     split_imgs.append(dr.ravel(split_img))
+                    
                 img.set_label_(f"image_b{it}_s{b}")
                 rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
                 img = dr.ravel(img)
-                # dr.disable_grad(img)
-                start_index = b * (H * W * C)
-                end_index = (b+1) * (H * W * C)
-                index = dr.arange(dr.cuda.ad.UInt, start_index, end_index)                
-                dr.scatter(imgs, img, index)
+    
+                # start_index = b * (H * W * C)
+                # end_index = (b+1) * (H * W * C)
+                # index = dr.arange(dr.cuda.ad.UInt, start_index, end_index)                
+                # dr.scatter(imgs, img, index)
             
-                time.sleep(1.0)
+                # time.sleep(1.0) # shouldn't need sleeps with async writing of bitmaps
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
                 success = save_adv_image_preds(model \
@@ -621,7 +719,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                     , path=os.path.join(preds_path,f'render_b{it}_s{cam_idx}.png'))
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
 
-            imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(imgs),shape=(N, H, H, C))
+            imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(img),shape=(N, H, W//N, C))
             if (dr.grad_enabled(imgs)==False):
                 dr.enable_grad(imgs)
             loss = model_input(imgs, target)
