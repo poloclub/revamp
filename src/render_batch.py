@@ -57,7 +57,6 @@ if __name__  == "__main__":
         if last_batch_size > 0:
             num_batches += 1
         print(f'num_batches={num_batches}')
-        print(f'last_batch_size={last_batch_size}')
         for i in range(0, num_batches):
             if i == num_batches - 1:
                 batched_camera_positions.append(camera_positions[i*batch_size:])
@@ -69,7 +68,7 @@ if __name__  == "__main__":
     num_batches = len(batched_camera_positions)
     for i, b in enumerate(batched_camera_positions):
         print(f'generating batch sensor for batch {i+1} of {num_batches}')
-        batch_sensor_dict = generate_batch_sensor(b, 128, 128, args.spp)
+        batch_sensor_dict = generate_batch_sensor(b, W, H, args.spp)
         batch_sensor = mi.load_dict(batch_sensor_dict)
         batch_sensors.append(batch_sensor)
         
@@ -78,15 +77,9 @@ if __name__  == "__main__":
     cam_key = args.cam_key
     print(f'rendering {len(camera_positions)} imgs...')
     for i in tqdm(range(0, len(batch_sensors)), desc='Rendering Batched Images'):
-        # params[cam_key].matrix = camera_positions[i].matrix
-        # params.update()
         batch_sensor = batch_sensors[i]
-        
         num_sensors = batch_sensor.m_film.size()[0]//W
         img =  mi.render(scene, params=params, spp=spp, sensor=batch_sensor, seed=i+1)
-        
-        # rendered_img_path = os.path.join(args.outdir,f"render_{i}.png")
-        # mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
         for j in range(num_sensors):
             start = j * W
             end = (j+1) * W
