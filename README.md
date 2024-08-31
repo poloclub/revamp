@@ -42,9 +42,18 @@ Run:
 ```
 mkdir pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x
 
-scp -r /raid/mhull32/diff_rendering_attack/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml
+scp -r /raid/mhull32/diff_rendering_attack/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml user@remotehost:/path/to/revamp/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml
 
-scp -r /raid/mhull32/diff_rendering_attack/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth
+scp -r /raid/mhull32/diff_rendering_attack/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth user@remotehost:/path/to/revamp/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth
+```
+
+where user@remotehost might be _e.g._ mhull32@cosmo.cc.gatech.edu
+
+
+Get the Mesa Scene (Poloclub Only)
+```
+scp -r /path/to/source_folder/* user@remote_host:/path/to/destination_folder/
+scp -r /raid/mhull32/diff_rendering_attack/scenes/mesa/* mhull32@cosmo.cc.gatech.edu/path/to/revamp/scenes/mesa/
 ```
 
 ### Examples
