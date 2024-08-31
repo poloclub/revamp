@@ -1,4 +1,4 @@
-name: diffr_attk
+name: revamp
 channels:
   - conda-forge
   - defaults
@@ -42,6 +42,7 @@ dependencies:
   - pyparsing=3.0.9=py39h06a4308_0
   - python=3.9.15=h7a1cb2a_2
   - python-dateutil=2.8.2=pyhd3eb1b0_0
+  - python_abi=3.9=2_cp39
   - pyzmq=23.2.0=py39h6a678d5_0
   - readline=8.2=h5eee18b_0
   - setuptools=65.5.0=py39h06a4308_0
@@ -71,7 +72,7 @@ dependencies:
     - cox==0.1.post3
     - cycler==0.11.0
     - dill==0.3.6
-    - drjit==0.3.2
+    - drjit==0.4.6
     - fairscale==0.4.12
     - fastapi==0.89.1
     - filelock==3.8.0
@@ -96,9 +97,13 @@ dependencies:
     - markdown==3.4.1
     - markupsafe==2.1.1
     - matplotlib==3.6.2
-    - mitsuba==3.1.1
+    - mitsuba==3.5.2
     - mypy-extensions==0.4.3
     - numpy==1.23.5
+    - nvidia-cublas-cu11==11.10.3.66
+    - nvidia-cuda-nvrtc-cu11==11.7.99
+    - nvidia-cuda-runtime-cu11==11.7.99
+    - nvidia-cudnn-cu11==8.5.0.96
     - oauthlib==3.2.2
     - omegaconf==2.2.3
     - opencv-python==4.6.0.66
@@ -132,8 +137,6 @@ dependencies:
     - timm==0.6.12
     - toml==0.10.2
     - tomli==2.0.1
-    - torch
-    - torchvision
     - tqdm==4.64.1
     - typing-extensions==4.4.0
     - urllib3==1.26.13
