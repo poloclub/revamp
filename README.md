@@ -15,11 +15,13 @@ Running this command chooses the "city" scene from the library of scenes, design
 
 ## Getting Started
 
+`git clone https://github.com/matthewdhull/revamp.git`
+
 `conda env create -f environment.yml`
 
 ### Install Torch, Torchvision for your system, 
 
-`pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu` (for Linux + Cuda)
+`pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124` (for Linux + Cuda)
 
 or follow instructions [here](https://pytorch.org/get-started/locally/)
 
