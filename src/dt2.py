@@ -49,6 +49,7 @@ def dt2_input(image_path:str)->dict:
     height = adv_image_tensor.shape[1]
     width = adv_image_tensor.shape[2]
     instances = Instances(image_size=(height,width))
+    # TODO - review this class setting... why is it needed?
     instances.gt_classes = ch.Tensor([2])
     # taxi bbox
     # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
@@ -445,6 +446,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     multicam = cfg.multicam
     resx = cfg.scene.resx
     resy = cfg.scene.resy
+    use_batch_sensor = cfg.scene.use_batch_sensor
     tmp_perturbation_path = os.path.join(f"{scene_file_dir}",f"textures/{target_string}_tex","tmp_perturbations")
     if os.path.exists(tmp_perturbation_path) == False:
         os.makedirs(tmp_perturbation_path)
@@ -492,14 +494,22 @@ def attack_dt2(cfg:DictConfig) -> None:
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
-        moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
+        if use_batch_sensor: 
+            moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
+                                                            ,cfg.scene.sensor_radius \
+                                                            , cfg.scene.sensor_count \
+                                                            , world_transformed=False)
+            batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
+            batch_sensor = mi.load_dict(batch_sensor_dict)
+            sensor_count =  batch_sensor.m_film.size()[0]//resx #divide by resx to get number of sensors
+        else: 
+            moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
                                                         ,cfg.scene.sensor_radius \
                                                         , cfg.scene.sensor_count \
-                                                        , world_transformed=False)
-        
-        batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
-        batch_sensor = mi.load_dict(batch_sensor_dict)
-        sensor_count =  batch_sensor.m_film.size()[0]//resx #divide by resx to get number of sensors
+                                                        , world_transformed=True)        
+            if randomize_sensors:
+                np.random.shuffle(moves_matrices)
+    
     #FIXME - truncate some of the camera positions;
     # moves_matrices = moves_matrices[10:]
     # reverse moves_matrices
@@ -507,9 +517,6 @@ def attack_dt2(cfg:DictConfig) -> None:
     # concat moves_matrices with moves_matrices[24:]
     # moves_matrices = np.concatenate((moves_matrices[0:5], moves_matrices[25:][::-1]), axis=0)
     
-    if randomize_sensors:
-        raise(DeprecationWarning("Randomizing camera positions has no effect with batch sensors"))
-        np.random.shuffle(moves_matrices)
 
     # load pre-trained robust faster-rcnn model
     dt2_config = get_cfg()
@@ -541,7 +548,8 @@ def attack_dt2(cfg:DictConfig) -> None:
         if targeted:
             assert(label is not None)
 
-        assert(batch_size <= sensor_count)
+        #assert(batch_size <= sensor_count)
+        assert(batch_size <= camera_positions.size)
         success = False
         
         # wrapper function that models the input image and returns the loss
@@ -614,20 +622,21 @@ def attack_dt2(cfg:DictConfig) -> None:
             # print(f'iter {it}')
             # logger.info(f"iter {it}")
             # keep 2 sets of parameters because we only need to differentiate wrt texture
+            num_cam_positions = sensor_count if use_batch_sensor else camera_positions.size
             diff_params = mi.traverse(scene)
             non_diff_params = mi.traverse(scene)
             diff_params.keep([k for k in param_keys])
             non_diff_params.keep([k1,k2])
-            # optimizer is not used but necessary to instantiate to get gradients from diff rendering.
+            # Optimizer is not used but necessary to instantiate to get gradients from diff rendering.
             opt = mi.ad.Adam(lr=0.1, params=diff_params)
             for i,k in enumerate(param_keys):
                 dr.enable_grad(orig_texs[i])
                 dr.enable_grad(opt[k])
                 opt[k].set_label_(f"{k}_bitmap")
             # sample random camera positions (=batch size) for each batch iteration
-            if sensor_count > 1:
+            if num_cam_positions > 1:
                 np.random.seed(it+1)
-                sampled_camera_positions_idx = np.random.randint(low=0, high=sensor_count-1,size=batch_size)
+                sampled_camera_positions_idx = np.random.randint(low=0, high=num_cam_positions-1,size=batch_size)
             else: sampled_camera_positions_idx = [0]
             if batch_size > 1:
                 sampled_camera_positions = camera_positions[sampled_camera_positions_idx]
@@ -637,28 +646,34 @@ def attack_dt2(cfg:DictConfig) -> None:
                 cam_idx += 1
                 print(f"Successful pred, using camera_idx {cam_idx}")
                 logger.info(f"Successful pred, using camera_idx {cam_idx}")
-            # N, H, W, C = batch_size, non_diff_params[k2][0], non_diff_params[k2][1], 3
-            batch_sensor_film_size = mi.traverse(batch_sensor)["film.size"]
-            N, H, W, C = sensor_count, batch_sensor_film_size[1], batch_sensor_film_size[0], 3
+            if use_batch_sensor:
+                batch_sensor_film_size = mi.traverse(batch_sensor)["film.size"]
+                N, H, W, C = sensor_count, batch_sensor_film_size[1], batch_sensor_film_size[0], 3
+            else: 
+                N, H, W, C = batch_size, non_diff_params[k2][0], non_diff_params[k2][1], 3
+                        
  
                 
             for b in range(0, batch_size):
 
                 # EOT Strategy
                 # set the camera position, render & attack
-                if cam_idx > len(sampled_camera_positions)-1:
-                    print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
-                    logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
-                    return
-                # if batch_size > 1: # sample from random camera positions
-                #     cam_idx = b
-                # if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
-                #     non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
-                # else:
-                #     non_diff_params[k1].matrix = mi.cuda_ad_rgb.Matrix4f(sampled_camera_positions[cam_idx])
+                if not use_batch_sensor:
+                    if cam_idx > len(sampled_camera_positions)-1:
+                        print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
+                        logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
+                        return
+                    if batch_size > 1: # sample from random camera positions
+                        cam_idx = b
+                    if isinstance(sampled_camera_positions[cam_idx], mi.cuda_ad_rgb.Transform4f):
+                        non_diff_params[k1].matrix = sampled_camera_positions[cam_idx].matrix
+                    else:
+                        non_diff_params[k1].matrix = mi.cuda_ad_rgb.Matrix4f(sampled_camera_positions[cam_idx])
                 non_diff_params.update()
                 params.update(opt)            
                 
+                sensor_i = batch_sensor if use_batch_sensor else camera_idx[it]
+
                 if multi_pass_rendering:
                     # achieve the affect of rendering at a high sample-per-pixel (spp) value 
                     # by rendering multiple times at a lower spp and averaging the results
@@ -672,7 +687,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                     mini_pass_renders = dr.empty(dr.cuda.ad.Float, render_passes * H * W * C)
                     for i in range(render_passes):
                         seed = np.random.randint(0,1000)+i
-                        img_i =  mi.render(scene, params=params, spp=mini_pass_spp, sensor=batch_sensor, seed=seed)
+                        img_i = mi.render(scene, params=params, spp=mini_pass_spp, sensor=sensor_i, seed=seed)
                         s_index = i * (H * W * C)
                         e_index = (i+1) * (H * W * C)
                         mini_pass_index = dr.arange(dr.cuda.ad.UInt, s_index, e_index)
@@ -681,6 +696,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                         
                     @dr.wrap_ad(source='drjit', target='torch')
                     def stack_imgs(imgs):
+                        # drjit cannot calculate the channel-wise mean of a 4D tensor!
                         # imgs = imgs.reshape((render_passes, H, W, C))
                         imgs = ch.mean(imgs,axis=0)
                         return imgs
@@ -689,8 +705,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                     mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, shape=(render_passes, H, W, C))
                     img = stack_imgs(mini_pass_renders)
                 else: # dont use multi-pass rendering
-                    #img = mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
-                    img = mi.render(scene, params=params, spp=spp, sensor=batch_sensor, seed=it+1)
+                    img = mi.render(scene, params=params, spp=spp, sensor=sensor_i, seed=it+1)
                 
                 # TODO - place this into a utils function
                 # split image into images for number of sensors if needed!
