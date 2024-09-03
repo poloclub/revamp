@@ -259,8 +259,8 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
 
 def attack_dt2(cfg:DictConfig) -> None:
 
-    cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
-    DEVICE = "cuda:0"
+    cuda_visible_device = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
+    DEVICE = f"cuda:{cuda_visible_device}"
 
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("dt2")
@@ -348,7 +348,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             if randomize_sensors:
                 np.random.shuffle(moves_matrices)
     
-    #FIXME - truncate some of the camera positions;
+    #FIXME - truncate some of the camera positions, when we don't want to render an entire orbit
     # moves_matrices = moves_matrices[10:]
     # reverse moves_matrices
     # moves_matrices = moves_matrices[::-1] 
@@ -360,7 +360,6 @@ def attack_dt2(cfg:DictConfig) -> None:
     dt2_config.merge_from_file(model_config)
     dt2_config.MODEL.WEIGHTS = weights_file
     dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
-    # FIXME - Get GPU Device form environment variable.
     dt2_config.MODEL.DEVICE = DEVICE
     model = build_model(dt2_config)
     checkpointer = DetectionCheckpointer(model)
@@ -399,6 +398,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             width = x.shape[3]
             instances = Instances(image_size=(height,width))
             instances.gt_classes = target.long()
+            #FIXME - need better way to calculate bboxes.
             # taxi bbox
             # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
             # stop sign bbox
@@ -546,12 +546,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
                 img = dr.ravel(img)
-    
-                # start_index = b * (H * W * C)
-                # end_index = (b+1) * (H * W * C)
-                # index = dr.arange(dr.cuda.ad.UInt, start_index, end_index)                
-                # dr.scatter(imgs, img, index)
-            
+     
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
                 success = save_adv_image_preds(model \
@@ -612,8 +607,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 dr.enable_grad(params[k])
                 params.update()
                 perturbed_tex = mi.Bitmap(params[k])
-                
-                
+                                
                 mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"{k}_{it}.png"), data=perturbed_tex, write_async=False)
                 if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
                     perturbed_tex = mi.Bitmap(params[k])
