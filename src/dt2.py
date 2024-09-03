@@ -4,7 +4,7 @@ import torch as ch
 from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
-import time
+import warnings
 from omegaconf import DictConfig
 import logging
 from tqdm import tqdm
@@ -665,6 +665,10 @@ def attack_dt2(cfg:DictConfig) -> None:
                     # render_passes = 16 # TODO - make this a config param
                     mini_pass_spp = spp//multi_pass_spp_divisor
                     render_passes = mini_pass_spp
+                    
+                    if render_passes * H * W * C > 2**32:
+                        # depending on rendering configs, max arr size is 2^32=4294967296 entries                    
+                        warnings.warn("The product of render_passes, H, W, and C is greater than or equal to 2^32")
                     mini_pass_renders = dr.empty(dr.cuda.ad.Float, render_passes * H * W * C)
                     for i in range(render_passes):
                         seed = np.random.randint(0,1000)+i
@@ -688,6 +692,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                     #img = mi.render(scene, params=params, spp=spp, sensor=camera_idx[it], seed=it+1)
                     img = mi.render(scene, params=params, spp=spp, sensor=batch_sensor, seed=it+1)
                 
+                # TODO - place this into a utils function
                 # split image into images for number of sensors if needed!
                 # split_imgs = []
                 # for i in range(len(camera_positions)):
