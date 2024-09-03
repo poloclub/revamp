@@ -4,5 +4,7 @@ textures: ["scenes/${scene.name}/textures/${texture}.png"]
 target_param_keys: ["mat-Material.005.brdf_0.base_color.data"]
 sensor_key: "PerspectiveCamera"
 sensor_radius: 400
-sensor_count: 1024
+sensor_count: 1
+resx: 512
+resy: 512
 sensor_z_lats: [8]
