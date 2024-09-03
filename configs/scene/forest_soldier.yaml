@@ -7,3 +7,4 @@ sensor_key: "PerspectiveCamera"
 sensor_radius: 30
 sensor_count: 1024
 sensor_z_lats: [2]
+use_batch_sensor: false
