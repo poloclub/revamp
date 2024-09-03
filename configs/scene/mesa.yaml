@@ -8,3 +8,4 @@ sensor_count: 1
 resx: 512
 resy: 512
 sensor_z_lats: [8]
+use_batch_sensor: false

@@ -11,7 +11,7 @@
 	<integrator type="path" id="elm__0" name="elm__0">
 		<integer name="max_depth" value="12"/>
 	</integrator>
-	<sensor type="perspective" id="elm__1" name="elm__1">
+	<sensor type="perspective" id="PerspectiveCamera" name="PerspectiveCamera">
 		<string name="fov_axis" value="x"/>
 		<float name="fov" value="39.597755"/>
 		<float name="principal_point_offset_x" value="0.000000"/>
