@@ -504,7 +504,6 @@ def attack_dt2(cfg:DictConfig) -> None:
                 if multi_pass_rendering:
                     # achieve the affect of rendering at a high sample-per-pixel (spp) value 
                     # by rendering multiple times at a lower spp and averaging the results
-                    # render_passes = 16 # TODO - make this a config param
                     mini_pass_spp = spp//multi_pass_spp_divisor
                     render_passes = mini_pass_spp
                     
@@ -524,7 +523,6 @@ def attack_dt2(cfg:DictConfig) -> None:
                     @dr.wrap_ad(source='drjit', target='torch')
                     def stack_imgs(imgs):
                         # drjit cannot calculate the channel-wise mean of a 4D tensor!
-                        # imgs = imgs.reshape((render_passes, H, W, C))
                         imgs = ch.mean(imgs,axis=0)
                         return imgs
 
@@ -554,7 +552,6 @@ def attack_dt2(cfg:DictConfig) -> None:
                 # index = dr.arange(dr.cuda.ad.UInt, start_index, end_index)                
                 # dr.scatter(imgs, img, index)
             
-                # time.sleep(1.0) # shouldn't need sleeps with async writing of bitmaps
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
                 success = save_adv_image_preds(model \
@@ -573,7 +570,6 @@ def attack_dt2(cfg:DictConfig) -> None:
             sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
             print(sensor_loss)
             logger.info(sensor_loss)
-            # model.train = False
             dr.enable_grad(loss)
             dr.backward(loss)
 
@@ -619,11 +615,9 @@ def attack_dt2(cfg:DictConfig) -> None:
                 
                 
                 mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"{k}_{it}.png"), data=perturbed_tex, write_async=False)
-                # time.sleep(0.2)
                 if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
                     perturbed_tex = mi.Bitmap(params[k])
                     mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex, write_async=False)
-                    #time.sleep(0.2) 
                 ch.cuda.empty_cache()
         return scene
     
