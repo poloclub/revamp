@@ -1,0 +1,95 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="4096"/>
+	<default name="resx" value="256"/>
+	<default name="resy" value="256"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path" id="elm__0" name="elm__0">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective" id="elm__1" name="elm__1">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597755"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="100.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-154.99999634471394"/>
+			<rotate y="1" angle="4.539656483950031e-06"/>
+			<rotate z="1" angle="-179.999991348578"/>
+			<translate value="0.000000 0.949068 2.411106"/>
+		</transform>
+		<sampler type="independent" name="sampler">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm" name="film">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-Material.002" name="mat-Material.002">
+		<bsdf type="principled" name="bsdf">
+			<rgb value="0.074214 0.093057 0.124774" name="base_color"/>
+			<rgb value="1.000000 1.000000 1.000000" name="spec_tint"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.250000"/>
+			<float name="sheen" value="0.000000"/>
+			<rgb value="1.000000 1.000000 1.000000" name="sheen_tint"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.001" name="mat-Material.001">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/noise_tex.png"/>
+			</texture>
+			<rgb value="1.000000 1.000000 1.000000" name="spec_tint"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.250000"/>
+			<float name="sheen" value="0.000000"/>
+			<rgb value="1.000000 1.000000 1.000000" name="sheen_tint"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+	<emitter type="envmap">
+		<string name="filename" value="textures/patio-hdri.exr.exr"/>
+		<float name="scale" value="1.000000"/>
+		<transform name="to_world">
+			<matrix value="0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</emitter>
+
+<!-- Shapes -->
+
+	<shape type="ply" id="table" name="table">
+		<string name="filename" value="meshes/table.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.002" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="paper" name="paper">
+		<string name="filename" value="meshes/paper.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.001" name="bsdf"/>
+	</shape>
+
+<!-- Volumes -->
+
+</scene>
