@@ -5,7 +5,7 @@ from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
 import warnings
-from omegaconf import DictConfig
+from omegaconf import DictConfig, ListConfig
 import logging
 from tqdm import tqdm
 from detectron2.config import get_cfg
@@ -253,10 +253,12 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
 
     return batch_sensor
 
-def generate_bboxes_for_target(target_mesh:str, scene_file:str, camera_positions:np.ndarray, resx:int, resy:int)->np.ndarray:
-    # generate a b&w scene with the target mesh
-    if len(target_mesh)>0:
+def generate_bboxes_for_target(target_mesh:ListConfig, camera_positions, resx:int, resy:int)->np.ndarray:
+
+    if len(target_mesh)>1:
         warnings.warn("Only 1 target mesh will be rendered.  Cannot generate bboxes for multiple targets.")
+        
+    # generate a b&w scene with the target mesh w/ black material and white envmap for a 'solo' render.
     scene = mi.load_dict({
         "type": "scene",
         "myintegrator": {
@@ -293,15 +295,43 @@ def generate_bboxes_for_target(target_mesh:str, scene_file:str, camera_positions
             }
         }
     })
+    gt_bboxes = []
     
-    batch_sensor = generate_batch_sensor(camera_positions=camera_positions, resx=resx, resy=resy, spp=2)
-    # construct a batch sensor to render the scene from each position
-    # split the rendered image into N images, one for each sensor
-    # load images into PIL
-    # invert images
-    # calculate bbox (PIL method)
-    # return bboxes as np.ndarray or torch tensor
-    return np.empty([0])
+    batch_sensor_dict = generate_batch_sensor(camera_positions=camera_positions, resx=resx, resy=resy, spp=2)
+    batch_sensor = mi.load_dict(batch_sensor_dict)
+    n, h, w, c = len(camera_positions), resy, resx, 3
+    img = mi.render(scene, sensor=batch_sensor)
+
+    @dr.wrap_ad(source='drjit', target='torch')
+    def reshape_batch_imgs(img, n, h, w, c):
+        imgs = img.reshape(h, n, w, c).permute(1, 0, 2, 3)
+        return imgs
+    imgs = reshape_batch_imgs(img, n, h, w, c)
+    for i in range(n):
+        # convert the renders to binary images and get bboxes
+        bmp = mi.Bitmap(imgs[i]).convert(pixel_format=mi.Bitmap.PixelFormat.RGB,component_format=mi.Struct.Type.UInt8)
+        pil_img = PIL.Image.fromarray(np.array(bmp), mode='RGB')
+        pil_img = pil_img.convert('L')
+        threshold = 128
+        # binarizing is important, some artifacts result in pixels that aren't completely black and affects bbox
+        pil_img = pil_img.point(lambda p: p > threshold and 255)
+        pil_img = PIL.ImageOps.invert(pil_img)
+        bbox = pil_img.getbbox()
+        gt_bboxes.append(bbox)
+        
+        # Initialize ImageDraw
+        draw = PIL.ImageDraw.Draw(pil_img)
+
+        # Draw the bounding box
+        draw.rectangle(bbox, outline="red", width=3)
+
+        # Optionally, add a label
+        draw.text((bbox[0], bbox[1] - 10), "Label", fill="red")
+
+        # Save or show the image
+        pil_img.save(f'renders/bw/bbox_render_{i}.jpg')        
+        
+    return np.array(gt_bboxes)
 
 def attack_dt2(cfg:DictConfig) -> None:
 
@@ -395,7 +425,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             if randomize_sensors:
                 np.random.shuffle(moves_matrices)
             
-        gt_bboxes = generate_bboxes_for_target(target_mesh, scene_file, cam_position_matrices, resx, resy)
+        gt_bboxes = generate_bboxes_for_target(target_mesh, cam_position_matrices, resx, resy)
     
     #FIXME - truncate some of the camera positions, when we don't want to render an entire orbit
     # moves_matrices = moves_matrices[10:]
