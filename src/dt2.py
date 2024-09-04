@@ -140,7 +140,7 @@ def gen_cam_positions(z,r,size,randomize_radius=False) -> np.ndarray:
     vertices = np.array([np.array([np.cos(a)*lat_r, z, np.sin(a)*lat_r]) for a in angles])
     return vertices
 
-def load_sensor_at_position(x,y,z):  
+def load_sensor_at_position(x,y,z, resx=None, resy=None, spp=None):  
     from mitsuba import ScalarTransform4f as T        
     origin = mi.ScalarPoint3f([x,y,z])
 
@@ -154,12 +154,12 @@ def load_sensor_at_position(x,y,z):
         ),
         'sampler': {
             'type': 'independent',
-            'sample_count': 16
+            'sample_count': spp
         },
         'film': {
             'type': 'hdrfilm',
-            'width': 512,
-            'height': 512,
+            'width': resx,
+            'height': resy,
             'rfilter': {
                 'type': 'tent',
             },
@@ -167,7 +167,7 @@ def load_sensor_at_position(x,y,z):
         },
     })
 
-def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_position=1,world_transformed=True):
+def generate_cam_positions_for_lats(lats=[], r=None, size=None, resx=None, resy=None, spp=None, reps_per_position=1,world_transformed=True):
     """
     Wrapper function to allow generation of camera angles for any list of arbitrary latitudes
     Note that the latitudes must be some z value within the pos/neg value of the radius in the sphere:
@@ -183,7 +183,7 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     if world_transformed == False:
         return all_pos  
     
-    positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in all_pos])
+    positions = np.array([load_sensor_at_position(p[0], p[1], p[2], resx=resx, resy=resy, spp=spp).world_transform() for p in all_pos])
     positions = np.repeat(positions, reps_per_position)
     return positions    
 
@@ -333,18 +333,24 @@ def attack_dt2(cfg:DictConfig) -> None:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
         if use_batch_sensor: 
-            moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
-                                                            ,cfg.scene.sensor_radius \
-                                                            , cfg.scene.sensor_count \
-                                                            , world_transformed=False)
+            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
+                                                            ,r=cfg.scene.sensor_radius \
+                                                            ,size=cfg.scene.sensor_count \
+                                                            ,resx=resx \
+                                                            ,resy=resy \
+                                                            ,spp=spp \
+                                                            ,world_transformed=False)
             batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
             batch_sensor = mi.load_dict(batch_sensor_dict)
             sensor_count =  batch_sensor.m_film.size()[0]//resx #divide by resx to get number of sensors
         else: 
-            moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
-                                                        ,cfg.scene.sensor_radius \
-                                                        , cfg.scene.sensor_count \
-                                                        , world_transformed=True)        
+            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
+                                                        ,r=cfg.scene.sensor_radius \
+                                                        ,size=cfg.scene.sensor_count \
+                                                        ,resx=resx \
+                                                        ,resy=resy \
+                                                        ,spp=spp \
+                                                        ,world_transformed=True)        
             if randomize_sensors:
                 np.random.shuffle(moves_matrices)
     
@@ -454,6 +460,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             non_diff_params = mi.traverse(scene)
             diff_params.keep([k for k in param_keys])
             non_diff_params.keep([k1,k2])
+            non_diff_params[k2] = [resx, resy]
             # Optimizer is not used but necessary to instantiate to get gradients from diff rendering.
             opt = mi.ad.Adam(lr=0.1, params=diff_params)
             for i,k in enumerate(param_keys):
