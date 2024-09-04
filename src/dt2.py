@@ -167,25 +167,23 @@ def load_sensor_at_position(x,y,z, resx=None, resy=None, spp=None):
         },
     })
 
-def generate_cam_positions_for_lats(lats=[], r=None, size=None, resx=None, resy=None, spp=None, reps_per_position=1,world_transformed=True):
+def generate_cam_positions_for_lats(lats=[], r=None, size=None, resx=None, resy=None, spp=None, reps_per_position=1)->tuple:
     """
     Wrapper function to allow generation of camera angles for any list of arbitrary latitudes
     Note that the latitudes must be some z value within the pos/neg value of the radius in the sphere:
     so: {z | -r <= z <= r}
+    
+    Returns: tuple of (positions, world_transformed_positions)
     """
 
-    all_pos = gen_cam_positions(lats[0], r, size)
+    positions = gen_cam_positions(lats[0], r, size)
     for i in range(1,len(lats)):
         p = gen_cam_positions(lats[i], r, size)
-        all_pos = np.concatenate((all_pos, p), axis=0)
+        positions = np.concatenate((positions, p), axis=0)
     
-    # return raw positions if world_transformed is False, e.g., if using a batch_sensor
-    if world_transformed == False:
-        return all_pos  
-    
-    positions = np.array([load_sensor_at_position(p[0], p[1], p[2], resx=resx, resy=resy, spp=spp).world_transform() for p in all_pos])
-    positions = np.repeat(positions, reps_per_position)
-    return positions    
+    world_transformed_positions = np.array([load_sensor_at_position(p[0], p[1], p[2], resx=resx, resy=resy, spp=spp).world_transform() for p in positions])
+    world_transformed_positions = np.repeat(world_transformed_positions, reps_per_position)
+    return positions, world_transformed_positions    
 
 def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None, randomize_sensors=False):
     from mitsuba import ScalarTransform4f as T        
@@ -332,25 +330,23 @@ def attack_dt2(cfg:DictConfig) -> None:
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
-        if use_batch_sensor: 
-            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
+        # refactor gen cam positions to return both world transformed and non transformed as a tuple. 
+        cam_position_matrices, world_transformed_cam_position_matrices = generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
                                                             ,r=cfg.scene.sensor_radius \
                                                             ,size=cfg.scene.sensor_count \
                                                             ,resx=resx \
                                                             ,resy=resy \
-                                                            ,spp=spp \
-                                                            ,world_transformed=False)
+                                                            ,spp=spp)
+        # then assign the needed one to moves_matrices
+        # in either case, we will use the batch sensor to render the b&w images for calculating the
+        # bboxes 
+        if use_batch_sensor: 
+            moves_matrices =  cam_position_matrices
             batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
             batch_sensor = mi.load_dict(batch_sensor_dict)
             sensor_count =  batch_sensor.m_film.size()[0]//resx #divide by resx to get number of sensors
         else: 
-            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
-                                                        ,r=cfg.scene.sensor_radius \
-                                                        ,size=cfg.scene.sensor_count \
-                                                        ,resx=resx \
-                                                        ,resy=resy \
-                                                        ,spp=spp \
-                                                        ,world_transformed=True)        
+            moves_matrices =  world_transformed_cam_position_matrices       
             if randomize_sensors:
                 np.random.shuffle(moves_matrices)
     
