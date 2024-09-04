@@ -253,7 +253,15 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
 
     return batch_sensor
 
-         
+def generate_bboxes_for_target(target_mesh:str, scene_file:str, camera_positions:np.ndarray, resx:int, resy:int)->np.ndarray:
+    # generate a b&w scene with the target mesh
+    # construct a batch sensor to render the scene from each position
+    # split the rendered image into N images, one for each sensor
+    # load images into PIL
+    # invert images
+    # calculate bbox (PIL method)
+    # return bboxes as np.ndarray or torch tensor
+    return np.empty([0])
 
 def attack_dt2(cfg:DictConfig) -> None:
 
@@ -277,6 +285,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     multi_pass_spp_divisor = cfg.attack.multi_pass_spp_divisor
     scene_file = cfg.scene.path
     param_keys = cfg.scene.target_param_keys
+    target_mesh = cfg.scene.target_mesh
     sensor_key = cfg.scene.sensor_key
     score_thresh = cfg.model.score_thresh_test
     weights_file = cfg.model.weights_file 
@@ -330,16 +339,12 @@ def attack_dt2(cfg:DictConfig) -> None:
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
-        # refactor gen cam positions to return both world transformed and non transformed as a tuple. 
         cam_position_matrices, world_transformed_cam_position_matrices = generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
                                                             ,r=cfg.scene.sensor_radius \
                                                             ,size=cfg.scene.sensor_count \
                                                             ,resx=resx \
                                                             ,resy=resy \
                                                             ,spp=spp)
-        # then assign the needed one to moves_matrices
-        # in either case, we will use the batch sensor to render the b&w images for calculating the
-        # bboxes 
         if use_batch_sensor: 
             moves_matrices =  cam_position_matrices
             batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
@@ -349,6 +354,8 @@ def attack_dt2(cfg:DictConfig) -> None:
             moves_matrices =  world_transformed_cam_position_matrices       
             if randomize_sensors:
                 np.random.shuffle(moves_matrices)
+            
+        gt_bboxes = generate_bboxes_for_target(target_mesh, scene_file, cam_position_matrices, resx, resy)
     
     #FIXME - truncate some of the camera positions, when we don't want to render an entire orbit
     # moves_matrices = moves_matrices[10:]
