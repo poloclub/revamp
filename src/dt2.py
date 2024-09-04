@@ -111,87 +111,6 @@ def save_adv_image_preds(model \
         return True
     return False
 
-def generate_stop_sign_approach_cam_moves(sample_size=10) -> np.array:
-    """
-    Generate an np.ndarray of camera transform matrices
-    Read in a set of camera positions that comprise an animation of the camera position
-    """
-    # grab animation values of the camera generated in blender aand 
-    # construct transform matrices for each camera position we want to sample
-    scene_path = os.path.join("scenes", "intersection_taxi")
-    animations_path = os.path.join(scene_path,"animations", "cam_moves.csv")
-    data = csv.reader(open(animations_path))
-    # invert values for blender/mitsuba compatability
-    moves = np.array([-float(d[0]) for d in data][0:]) 
-    sample_moves = np.random.choice(moves, sample_size) #randomly sample cameraa positions (default=10)
-    moves_matrices = []
-    mat = p[k1].matrix
-    for m in sample_moves:
-        _mat = mi.cuda_ad_rgb.Matrix4f(mat)
-        _mat[3][2]= m # modify the camera z-position
-        moves_matrices.append(_mat)
-    return np.array(moves_matrices)
-
-def generate_taxi_cam_positions() -> np.array:
-    def load_sensor(r, y, phi, theta):
-        from mitsuba import ScalarTransform4f as T
-        # Apply two rotations to convert from spherical coordinates to world 3D coordinates.
-        origin = T.rotate([0, 1, 0], phi).rotate([0, 0, 1], theta) @ mi.ScalarPoint3f([0, y, r])
-
-        return mi.load_dict({
-            'type': 'perspective',
-            'fov': 39.3077,
-            'to_world': T.look_at(
-                origin=origin,
-                target=[0, -0.20, 0],
-                #up=[0, 0, 1]
-                up=[0, 1, 0]            
-            ),
-            'sampler': {
-                'type': 'independent',
-                'sample_count': 16
-            },
-            'film': {
-                'type': 'hdrfilm',
-                'width': 512,
-                'height': 512,
-                'rfilter': {
-                    'type': 'tent',
-                },
-                'pixel_format': 'rgb',
-            },
-        })
-    
-    # e.g, use sensor_count=6 & phis=30 to get 180 deg view
-    sensor_count = 6
-    radius = 5.0
-    phis = [60.0 * i for i in range(sensor_count)]
-    theta = 12.0
-    # y = 5
-    # ys = [1,3,5]
-    ys = [1]
-    sensors = np.array([])
-    for y in ys:
-        _sensors = np.array([load_sensor(radius, y, phi, theta) for phi in phis])
-        sensors = np.append(sensors, _sensors)
-    sensors = sensors.flatten()
-    sensors = np.array([s.world_transform() for s in sensors])
-    return sensors
-
-def generate_sunset_taxi_cam_positions() -> np.array:
-    mi.load_file("scenes/street_sunset/street_sunset.xml")
-    p = mi.traverse(scene)
-    cam_keys = ['PerspectiveCamera_5.to_world', \
-        'PerspectiveCamera.to_world', 
-        'PerspectiveCamera_1.to_world', 
-        'PerspectiveCamera_2.to_world',
-        'PerspectiveCamera_3.to_world',
-        'PerspectiveCamera_4.to_world',         
-        'PerspectiveCamera_6.to_world',
-        'PerspectiveCamera_7.to_world']
-    sensors = np.array([p[k] for k in cam_keys])
-    return sensors
-
 def use_provided_cam_position(scene_file:str,sensor_key:str) -> np.array:
     #     from mitsuba import ScalarTransform4f as T  
     # scene = mi.load_file("scenes/water_scene/water_scene.xml")
@@ -200,81 +119,6 @@ def use_provided_cam_position(scene_file:str,sensor_key:str) -> np.array:
     sensor_key_tansform_key = f'{sensor_key}.to_world'
     sensor = np.array([p[sensor_key_tansform_key]])
     return sensor
-
-def generate_cube_scene_cam_positions() -> np.array:
-    """
-    Load a mesh and use its vertices as camera positions
-    e.g.,  Load a half-icosphere and separate the vertices by their height above target object
-    each strata of vertices forms a 'ring' around the object. place cameras in a ring around the object
-    and return camera positions (world_transform())
-    """
-    from mitsuba import ScalarTransform4f as T    
-    def load_sensor_at_position(x,y,z):  
-        origin = mi.ScalarPoint3f([x,y,z])
-
-        return mi.load_dict({
-            'type': 'perspective',
-            'fov': 39.3077,
-            'to_world': T.look_at(
-                origin=origin,
-                target=[0, -0.5, 0],
-                up=[0, 1, 0]
-            ),
-            'sampler': {
-                'type': 'independent',
-                'sample_count': 16
-            },
-            'film': {
-                'type': 'hdrfilm',
-                'width': 512,
-                'height': 512,
-                'rfilter': {
-                    'type': 'tent',
-                },
-                'pixel_format': 'rgb',
-            },
-        })
-    sphere = mi.load_dict({
-        'type': 'scene',
-        'sphere': {
-            'type': 'ply',
-            'filename': "scenes/cube_scene/meshes/sphere_mid.ply"
-        },
-    })
-    sphere_outer = mi.load_dict({
-        'type': 'scene',
-        'sphere': {
-            'type': 'ply',
-            'filename': "scenes/cube_scene/meshes/sphere_outer.ply"
-        },
-    })  
-    sphere_inner = mi.load_dict({
-        'type': 'scene',
-        'sphere': {
-            'type': 'ply',
-            'filename': "scenes/cube_scene/meshes/sphere_inner.ply"
-        },
-    })        
-    ip = mi.traverse(sphere)
-    ipv = np.array(ip["sphere.vertex_positions"])
-    ipv  = np.reshape(ipv,(int(len(ipv)/3),3))    
-
-    outer_sphere_ip = mi.traverse(sphere_outer)
-    outer_sphere_ipv = np.array(outer_sphere_ip["sphere.vertex_positions"])
-    outer_sphere_ipv = np.reshape(outer_sphere_ipv,(int(len(outer_sphere_ipv)/3),3))    
-
-    inner_sphere_ip = mi.traverse(sphere_inner)
-    inner_sphere_ipv = np.array(inner_sphere_ip["sphere.vertex_positions"])    
-    inner_sphere_ipv = np.reshape(inner_sphere_ipv,(int(len(inner_sphere_ipv)/3),3))       
-    # strata = np.array(list(set(np.round(ipv[:,1],3))))  
-    # strata_2_cams =  ipv[np.where(np.round(ipv,3)[:,1] == strata[2])]    
-    # strata_1_cams = ipv[np.where(np.round(ipv,3)[:,1] == strata[1])]    
-    ipv_f = ipv[np.where(ipv[:,0] > 0)]
-    outer_sphere_ipv_f = outer_sphere_ipv[np.where(outer_sphere_ipv[:,0] > 0)]
-    inner_sphere_ipv_f = inner_sphere_ipv[np.where(inner_sphere_ipv[:,0] > 0)]
-    cam_pos_ring = np.concatenate((ipv_f, outer_sphere_ipv_f, inner_sphere_ipv_f))
-    positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in cam_pos_ring])
-    return positions
 
 def gen_cam_positions(z,r,size,randomize_radius=False) -> np.ndarray:
     """
@@ -296,7 +140,7 @@ def gen_cam_positions(z,r,size,randomize_radius=False) -> np.ndarray:
     vertices = np.array([np.array([np.cos(a)*lat_r, z, np.sin(a)*lat_r]) for a in angles])
     return vertices
 
-def load_sensor_at_position(x,y,z):  
+def load_sensor_at_position(x,y,z, resx=None, resy=None, spp=None):  
     from mitsuba import ScalarTransform4f as T        
     origin = mi.ScalarPoint3f([x,y,z])
 
@@ -310,12 +154,12 @@ def load_sensor_at_position(x,y,z):
         ),
         'sampler': {
             'type': 'independent',
-            'sample_count': 16
+            'sample_count': spp
         },
         'film': {
             'type': 'hdrfilm',
-            'width': 512,
-            'height': 512,
+            'width': resx,
+            'height': resy,
             'rfilter': {
                 'type': 'tent',
             },
@@ -323,7 +167,7 @@ def load_sensor_at_position(x,y,z):
         },
     })
 
-def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_position=1,world_transformed=True):
+def generate_cam_positions_for_lats(lats=[], r=None, size=None, resx=None, resy=None, spp=None, reps_per_position=1,world_transformed=True):
     """
     Wrapper function to allow generation of camera angles for any list of arbitrary latitudes
     Note that the latitudes must be some z value within the pos/neg value of the radius in the sphere:
@@ -339,10 +183,9 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, reps_per_positio
     if world_transformed == False:
         return all_pos  
     
-    positions = np.array([load_sensor_at_position(p[0], p[1], p[2]).world_transform() for p in all_pos])
+    positions = np.array([load_sensor_at_position(p[0], p[1], p[2], resx=resx, resy=resy, spp=spp).world_transform() for p in all_pos])
     positions = np.repeat(positions, reps_per_position)
     return positions    
-
 
 def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None, randomize_sensors=False):
     from mitsuba import ScalarTransform4f as T        
@@ -416,8 +259,8 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
 
 def attack_dt2(cfg:DictConfig) -> None:
 
-    cuda_visible_devices = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
-    DEVICE = "cuda:0"
+    cuda_visible_device = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
+    DEVICE = f"cuda:{cuda_visible_device}"
 
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("dt2")
@@ -485,45 +328,44 @@ def attack_dt2(cfg:DictConfig) -> None:
     p.keep(keep_keys)
     p.update()
     orig_texs = []
-    # moves_matrices = generate_stop_sign_approach_cam_moves()
-    # moves_matrices = generate_taxi_cam_positions()
-    # moves_matrices = generate_sunset_taxi_cam_positions()
-    # moves_matrices = np.tile(p[k1],1)
-    # moves_matrices = generate_cam_positions()
-    # moves_matrices = generate_orbit_cam_positions()
+
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
         if use_batch_sensor: 
-            moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
-                                                            ,cfg.scene.sensor_radius \
-                                                            , cfg.scene.sensor_count \
-                                                            , world_transformed=False)
+            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
+                                                            ,r=cfg.scene.sensor_radius \
+                                                            ,size=cfg.scene.sensor_count \
+                                                            ,resx=resx \
+                                                            ,resy=resy \
+                                                            ,spp=spp \
+                                                            ,world_transformed=False)
             batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
             batch_sensor = mi.load_dict(batch_sensor_dict)
             sensor_count =  batch_sensor.m_film.size()[0]//resx #divide by resx to get number of sensors
         else: 
-            moves_matrices =  generate_cam_positions_for_lats(cfg.scene.sensor_z_lats \
-                                                        ,cfg.scene.sensor_radius \
-                                                        , cfg.scene.sensor_count \
-                                                        , world_transformed=True)        
+            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
+                                                        ,r=cfg.scene.sensor_radius \
+                                                        ,size=cfg.scene.sensor_count \
+                                                        ,resx=resx \
+                                                        ,resy=resy \
+                                                        ,spp=spp \
+                                                        ,world_transformed=True)        
             if randomize_sensors:
                 np.random.shuffle(moves_matrices)
     
-    #FIXME - truncate some of the camera positions;
+    #FIXME - truncate some of the camera positions, when we don't want to render an entire orbit
     # moves_matrices = moves_matrices[10:]
     # reverse moves_matrices
     # moves_matrices = moves_matrices[::-1] 
     # concat moves_matrices with moves_matrices[24:]
     # moves_matrices = np.concatenate((moves_matrices[0:5], moves_matrices[25:][::-1]), axis=0)
-    
 
     # load pre-trained robust faster-rcnn model
     dt2_config = get_cfg()
     dt2_config.merge_from_file(model_config)
     dt2_config.MODEL.WEIGHTS = weights_file
     dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
-    # FIXME - Get GPU Device form environment variable.
     dt2_config.MODEL.DEVICE = DEVICE
     model = build_model(dt2_config)
     checkpointer = DetectionCheckpointer(model)
@@ -532,16 +374,6 @@ def attack_dt2(cfg:DictConfig) -> None:
     model.training = True
     model.proposal_generator.training = True
     model.roi_heads.training = True
-    # smoke test - get a pred!
-    # input = dt2_input(image_path=adv_path)
-    # save_adv_image_preds(model=model, input=input, path=f'dt2_prediction_img/{img_name}_preds.jpg')
-    # print('')
-
-    # rn = 10
-    # s = 8
-    # nput = dt2_input(f'renders/render_{rn}_s{s}.jpg')
-    # save_adv_image_preds(model=model, input=nput, instance_mask_thresh=0.2, path=f'preds/render_{rn}_s{s}.jpg')
-
 
     def optim_batch(scene, batch_size, camera_positions, spp, k, label, unlabel, iters, alpha, epsilon, targeted=False):
         # run attack
@@ -572,6 +404,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             width = x.shape[3]
             instances = Instances(image_size=(height,width))
             instances.gt_classes = target.long()
+            #FIXME - need better way to calculate bboxes.
             # taxi bbox
             # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
             # stop sign bbox
@@ -627,6 +460,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             non_diff_params = mi.traverse(scene)
             diff_params.keep([k for k in param_keys])
             non_diff_params.keep([k1,k2])
+            non_diff_params[k2] = [resx, resy]
             # Optimizer is not used but necessary to instantiate to get gradients from diff rendering.
             opt = mi.ad.Adam(lr=0.1, params=diff_params)
             for i,k in enumerate(param_keys):
@@ -677,7 +511,6 @@ def attack_dt2(cfg:DictConfig) -> None:
                 if multi_pass_rendering:
                     # achieve the affect of rendering at a high sample-per-pixel (spp) value 
                     # by rendering multiple times at a lower spp and averaging the results
-                    # render_passes = 16 # TODO - make this a config param
                     mini_pass_spp = spp//multi_pass_spp_divisor
                     render_passes = mini_pass_spp
                     
@@ -697,7 +530,6 @@ def attack_dt2(cfg:DictConfig) -> None:
                     @dr.wrap_ad(source='drjit', target='torch')
                     def stack_imgs(imgs):
                         # drjit cannot calculate the channel-wise mean of a 4D tensor!
-                        # imgs = imgs.reshape((render_passes, H, W, C))
                         imgs = ch.mean(imgs,axis=0)
                         return imgs
 
@@ -721,13 +553,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
                 img = dr.ravel(img)
-    
-                # start_index = b * (H * W * C)
-                # end_index = (b+1) * (H * W * C)
-                # index = dr.arange(dr.cuda.ad.UInt, start_index, end_index)                
-                # dr.scatter(imgs, img, index)
-            
-                # time.sleep(1.0) # shouldn't need sleeps with async writing of bitmaps
+     
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
                 success = save_adv_image_preds(model \
@@ -746,7 +572,6 @@ def attack_dt2(cfg:DictConfig) -> None:
             sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
             print(sensor_loss)
             logger.info(sensor_loss)
-            # model.train = False
             dr.enable_grad(loss)
             dr.backward(loss)
 
@@ -789,14 +614,11 @@ def attack_dt2(cfg:DictConfig) -> None:
                 dr.enable_grad(params[k])
                 params.update()
                 perturbed_tex = mi.Bitmap(params[k])
-                
-                
+                                
                 mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"{k}_{it}.png"), data=perturbed_tex, write_async=False)
-                # time.sleep(0.2)
                 if it==(iters-1) and isinstance(params[k], dr.cuda.ad.TensorXf):
                     perturbed_tex = mi.Bitmap(params[k])
                     mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex, write_async=False)
-                    #time.sleep(0.2) 
                 ch.cuda.empty_cache()
         return scene
     
