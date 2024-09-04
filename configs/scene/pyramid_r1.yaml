@@ -2,6 +2,7 @@ name: pyramid_r1
 path: "scenes/${scene.name}/${scene.name}.xml"
 textures: ["scenes/${scene.name}/textures/${texture}.png"]
 target_param_keys: ["mat-Material.brdf_0.base_color.data"]
+target_mesh: ["scenes/${scene.name}/meshes/Pyramid.ply"]
 sensor_key: "PerspectiveCamera"
 sensor_radius: 11
 sensor_count: 32

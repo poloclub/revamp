@@ -2,5 +2,10 @@ name: soldier
 path: "scenes/${scene.name}/${scene.name}.xml"
 textures: ["scenes/${scene.name}/textures/${texture}.png"]
 target_param_keys: ["mat-Material-patch.brdf_0.base_color.data"]
+# this scene repeats the same pattern on multiple meshes, which is not
+# currently supported for bbox calculation
+# e.g., the patch is repeated all over the soldier's uniform
+# need to render multiple times with each object by itself to generate all bboxes and then merge them
+target_mesh: ["scenes/${scene.name}/meshes/patch_right_torso_2.ply"]
 sensor_key: "PerspectiveCamera"
 use_batch_sensor: false
