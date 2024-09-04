@@ -255,6 +255,46 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
 
 def generate_bboxes_for_target(target_mesh:str, scene_file:str, camera_positions:np.ndarray, resx:int, resy:int)->np.ndarray:
     # generate a b&w scene with the target mesh
+    if len(target_mesh)>0:
+        warnings.warn("Only 1 target mesh will be rendered.  Cannot generate bboxes for multiple targets.")
+    scene = mi.load_dict({
+        "type": "scene",
+        "myintegrator": {
+            "type": "path",
+        },
+        'emitter': {
+            'type': 'envmap',
+            'filename': "scenes/bw/textures/white.exr",
+        },
+        "mat-Black":  {
+            'type': 'principled',
+                'base_color': {
+                    'type': 'rgb',
+                    'value': [0.0,0.0,0.0]
+                },
+                'metallic': 0.0,
+                'specular': 0.0,
+                'roughness': 1.0,
+                'spec_tint': 0.0,
+                'anisotropic': 0.0,
+                'sheen': 0.0,
+                'sheen_tint': 0.0,
+                'clearcoat': 0.0,
+                'clearcoat_gloss': 0.0,
+                'spec_trans': 0.0
+                ,'id': 'mat-Black'
+        },
+        'shape': {
+            'type': 'ply',
+            'filename': target_mesh[0],
+            'bsdf': {
+                'type': 'ref', 
+                'id': 'mat-Black'
+            }
+        }
+    })
+    
+    batch_sensor = generate_batch_sensor(camera_positions=camera_positions, resx=resx, resy=resy, spp=2)
     # construct a batch sensor to render the scene from each position
     # split the rendered image into N images, one for each sensor
     # load images into PIL
