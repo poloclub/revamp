@@ -3,6 +3,7 @@ path: "scenes/${scene.name}/${scene.name}.xml"
 textures: ["scenes/${scene.name}/textures/${texture}.png"]
 # target_param_keys: ["camo-Blend.weight.data","camo-Blend-1.weight.data", "camo-Blend-2.weight.data", "camo-Blend-3.weight.data","camo-Blend-1-2.weight.data"]
 target_param_keys: ["camo-Blend-adv-2.weight.data","camo-Blend-1-adv-2.weight.data", "camo-Blend-2-adv-2.weight.data", "camo-Blend-3-adv-2.weight.data","camo-Blend-1-2-adv-2.weight.data"]
+target_mesh: ["scenes/${scene.name}/meshes/soldier_body_tree_left.ply"]
 sensor_key: "PerspectiveCamera"
 sensor_radius: 30
 sensor_count: 1024

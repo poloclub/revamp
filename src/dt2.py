@@ -5,7 +5,7 @@ from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
 import warnings
-from omegaconf import DictConfig
+from omegaconf import DictConfig, ListConfig
 import logging
 from tqdm import tqdm
 from detectron2.config import get_cfg
@@ -167,25 +167,23 @@ def load_sensor_at_position(x,y,z, resx=None, resy=None, spp=None):
         },
     })
 
-def generate_cam_positions_for_lats(lats=[], r=None, size=None, resx=None, resy=None, spp=None, reps_per_position=1,world_transformed=True):
+def generate_cam_positions_for_lats(lats=[], r=None, size=None, resx=None, resy=None, spp=None, reps_per_position=1)->tuple:
     """
     Wrapper function to allow generation of camera angles for any list of arbitrary latitudes
     Note that the latitudes must be some z value within the pos/neg value of the radius in the sphere:
     so: {z | -r <= z <= r}
+    
+    Returns: tuple of (positions, world_transformed_positions)
     """
 
-    all_pos = gen_cam_positions(lats[0], r, size)
+    positions = gen_cam_positions(lats[0], r, size)
     for i in range(1,len(lats)):
         p = gen_cam_positions(lats[i], r, size)
-        all_pos = np.concatenate((all_pos, p), axis=0)
+        positions = np.concatenate((positions, p), axis=0)
     
-    # return raw positions if world_transformed is False, e.g., if using a batch_sensor
-    if world_transformed == False:
-        return all_pos  
-    
-    positions = np.array([load_sensor_at_position(p[0], p[1], p[2], resx=resx, resy=resy, spp=spp).world_transform() for p in all_pos])
-    positions = np.repeat(positions, reps_per_position)
-    return positions    
+    world_transformed_positions = np.array([load_sensor_at_position(p[0], p[1], p[2], resx=resx, resy=resy, spp=spp).world_transform() for p in positions])
+    world_transformed_positions = np.repeat(world_transformed_positions, reps_per_position)
+    return positions, world_transformed_positions    
 
 def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None, randomize_sensors=False):
     from mitsuba import ScalarTransform4f as T        
@@ -255,7 +253,79 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
 
     return batch_sensor
 
-         
+@dr.wrap_ad(source='drjit', target='torch')
+def reshape_batch_imgs(img, n, h, w, c):
+    imgs = img.reshape(h, n, w, c).permute(1, 0, 2, 3)
+    return imgs
+
+def generate_bboxes_for_target(target_mesh:ListConfig, camera_positions, resx:int, resy:int)->np.ndarray:
+
+    if len(target_mesh)>1:
+        warnings.warn("Only 1 target mesh will be rendered.  Cannot generate bboxes for multiple targets.")
+        
+    # generate a b&w scene with the target mesh w/ black material and white envmap for a 'solo' render.
+    scene = mi.load_dict({
+        "type": "scene",
+        "myintegrator": {
+            "type": "path",
+        },
+        'emitter': {
+            'type': 'envmap',
+            'filename': "scenes/bw/textures/white.exr",
+        },
+        "mat-Black":  {
+            'type': 'principled',
+                'base_color': {
+                    'type': 'rgb',
+                    'value': [0.0,0.0,0.0]
+                },
+                'metallic': 0.0,
+                'specular': 0.0,
+                'roughness': 1.0,
+                'spec_tint': 0.0,
+                'anisotropic': 0.0,
+                'sheen': 0.0,
+                'sheen_tint': 0.0,
+                'clearcoat': 0.0,
+                'clearcoat_gloss': 0.0,
+                'spec_trans': 0.0
+                ,'id': 'mat-Black'
+        },
+        'shape': {
+            'type': 'ply',
+            'filename': target_mesh[0],
+            'bsdf': {
+                'type': 'ref', 
+                'id': 'mat-Black'
+            }
+        }
+    })
+    gt_bboxes = []
+    
+    batch_sensor_dict = generate_batch_sensor(camera_positions=camera_positions, resx=resx, resy=resy, spp=2)
+    batch_sensor = mi.load_dict(batch_sensor_dict)
+    n, h, w, c = len(camera_positions), resy, resx, 3
+    img = mi.render(scene, sensor=batch_sensor)
+    imgs = reshape_batch_imgs(img, n, h, w, c)
+    for i in range(n):
+        # convert the renders to binary images and get bboxes
+        bmp = mi.Bitmap(imgs[i]).convert(pixel_format=mi.Bitmap.PixelFormat.RGB,component_format=mi.Struct.Type.UInt8)
+        pil_img = PIL.Image.fromarray(np.array(bmp), mode='RGB')
+        pil_img = pil_img.convert('L')
+        threshold = 128
+        # binarizing is important, some artifacts result in pixels that aren't completely black and affects bbox
+        pil_img = pil_img.point(lambda p: p > threshold and 255)
+        pil_img = PIL.ImageOps.invert(pil_img)
+        bbox = pil_img.getbbox()
+        gt_bboxes.append(bbox)
+        
+        # Annotate bbox on the image
+        draw = PIL.ImageDraw.Draw(pil_img)
+        draw.rectangle(bbox, outline="red", width=3)
+        draw.text((bbox[0], bbox[1] - 10), "object", fill="red")
+        pil_img.save(f'renders/bw/bbox_render_{i}.jpg')        
+        
+    return np.array(gt_bboxes)
 
 def attack_dt2(cfg:DictConfig) -> None:
 
@@ -279,6 +349,7 @@ def attack_dt2(cfg:DictConfig) -> None:
     multi_pass_spp_divisor = cfg.attack.multi_pass_spp_divisor
     scene_file = cfg.scene.path
     param_keys = cfg.scene.target_param_keys
+    target_mesh = cfg.scene.target_mesh
     sensor_key = cfg.scene.sensor_key
     score_thresh = cfg.model.score_thresh_test
     weights_file = cfg.model.weights_file 
@@ -332,27 +403,23 @@ def attack_dt2(cfg:DictConfig) -> None:
     if multicam == 1:
         moves_matrices = use_provided_cam_position(scene_file=scene_file, sensor_key=sensor_key)  
     else:
-        if use_batch_sensor: 
-            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
+        cam_position_matrices, world_transformed_cam_position_matrices = generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
                                                             ,r=cfg.scene.sensor_radius \
                                                             ,size=cfg.scene.sensor_count \
                                                             ,resx=resx \
                                                             ,resy=resy \
-                                                            ,spp=spp \
-                                                            ,world_transformed=False)
+                                                            ,spp=spp)
+        if use_batch_sensor: 
+            moves_matrices =  cam_position_matrices
             batch_sensor_dict = generate_batch_sensor(moves_matrices, resx, resy, spp)
             batch_sensor = mi.load_dict(batch_sensor_dict)
             sensor_count =  batch_sensor.m_film.size()[0]//resx #divide by resx to get number of sensors
         else: 
-            moves_matrices =  generate_cam_positions_for_lats(lats=cfg.scene.sensor_z_lats \
-                                                        ,r=cfg.scene.sensor_radius \
-                                                        ,size=cfg.scene.sensor_count \
-                                                        ,resx=resx \
-                                                        ,resy=resy \
-                                                        ,spp=spp \
-                                                        ,world_transformed=True)        
+            moves_matrices =  world_transformed_cam_position_matrices       
             if randomize_sensors:
                 np.random.shuffle(moves_matrices)
+            
+        gt_bboxes = generate_bboxes_for_target(target_mesh, cam_position_matrices, resx, resy)
     
     #FIXME - truncate some of the camera positions, when we don't want to render an entire orbit
     # moves_matrices = moves_matrices[10:]
@@ -387,13 +454,26 @@ def attack_dt2(cfg:DictConfig) -> None:
         # wrapper function that models the input image and returns the loss
         # TODO - 2 model input should accept a batch
         @dr.wrap_ad(source='drjit', target='torch')
-        def model_input(x, target):
+        def model_input(x, target, bboxes, batch_size=1):
             """
             To get the losses using DT2, we must supply the Ground Truth w/ the input dict
             as an Instances object. This includes the ground truth boxes (gt_boxes)
             and ground truth classes (gt_classes).  There should be a class & box for 
             each GT object in the scene.
             """
+            
+            if batch_size > 1:
+                x = x.reshape(x.shape[0],batch_size,x.shape[1]//batch_size,x.shape[2]).permute(1, 0, 2, 3).requires_grad_()
+                x.retain_grad()
+            else:
+                x = x.unsqueeze(0).requires_grad_()
+                x.retain_grad()
+            # visualize x
+            # z = x[0].detach().cpu().numpy()
+            # PIL.Image.fromarray(((z - z.min()) / (z.max() - z.min())*255).clip(0, 255).astype(np.uint8)).save("renders/bw/tensor.png")
+            
+            
+            # incoming tensor is N, H, W, C
             losses_name = ["loss_cls", "loss_box_reg", "loss_rpn_cls", "loss_rpn_loc"]            
             target_loss_idx = [0] # this targets es only `loss_cls` loss
             # detectron2 wants images as RGB 0-255 range
@@ -402,15 +482,17 @@ def attack_dt2(cfg:DictConfig) -> None:
             x.retain_grad()
             height = x.shape[2]
             width = x.shape[3]
-            instances = Instances(image_size=(height,width))
-            instances.gt_classes = target.long()
-            #FIXME - need better way to calculate bboxes.
-            # taxi bbox
-            # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
-            # stop sign bbox
-            instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, float(height), float(width)]]))
+            if ch.tensor(bboxes).dim() == 1:
+                # pad tensor if only dealing w/ single bbox
+                gt_boxes = ch.tensor(bboxes).unsqueeze(0)
+            else :
+                gt_boxes = ch.tensor(bboxes)
+    
             inputs = list()
             for i in  range(0, x.shape[0]):                
+                instances = Instances(image_size=(height,width))
+                instances.gt_classes = target.long()
+                instances.gt_boxes = Boxes(gt_boxes[i].unsqueeze(0))
                 input = {}
                 input['image']  = x[i]    
                 input['filename'] = ''
@@ -552,7 +634,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 img.set_label_(f"image_b{it}_s{b}")
                 rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
-                img = dr.ravel(img)
+                #img = dr.ravel(img)
      
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
@@ -565,10 +647,12 @@ def attack_dt2(cfg:DictConfig) -> None:
                     , path=os.path.join(preds_path,f'render_b{it}_s{cam_idx}.png'))
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
 
-            imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(img),shape=(N, H, W//N, C))
-            if (dr.grad_enabled(imgs)==False):
-                dr.enable_grad(imgs)
-            loss = model_input(imgs, target)
+            #imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(img),shape=(N, H, W//N, C))
+            
+            if (dr.grad_enabled(img)==False):
+                dr.enable_grad(img)
+            selected_bboxes = gt_bboxes if use_batch_sensor else gt_bboxes[cam_idx] # pass single bbox or all bboxes
+            loss = model_input(img, target, selected_bboxes, N)
             sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
             print(sensor_loss)
             logger.info(sensor_loss)

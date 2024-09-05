@@ -40,7 +40,7 @@ if __name__  == "__main__":
     mi.set_variant("cuda_ad_rgb")
     scene = mi.load_file(args.scene)
     
-    camera_positions = generate_cam_positions_for_lats(lats=sensor_z_lats, r=args.sensor_radius, size=args.sensor_count, world_transformed=False)
+    camera_positions, _ = generate_cam_positions_for_lats(lats=sensor_z_lats, r=args.sensor_radius, size=args.sensor_count, resx=W, resy=H, spp=spp)
     
     # idea is to "batch the batch" because > 30 sensors causes out of memory error.
     # first idea, is if batch is >30, then divide number of sensors by 30 for each batch
