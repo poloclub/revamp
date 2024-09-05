@@ -253,6 +253,11 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
 
     return batch_sensor
 
+@dr.wrap_ad(source='drjit', target='torch')
+def reshape_batch_imgs(img, n, h, w, c):
+    imgs = img.reshape(h, n, w, c).permute(1, 0, 2, 3)
+    return imgs
+
 def generate_bboxes_for_target(target_mesh:ListConfig, camera_positions, resx:int, resy:int)->np.ndarray:
 
     if len(target_mesh)>1:
@@ -301,11 +306,6 @@ def generate_bboxes_for_target(target_mesh:ListConfig, camera_positions, resx:in
     batch_sensor = mi.load_dict(batch_sensor_dict)
     n, h, w, c = len(camera_positions), resy, resx, 3
     img = mi.render(scene, sensor=batch_sensor)
-
-    @dr.wrap_ad(source='drjit', target='torch')
-    def reshape_batch_imgs(img, n, h, w, c):
-        imgs = img.reshape(h, n, w, c).permute(1, 0, 2, 3)
-        return imgs
     imgs = reshape_batch_imgs(img, n, h, w, c)
     for i in range(n):
         # convert the renders to binary images and get bboxes
@@ -319,16 +319,10 @@ def generate_bboxes_for_target(target_mesh:ListConfig, camera_positions, resx:in
         bbox = pil_img.getbbox()
         gt_bboxes.append(bbox)
         
-        # Initialize ImageDraw
+        # Annotate bbox on the image
         draw = PIL.ImageDraw.Draw(pil_img)
-
-        # Draw the bounding box
         draw.rectangle(bbox, outline="red", width=3)
-
-        # Optionally, add a label
-        draw.text((bbox[0], bbox[1] - 10), "Label", fill="red")
-
-        # Save or show the image
+        draw.text((bbox[0], bbox[1] - 10), "object", fill="red")
         pil_img.save(f'renders/bw/bbox_render_{i}.jpg')        
         
     return np.array(gt_bboxes)
@@ -460,13 +454,26 @@ def attack_dt2(cfg:DictConfig) -> None:
         # wrapper function that models the input image and returns the loss
         # TODO - 2 model input should accept a batch
         @dr.wrap_ad(source='drjit', target='torch')
-        def model_input(x, target):
+        def model_input(x, target, bboxes, batch_size=1):
             """
             To get the losses using DT2, we must supply the Ground Truth w/ the input dict
             as an Instances object. This includes the ground truth boxes (gt_boxes)
             and ground truth classes (gt_classes).  There should be a class & box for 
             each GT object in the scene.
             """
+            
+            if batch_size > 1:
+                x = x.reshape(x.shape[0],batch_size,x.shape[1]//batch_size,x.shape[2]).permute(1, 0, 2, 3).requires_grad_()
+                x.retain_grad()
+            else:
+                x = x.unsqueeze(0).requires_grad_()
+                x.retain_grad()
+            # visualize x
+            # z = x[0].detach().cpu().numpy()
+            # PIL.Image.fromarray(((z - z.min()) / (z.max() - z.min())*255).clip(0, 255).astype(np.uint8)).save("renders/bw/tensor.png")
+            
+            
+            # incoming tensor is N, H, W, C
             losses_name = ["loss_cls", "loss_box_reg", "loss_rpn_cls", "loss_rpn_loc"]            
             target_loss_idx = [0] # this targets es only `loss_cls` loss
             # detectron2 wants images as RGB 0-255 range
@@ -475,15 +482,17 @@ def attack_dt2(cfg:DictConfig) -> None:
             x.retain_grad()
             height = x.shape[2]
             width = x.shape[3]
-            instances = Instances(image_size=(height,width))
-            instances.gt_classes = target.long()
-            #FIXME - need better way to calculate bboxes.
-            # taxi bbox
-            # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
-            # stop sign bbox
-            instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, float(height), float(width)]]))
+            if ch.tensor(bboxes).dim() == 1:
+                # pad tensor if only dealing w/ single bbox
+                gt_boxes = ch.tensor(bboxes).unsqueeze(0)
+            else :
+                gt_boxes = ch.tensor(bboxes)
+    
             inputs = list()
             for i in  range(0, x.shape[0]):                
+                instances = Instances(image_size=(height,width))
+                instances.gt_classes = target.long()
+                instances.gt_boxes = Boxes(gt_boxes[i].unsqueeze(0))
                 input = {}
                 input['image']  = x[i]    
                 input['filename'] = ''
@@ -625,7 +634,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 img.set_label_(f"image_b{it}_s{b}")
                 rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
-                img = dr.ravel(img)
+                #img = dr.ravel(img)
      
                 # Get and Vizualize DT2 Predictions from rendered image
                 rendered_img_input = dt2_input(rendered_img_path)
@@ -638,10 +647,12 @@ def attack_dt2(cfg:DictConfig) -> None:
                     , path=os.path.join(preds_path,f'render_b{it}_s{cam_idx}.png'))
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
 
-            imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(img),shape=(N, H, W//N, C))
-            if (dr.grad_enabled(imgs)==False):
-                dr.enable_grad(imgs)
-            loss = model_input(imgs, target)
+            #imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(img),shape=(N, H, W//N, C))
+            
+            if (dr.grad_enabled(img)==False):
+                dr.enable_grad(img)
+            selected_bboxes = gt_bboxes if use_batch_sensor else gt_bboxes[cam_idx] # pass single bbox or all bboxes
+            loss = model_input(img, target, selected_bboxes, N)
             sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
             print(sensor_loss)
             logger.info(sensor_loss)
