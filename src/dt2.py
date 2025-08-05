@@ -140,18 +140,16 @@ def gen_cam_positions(z,r,size,randomize_radius=False) -> np.ndarray:
     vertices = np.array([np.array([np.cos(a)*lat_r, z, np.sin(a)*lat_r]) for a in angles])
     return vertices
 
-def load_sensor_at_position(x,y,z, resx=None, resy=None, spp=None):  
-    from mitsuba import ScalarTransform4f as T        
-    origin = mi.ScalarPoint3f([x,y,z])
+def load_sensor_at_position(x, y, z, resx=None, resy=None, spp=None):
+    from mitsuba import ScalarTransform4f as T, ScalarPoint3f
+    origin   = ScalarPoint3f([x, y, z])
+    target   = ScalarPoint3f([0, 0, 0])
+    up       = ScalarPoint3f([0, 1, 0])
 
     return mi.load_dict({
         'type': 'perspective',
         'fov': 39.3077,
-        'to_world': T.look_at(
-            origin=origin,
-            target=[0, 0, 0],
-            up=[0, 1, 0]
-        ),
+        'to_world': T().look_at(origin=origin, target=target, up=up),
         'sampler': {
             'type': 'independent',
             'sample_count': spp
@@ -186,14 +184,11 @@ def generate_cam_positions_for_lats(lats=[], r=None, size=None, resx=None, resy=
     return positions, world_transformed_positions    
 
 def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None, randomize_sensors=False):
-    from mitsuba import ScalarTransform4f as T        
-    
+    from mitsuba import ScalarTransform4f as T
     # all_pos = gen_cam_positions(lats[0], r, size)
-    
     # for i in range(1,len(lats)):
     #     p = gen_cam_positions(lats[i], r, size)
     #     all_pos = np.concatenate((all_pos, p), axis=0)
-
 
     batch_sensor = {
         'type': 'batch',
@@ -209,11 +204,8 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
             'sample_count': spp
         }
     }
-    
-    
-    
-    for i,p in enumerate(camera_positions):
-        
+
+    for i, p in enumerate(camera_positions):
         target_x = 0
         target_y = 0
         target_z = 0
@@ -221,39 +213,39 @@ def generate_batch_sensor(camera_positions=None, resy=None, resx=None, spp=None,
         up_vec_z = 0
 
         if randomize_sensors:
-            target_x = np.random.uniform(-0.2,0.2)
-            target_y = np.random.uniform(-0.2,0.2)
-            target_z = np.random.uniform(-0.2,0.2)
-            up_vec_z = np.random.uniform(-1,1)
-            up_vec_y = 1- np.abs(up_vec_z)
-        
+            target_x = np.random.uniform(-0.2, 0.2)
+            target_y = np.random.uniform(-0.2, 0.2)
+            target_z = np.random.uniform(-0.2, 0.2)
+            up_vec_z = np.random.uniform(-1, 1)
+            up_vec_y = 1 - np.abs(up_vec_z)
+
         origin = mi.ScalarPoint3f([p[0], p[1], p[2]])
         batch_sensor[f'sensor{i}'] = {
-                'type': 'perspective',
-                'fov': 39.3077,
-                'to_world': T.look_at(
-                    origin=origin,
-                    target=[target_x, target_y, target_z], # defaults is [0,0,0]
-                    up=[0, up_vec_y, up_vec_z] # defaults is [0,1,0]
-                ),
-                'sampler': {
-                    'type': 'independent',
-                    'sample_count': spp
+            'type': 'perspective',
+            'fov': 39.3077,
+            'to_world': T().look_at(
+                origin=origin,
+                target=mi.ScalarPoint3f([target_x, target_y, target_z]),
+                up=mi.ScalarPoint3f([0, up_vec_y, up_vec_z])
+            ),
+            'sampler': {
+                'type': 'independent',
+                'sample_count': spp
+            },
+            'film': {
+                'type': 'hdrfilm',
+                'width': resx,
+                'height': resy,
+                'rfilter': {
+                    'type': 'tent',
                 },
-                'film': {
-                    'type': 'hdrfilm',
-                    'width': resx,
-                    'height': resy,
-                    'rfilter': {
-                        'type': 'tent',
-                    },
-                    'pixel_format': 'rgb',
-                },
-            }
+                'pixel_format': 'rgb',
+            },
+        }
 
     return batch_sensor
 
-@dr.wrap_ad(source='drjit', target='torch')
+@dr.wrap(source='drjit', target='torch')
 def reshape_batch_imgs(img, n, h, w, c):
     imgs = img.reshape(h, n, w, c).permute(1, 0, 2, 3)
     return imgs
@@ -453,7 +445,7 @@ def attack_dt2(cfg:DictConfig) -> None:
         
         # wrapper function that models the input image and returns the loss
         # TODO - 2 model input should accept a batch
-        @dr.wrap_ad(source='drjit', target='torch')
+        @dr.wrap(source='drjit', target='torch')
         def model_input(x, target, bboxes, batch_size=1):
             """
             To get the losses using DT2, we must supply the Ground Truth w/ the input dict
@@ -517,7 +509,8 @@ def attack_dt2(cfg:DictConfig) -> None:
             else:
                 raise Exception("Unrecognized Differentiable Parameter Data Type.  Should be one of dr.cuda.ad.Float or dr.cuda.ad.TensorXf")
 
-            orig_tex.set_label_(f"{k}_orig_tex")
+            # orig_tex.set_label(f"{k}_orig_tex")
+            dr.set_label(orig_tex, f"{k}_orig_tex")
             orig_texs.append(orig_tex)
         
         # indicate sensors to use in producing the perturbation
@@ -548,7 +541,8 @@ def attack_dt2(cfg:DictConfig) -> None:
             for i,k in enumerate(param_keys):
                 dr.enable_grad(orig_texs[i])
                 dr.enable_grad(opt[k])
-                opt[k].set_label_(f"{k}_bitmap")
+                # opt[k].set_label(f"{k}_bitmap")
+                dr.set_label(opt[k], f"{k}_bitmap")
             # sample random camera positions (=batch size) for each batch iteration
             if num_cam_positions > 1:
                 np.random.seed(it+1)
@@ -609,7 +603,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                         img_i = dr.ravel(img_i)
                         dr.scatter(mini_pass_renders, img_i, mini_pass_index)
                         
-                    @dr.wrap_ad(source='drjit', target='torch')
+                    @dr.wrap(source='drjit', target='torch')
                     def stack_imgs(imgs):
                         # drjit cannot calculate the channel-wise mean of a 4D tensor!
                         imgs = ch.mean(imgs,axis=0)
@@ -631,7 +625,8 @@ def attack_dt2(cfg:DictConfig) -> None:
                 #     # mi.util.write_bitmap(f"split_img_{i}.png", data=split_img, write_async=False)   
                 #     split_imgs.append(dr.ravel(split_img))
                     
-                img.set_label_(f"image_b{it}_s{b}")
+                #  img.set_label(f"image_b{it}_s{b}")
+                dr.set_label(img, f"image_b{it}_s{b}")
                 rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
                 mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
                 #img = dr.ravel(img)
@@ -667,9 +662,9 @@ def attack_dt2(cfg:DictConfig) -> None:
             # if targeted:
             #     eta = -eta
             # tex = tex + eta
-            # eta = dr.clamp(tex - orig_tex, -epsilon, epsilon)
+            # eta = dr.clip(tex - orig_tex, -epsilon, epsilon)
             # tex = orig_tex + eta
-            # tex = dr.clamp(tex, 0, 1)
+            # tex = dr.clip(tex, 0, 1)
             #########################################################################
             for i, k in enumerate(param_keys):
                 HH, WW  = dr.shape(dr.grad(opt[k]))[0], dr.shape(dr.grad(opt[k]))[1]
@@ -693,7 +688,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 # divide by average brightness
                 scaled_img = img / dr.mean(dr.detach(img))
                 tex = tex / dr.mean(scaled_img)         
-                tex = dr.clamp(tex, 0, 1)
+                tex = dr.clip(tex, 0, 1)
                 params[k] = tex     
                 dr.enable_grad(params[k])
                 params.update()
