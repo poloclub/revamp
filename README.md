@@ -15,14 +15,48 @@ Running this command chooses the "city" scene from the library of scenes, design
 
 ## Getting Started
 
+`git clone https://github.com/matthewdhull/revamp.git`
+
 `conda env create -f environment.yml`
 
-Install Detectron2
+### Install Torch, Torchvision for your system, 
 
-`python -m pip install 'git+https://github.com/facebookresearch/detectron2.git'`
+`pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124` (for Linux + Cuda)
+
+or follow instructions [here](https://pytorch.org/get-started/locally/)
+
+### Install Detectron2
+
+`git clone https://github.com/facebookresearch/detectron2.git`
+
+`python -m pip install -e detectron2`
+
+or follow steps in this [installation tutorial](https://detectron2.readthedocs.io/en/latest/tutorials/install.html).
+
 
 ### Model Weights
+
 We use [Robust ImageNet Models](https://huggingface.co/madrylab/robust-imagenet-models). You'll need to choose an appropriate model for your experiment. Currently we use this ResNet-50 [L2-Robust Model](https://huggingface.co/madrylab/robust-imagenet-models/resolve/main/resnet50_l2_eps0.05.ckpt) for object detection with Detectron2. After downloading this model, place it in the `pretrained-models/` directory.  If you want another model, you'll need to create a model config in `configs/model/{model}.yaml`. You may copy the existing configs and use it as a template.
+
+Polo Club Only:
+
+Run:
+```
+mkdir pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x
+
+scp -r /raid/mhull32/diff_rendering_attack/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml user@remotehost:/path/to/revamp/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/config.yaml
+
+scp -r /raid/mhull32/diff_rendering_attack/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth user@remotehost:/path/to/revamp/pretrained-models/faster_rcnn-robust_l2_eps005_imagenet_C2-R_50_FPN_3x/model_final.pth
+```
+
+where user@remotehost might be _e.g._ mhull32@cosmo.cc.gatech.edu
+
+
+Get the Mesa Scene (Poloclub Only)
+```
+scp -r /path/to/source_folder/* user@remote_host:/path/to/destination_folder/
+scp -r /raid/mhull32/diff_rendering_attack/scenes/mesa/* mhull32@cosmo.cc.gatech.edu/path/to/revamp/scenes/mesa/
+```
 
 ### Examples
 Run a texture attack on Detectron2 and log the results to a file.  We use Hydra for configuring experiments and you can easily supply your own Hydra-style config arguments. See this [Hydra tutorial](https://hydra.cc/docs/tutorials/basic/your_first_app/simple_cli/)

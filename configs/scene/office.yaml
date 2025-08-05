@@ -2,4 +2,6 @@ name: office
 path: "scenes/${scene.name}/${scene.name}.xml"
 textures: ["scenes/${scene.name}/textures/${texture}.png"]
 target_param_keys: ["mat-Material.brdf_0.base_color.data"]
+target_mesh: ["scenes/${scene.name}/meshes/Cube.ply"]
 sensor_key: "PerspectiveCamera"
+use_batch_sensor: false

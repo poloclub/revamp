@@ -323,7 +323,7 @@ if __name__ == "__main__":
         if targeted:
             assert(label is not None)
 
-        @dr.wrap_ad(source='drjit', target='torch')
+        @dr.wrap(source='drjit', target='torch')
         def model_input(x, target):
             x = ch.permute(x, (2,1,0)).unsqueeze(dim=0).requires_grad_()
             logits = model(x)[0]
@@ -379,9 +379,9 @@ if __name__ == "__main__":
             if targeted:
                 eta = -eta
             tex = tex + eta
-            eta = dr.clamp(tex - orig_tex, -epsilon, epsilon)
+            eta = dr.clip(tex - orig_tex, -epsilon, epsilon)
             tex = orig_tex + eta
-            tex = dr.clamp(tex, 0, 1)
+            tex = dr.clip(tex, 0, 1)
             params[k] = tex
             dr.enable_grad(params[k])
             params.update()

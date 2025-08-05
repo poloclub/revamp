@@ -1,0 +1,378 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="64"/>
+	<default name="resx" value="256"/>
+	<default name="resy" value="256"/>
+	<!-- <default name="resx" value="256"/>
+	<default name="resy" value="256"/> -->
+	
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path" id="elm__0" name="elm__0">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective" id="PerspectiveCamera" name="PerspectiveCamera">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597755"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-171.30675879941754"/>
+			<rotate y="1" angle="-66.5496613100741"/>
+			<rotate z="1" angle="178.9831810868382"/>
+			<translate value="1.848736 0.120675 0.874887"/>
+		</transform>
+		<sampler type="independent" name="sampler">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm" name="film">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-ResBuilding 2" name="mat-ResBuilding 2">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Brick Building_Color.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<!-- <texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/Brick Building_Roughness.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<texture type="bitmap" name="metallic">
+				<string name="filename" value="textures/Brick Building_Gloss.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>	 -->
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>			 
+		<bsdf type="normalmap">
+			<texture name="normalmap" type="bitmap">
+				<boolean name="raw" value="true"/>
+				<string name="filename" value="textures/Brick Building_Normal.png"/>
+			</texture>
+			<bsdf type="roughplastic">
+				<string name="distribution" value="ggx"/>
+				<float name="alpha" value="0.300000"/>
+			</bsdf>		
+		</bsdf>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-Office Building 2" name="mat-Office Building 2">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-ResBuilding 1" name="mat-ResBuilding 1">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Brownstone red_Color.001.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/Brownstone red_Roughness.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>			 
+		<bsdf type="normalmap">
+			<texture name="normalmap" type="bitmap">
+				<boolean name="raw" value="true"/>
+				<string name="filename" value="textures/Brownstone red_Normal.png"/>
+			</texture>
+			<bsdf type="roughplastic">
+				<string name="distribution" value="ggx"/>
+				<float name="alpha" value="0.300000"/>
+			</bsdf>			
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided"  id="mat-ResBuilding 2 v2" name="mat-ResBuilding 2 v2">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Brownstone red_ColorV2.001.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/Brownstone red_Roughness.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>			 
+		<bsdf type="normalmap">
+			<texture name="normalmap" type="bitmap">
+				<boolean name="raw" value="true"/>
+				<string name="filename" value="textures/Brownstone red_Normal.png"/>
+			</texture>
+			<bsdf type="roughplastic">
+				<string name="distribution" value="ggx"/>
+				<float name="alpha" value="0.300000"/>
+			</bsdf>			
+		</bsdf>
+	</bsdf>
+	<!-- <bsdf type="diffuse" id="mat-Office Building 1" name="mat-Office Building 1">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf> -->
+	<bsdf type="twosided" id="mat-Office Building 1" name="mat-Office Building 1">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Office Building 1 Color.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>			 
+	</bsdf>
+	<bsdf type="twosided" id="mat-Car" name="mat-Car">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Car Color.png"/>
+			</texture>						 	
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>	
+	</bsdf>
+	<bsdf type="twosided" id="mat-Sidewalk" name="mat-Sidewalk">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Sidewalk_Color.png.png"/>
+			</texture>
+			<rgb value="1.000000 1.000000 1.000000" name="spec_tint"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/Sidewalk_Roughness.png.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<float name="sheen" value="0.000000"/>
+			<rgb value="1.000000 1.000000 1.000000" name="sheen_tint"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Center road" name="mat-Center road">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Center Road.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/Center road_Gloss.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>			 
+		<bsdf type="normalmap">
+			<texture name="normalmap" type="bitmap">
+				<boolean name="raw" value="true"/>
+				<string name="filename" value="textures/Center road_Normal.png"/>
+			</texture>
+			<bsdf type="roughplastic">
+				<string name="distribution" value="ggx"/>
+				<float name="alpha" value="0.300000"/>
+			</bsdf>			
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Road" name="mat-Road">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/Road.png.png"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/Road_Gloss.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>			 
+		<bsdf type="normalmap">
+			<texture name="normalmap" type="bitmap">
+				<boolean name="raw" value="true"/>
+				<string name="filename" value="textures/Road_Normal.png"/>
+			</texture>
+			<bsdf type="roughplastic"/>
+		</bsdf>
+	</bsdf>	
+	<bsdf type="twosided" id="mat-fire hydrant" name="mat-fire hydrant">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/fire hydrant_Color.png.png"/>
+			</texture>
+			<rgb value="1.000000 1.000000 1.000000" name="spec_tint"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/fire hydrant_ Roughness.png.png"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<float name="sheen" value="0.000000"/>
+			<rgb value="1.000000 1.000000 1.000000" name="sheen_tint"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.004" name="mat-Material.004">
+		<bsdf type="principled" name="bsdf">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/stop_sign_tex.png"/>
+			</texture>
+			<rgb value="1.000000 1.000000 1.000000" name="spec_tint"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.250000"/>
+			<float name="sheen" value="0.000000"/>
+			<rgb value="1.000000 1.000000 1.000000" name="sheen_tint"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.003" name="mat-Material.003">
+		<bsdf type="principled" name="bsdf">
+			<rgb value="0.476990 0.476990 0.476990" name="base_color"/>
+			<rgb value="1.000000 1.000000 1.000000" name="spec_tint"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.476148"/>
+			<float name="sheen" value="0.000000"/>
+			<rgb value="1.000000 1.000000 1.000000" name="sheen_tint"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.825397"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+	<emitter type="envmap">
+		<string name="filename" value="textures/city.hdr"/>
+		<float name="scale" value="0.5"/>
+		<transform name="to_world">
+			<matrix value="0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</emitter>
+
+<!-- Shapes -->
+
+	<shape type="ply" id="elm__2" name="elm__2">
+		<string name="filename" value="meshes/ResBuilding_2.ply"/>
+		<ref id="mat-ResBuilding 2" name="bsdf"/>
+	</shape>
+	<!-- <shape type="ply" id="elm__4" name="elm__4">
+		<string name="filename" value="meshes/OfficeBuilding_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Office Building 2" name="bsdf"/>
+	</shape> 
+	<shape type="ply" id="elm__10" name="elm__10">
+		<string name="filename" value="meshes/OfficeBuilding_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Office Building 1" name="bsdf"/>
+	</shape> -->
+	<shape type="ply" id="elm__7" name="elm__7">
+		<string name="filename" value="meshes/ResBuilding_1-ResBuilding 1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-ResBuilding 1" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__8" name="elm__8">
+		<string name="filename" value="meshes/ResBuilding_1-ResBuilding 2 v2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-ResBuilding 2 v2" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="Car" name="Car">
+		<string name="filename" value="meshes/Car.ply"/>
+		<ref id="mat-Car" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="Road-Sidewalk" name="Road-Sidewalk">
+		<string name="filename" value="meshes/Road-Sidewalk.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Sidewalk" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm_Road-Center_17" name="Road-Center">
+		<string name="filename" value="meshes/Road-Center road.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Center road" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="Road" name="Road">
+		<string name="filename" value="meshes/Road-Road.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Road" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="fire_hydrant" name="fire_hydrant">
+		<string name="filename" value="meshes/fire_hydrant.ply"/>
+		<ref id="mat-fire hydrant" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="stop_sign" name="stop_sign">
+		<string name="filename" value="meshes/stop_sign.ply"/>
+		<ref id="mat-Material.004" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="stop_sign_bolt_1" name="stop_sign_bolt_1">
+		<string name="filename" value="meshes/stop_sign_bolt_1.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="stop_sign_bolt_2" name="stop_sign_bolt_2">
+		<string name="filename" value="meshes/stop_sign_bolt_2.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="stop_sign_post" name="stop_sign_post">
+		<string name="filename" value="meshes/stop_sign_post.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Material.003" name="bsdf"/>
+	</shape>
+
+<!-- Volumes -->
+
+</scene>

@@ -2,7 +2,9 @@ name: teapot_scene
 path: "scenes/${scene.name}/${scene.name}.xml"
 textures: ["scenes/${scene.name}/textures/noise_tex.png"]
 target_param_keys: ["mat-Material.brdf_0.base_color.data"]
+target_mesh: ["scenes/${scene.name}/meshes/teapot.ply"]
 sensor_key: "PerspectiveCamera"
 sensor_radius: 11
 sensor_count: 32
 sensor_z_lats: [2.1381900311, 4.1942100525, 6.0890493393]
+use_batch_sensor: false
