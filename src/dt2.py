@@ -1,12 +1,16 @@
 import os, PIL, csv
 import numpy as np
 import torch as ch
+import gc
+import time
+import contextlib
 from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
 import warnings
 from omegaconf import DictConfig, ListConfig
 import logging
+from typing import Union
 from tqdm import tqdm
 from detectron2.config import get_cfg
 from detectron2.utils.visualizer import Visualizer, VisImage
@@ -19,6 +23,36 @@ from detectron2.utils.events import EventStorage
 from detectron2.data.detection_utils import read_image
 from detectron2.structures import Instances
 from detectron2.data.detection_utils import *
+from .utils.gpu_memory_profile import gpu_mem, NvtxRange
+
+ # --------------------- Loss-resolution downscaling helper ---------------------
+def _downscale_for_loss(x: ch.Tensor, max_side: int):
+    """Downscale NCHW tensor so that max(H,W) <= max_side. Returns (x_ds, scale)."""
+    n, c, h, w = x.shape
+    maxdim = max(h, w)
+    if maxdim <= max_side:
+        return x, 1.0
+    scale = max_side / float(maxdim)
+    x_ds = ch.nn.functional.interpolate(x, scale_factor=scale, mode="bilinear", align_corners=False)
+    return x_ds, scale
+# -----------------------------------------------------------------------------
+
+# Optional: help PyTorch use larger segments and reduce fragmentation
+# Build allocator config compatible with the installed torch version
+try:
+    _ver_parts = ch.__version__.split("+")[0].split(".")
+    _major = int(_ver_parts[0]) if len(_ver_parts) > 0 else 0
+    _minor = int(_ver_parts[1]) if len(_ver_parts) > 1 else 0
+except Exception:
+    _major, _minor = 0, 0
+
+_alloc_opts = ["max_split_size_mb:256"]
+# 'expandable_segments' is only supported on newer PyTorch versions; gate it.
+if (_major, _minor) >= (2, 0):
+    _alloc_opts.insert(0, "expandable_segments:True")
+
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", ",".join(_alloc_opts))
+# ==========================================================================
 
 
 # created symlink in /nvmescratch/mhull32/robust-models-transfer dir for datasets: ln -s /nvmescratch/mhull32/datasets datasets
@@ -84,6 +118,7 @@ def save_adv_image_preds(model \
     model.proposal_generator.training = False
     model.roi_heads.training = False    
     with ch.no_grad():
+        gpu_mem("before detectron2 forward", dt2_config.MODEL.DEVICE)
         adv_outputs = model([input])
         perturbed_image = input['image'].data.permute((1,2,0)).detach().cpu().numpy()
         pbi = ch.tensor(perturbed_image, requires_grad=False).detach().cpu().numpy()
@@ -100,6 +135,7 @@ def save_adv_image_preds(model \
         target_pred_exists = target in instances.pred_classes.cpu().numpy().tolist()
         untarget_pred_not_exists = untarget not in instances.pred_classes.cpu().numpy().tolist()
         pred = out.get_image()
+        gpu_mem("after detectron2 forward", dt2_config.MODEL.DEVICE)
     model.train = True
     model.training = True
     model.proposal_generator.training = True
@@ -324,6 +360,27 @@ def attack_dt2(cfg:DictConfig) -> None:
     cuda_visible_device = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
     DEVICE = f"cuda:{cuda_visible_device}"
 
+    # Hydra-controlled memory profiling flag (default false via config)
+    MEM_PROFILE = getattr(cfg.sysconfig, "mem_profile", False)
+
+    # If disabled, silence gpu_mem() and NvtxRange by rebinding the GLOBAL symbols
+    if not MEM_PROFILE:
+        global gpu_mem, NvtxRange
+        def _gpu_mem_noop(*args, **kwargs):
+            return None
+        class _NvtxRangeNoop:
+            def __init__(self, *_, **__):
+                pass
+            def __enter__(self):
+                return self
+            def __exit__(self, exc_type, exc, tb):
+                return False
+        gpu_mem = _gpu_mem_noop
+        NvtxRange = _NvtxRangeNoop
+    if ch.cuda.is_available():
+        ch.cuda.reset_peak_memory_stats()
+        gpu_mem("startup", DEVICE)
+
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("dt2")
 
@@ -337,6 +394,13 @@ def attack_dt2(cfg:DictConfig) -> None:
     untargeted_string = cfg.untargeted_class
     iters = cfg.attack.iters
     spp = cfg.attack.samples_per_pixel
+    spp_grad = getattr(cfg.attack, "spp_grad", 1)
+    # NOTE:
+    #  - `spp_grad` controls the SPP used for the gradient/backprop render. Keep this low (1–2)
+    #    to minimize AD memory. We do NOT save these low-SPP images to disk.
+    #  - `spp_viz` controls a separate high-quality, no-grad visualization render that *is*
+    #    saved as `*_hq.png` in both renders/ and preds/.
+    spp_viz = getattr(cfg.attack, "spp_viz", 32)
     multi_pass_rendering = cfg.attack.multi_pass_rendering
     multi_pass_spp_divisor = cfg.attack.multi_pass_spp_divisor
     scene_file = cfg.scene.path
@@ -365,6 +429,9 @@ def attack_dt2(cfg:DictConfig) -> None:
     
     if multi_pass_rendering:
         logger.info(f"Using multi-pass rendering with {spp//multi_pass_spp_divisor} passes")
+
+    # Max side (in pixels) for D2 loss path to control activation memory
+    loss_max_side = getattr(cfg.model, "loss_max_side", 512)
     
     # img_name = 'render_39_s3'
     # adv_path = f'/nvmescratch/mhull32/robust-models-transfer/renders/{img_name}.jpg'
@@ -433,11 +500,18 @@ def attack_dt2(cfg:DictConfig) -> None:
     model.training = True
     model.proposal_generator.training = True
     model.roi_heads.training = True
+    # We only need gradients w.r.t. the input image, not model weights
+    for p in model.parameters():
+        p.requires_grad_(False)
 
     def optim_batch(scene, batch_size, camera_positions, spp, k, label, unlabel, iters, alpha, epsilon, targeted=False):
         # run attack
         if targeted:
             assert(label is not None)
+
+        if ch.cuda.is_available():
+            ch.cuda.reset_peak_memory_stats()
+        gpu_mem("optim_batch:start", DEVICE)
 
         #assert(batch_size <= sensor_count)
         assert(batch_size <= camera_positions.size)
@@ -470,16 +544,20 @@ def attack_dt2(cfg:DictConfig) -> None:
             target_loss_idx = [0] # this targets es only `loss_cls` loss
             # detectron2 wants images as RGB 0-255 range
             x = ch.clip(x * 255 + 0.5, 0, 255).requires_grad_()
-            x = ch.permute(x, (0, 3, 1, 2)).requires_grad_()
+            x = ch.permute(x, (0, 3, 1, 2)).requires_grad_()  # NCHW
             x.retain_grad()
+            # Downscale to reduce activation memory for D2
+            x, scale = _downscale_for_loss(x, loss_max_side)
             height = x.shape[2]
             width = x.shape[3]
             if ch.tensor(bboxes).dim() == 1:
-                # pad tensor if only dealing w/ single bbox
                 gt_boxes = ch.tensor(bboxes).unsqueeze(0)
-            else :
+            else:
                 gt_boxes = ch.tensor(bboxes)
-    
+            # scale boxes to match downscaled image (xyxy)
+            if scale != 1.0:
+                gt_boxes = gt_boxes * scale
+
             inputs = list()
             for i in  range(0, x.shape[0]):                
                 instances = Instances(image_size=(height,width))
@@ -492,11 +570,20 @@ def attack_dt2(cfg:DictConfig) -> None:
                 input['width'] = width
                 input['instances'] = instances      
                 inputs.append(input)
-            with EventStorage(0) as storage:            
-                # loss = model([input])[losses_name[target_loss_idx[0]]].requires_grad_()
-                losses = model(inputs)
-                loss = sum([losses[losses_name[tgt_idx]] for tgt_idx in target_loss_idx]).requires_grad_()
+            gpu_mem("model_input:pre-forward", DEVICE)
+            with EventStorage(0) as storage:
+                # Mixed precision to reduce activation memory
+                use_amp = ch.cuda.is_available()
+                ctx = ch.autocast(device_type="cuda", dtype=ch.float16) if use_amp else contextlib.nullcontext()
+                with ctx:
+                    losses = model(inputs)
+                    loss = sum([losses[losses_name[tgt_idx]] for tgt_idx in target_loss_idx]).requires_grad_()
+            gpu_mem("model_input:post-forward", DEVICE)
             del x
+            try:
+                del losses
+            except Exception:
+                pass
             return loss
 
         params = mi.traverse(scene)
@@ -584,36 +671,16 @@ def attack_dt2(cfg:DictConfig) -> None:
                 
                 sensor_i = batch_sensor if use_batch_sensor else camera_idx[it]
 
+                gpu_mem("pre-render", DEVICE)
                 if multi_pass_rendering:
-                    # achieve the affect of rendering at a high sample-per-pixel (spp) value 
-                    # by rendering multiple times at a lower spp and averaging the results
-                    mini_pass_spp = spp//multi_pass_spp_divisor
-                    render_passes = mini_pass_spp
-                    
-                    if render_passes * H * W * C > 2**32:
-                        # depending on rendering configs, max arr size is 2^32=4294967296 entries                    
-                        warnings.warn("The product of render_passes, H, W, and C is greater than or equal to 2^32")
-                    mini_pass_renders = dr.empty(dr.cuda.ad.Float, render_passes * H * W * C)
-                    for i in range(render_passes):
-                        seed = np.random.randint(0,1000)+i
-                        img_i = mi.render(scene, params=params, spp=mini_pass_spp, sensor=sensor_i, seed=seed)
-                        s_index = i * (H * W * C)
-                        e_index = (i+1) * (H * W * C)
-                        mini_pass_index = dr.arange(dr.cuda.ad.UInt, s_index, e_index)
-                        img_i = dr.ravel(img_i)
-                        dr.scatter(mini_pass_renders, img_i, mini_pass_index)
-                        
-                    @dr.wrap(source='drjit', target='torch')
-                    def stack_imgs(imgs):
-                        # drjit cannot calculate the channel-wise mean of a 4D tensor!
-                        imgs = ch.mean(imgs,axis=0)
-                        return imgs
-
-                    # mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, dr.shape(mini_pass_renders))
-                    mini_pass_renders = dr.cuda.ad.TensorXf(mini_pass_renders, shape=(render_passes, H, W, C))
-                    img = stack_imgs(mini_pass_renders)
-                else: # dont use multi-pass rendering
-                    img = mi.render(scene, params=params, spp=spp, sensor=sensor_i, seed=it+1)
+                    # For gradient computation, keep it cheap regardless of multi-pass settings
+                    render_passes = 1
+                    mini_pass_spp = max(1, int(spp_grad))
+                    seed = np.random.randint(0, 1000)
+                    img = mi.render(scene, params=params, spp=mini_pass_spp, sensor=sensor_i, seed=seed)
+                else:
+                    img = mi.render(scene, params=params, spp=max(1, int(spp_grad)), sensor=sensor_i, seed=it+1)
+                gpu_mem("post-render", DEVICE)
                 
                 # TODO - place this into a utils function
                 # split image into images for number of sensors if needed!
@@ -627,19 +694,23 @@ def attack_dt2(cfg:DictConfig) -> None:
                     
                 #  img.set_label(f"image_b{it}_s{b}")
                 dr.set_label(img, f"image_b{it}_s{b}")
-                rendered_img_path = os.path.join(render_path,f"render_b{it}_p{b}_s{cam_idx}.png")
-                mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
-                #img = dr.ravel(img)
-     
-                # Get and Vizualize DT2 Predictions from rendered image
-                rendered_img_input = dt2_input(rendered_img_path)
-                success = save_adv_image_preds(model \
-                    , dt2_config, input=rendered_img_input \
-                    , instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST \
-                    , target = label
-                    , untarget = unlabel
-                    , is_targeted = targeted
-                    , path=os.path.join(preds_path,f'render_b{it}_s{cam_idx}.png'))
+                # === Low-SPP visualization disabled ===
+                # We deliberately do not write the low-SPP (gradient) render to disk to avoid noisy images.
+                # Backprop still uses `img` internally. To increase gradient quality, adjust `spp_grad` in config.
+                # If you need to debug, uncomment the lines below.
+                # rendered_img_path = os.path.join(render_path, f"render_b{it}_p{b}_s{cam_idx}.png")
+                # mi.util.write_bitmap(rendered_img_path, data=img, write_async=False)
+                # rendered_img_input = dt2_input(rendered_img_path)
+                # success = save_adv_image_preds(
+                #     model,
+                #     dt2_config,
+                #     input=rendered_img_input,
+                #     instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST,
+                #     target=label,
+                #     untarget=unlabel,
+                #     is_targeted=targeted,
+                #     path=os.path.join(preds_path, f'render_b{it}_s{cam_idx}.png')
+                # )
                 target = dr.cuda.ad.TensorXf([label], shape=(1,))
 
             #imgs = dr.cuda.ad.TensorXf(dr.cuda.ad.Float(img),shape=(N, H, W//N, C))
@@ -648,11 +719,49 @@ def attack_dt2(cfg:DictConfig) -> None:
                 dr.enable_grad(img)
             selected_bboxes = gt_bboxes if use_batch_sensor else gt_bboxes[cam_idx] # pass single bbox or all bboxes
             loss = model_input(img, target, selected_bboxes, N)
+            gpu_mem("post-model_input(loss ready)", DEVICE)
             sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
             print(sensor_loss)
             logger.info(sensor_loss)
             dr.enable_grad(loss)
-            dr.backward(loss)
+            with NvtxRange("backward"):
+                t0 = time.time()
+                gpu_mem("pre-backward", DEVICE)
+                try:
+                    ch.cuda.empty_cache()
+                except Exception:
+                    pass
+                try:
+                    dr.flush_malloc_cache()
+                except Exception:
+                    pass
+                try:
+                    model.zero_grad(set_to_none=True)
+                except Exception:
+                    pass
+                dr.backward(loss)
+                ch.cuda.synchronize()
+                gpu_mem("post-backward", DEVICE)
+                if MEM_PROFILE:
+                    print(f"[TIMING] backward took {time.time() - t0:.3f}s")
+            # Explicit graph cleanup to avoid growth across iters
+            try:
+                # Drop references and gradients we no longer need
+                del selected_bboxes
+            except Exception:
+                pass
+            try:
+                # Clear PyTorch autograd state tied to this loss
+                if isinstance(loss, ch.Tensor):
+                    loss.detach_()
+                del loss
+            except Exception:
+                pass
+            gc.collect()
+            try:
+                ch.cuda.empty_cache()
+            except Exception:
+                pass
 
             #########################################################################
             # L-INFattack
@@ -667,6 +776,7 @@ def attack_dt2(cfg:DictConfig) -> None:
             # tex = dr.clip(tex, 0, 1)
             #########################################################################
             for i, k in enumerate(param_keys):
+                gpu_mem(f"update:{k}:start", DEVICE)
                 HH, WW  = dr.shape(dr.grad(opt[k]))[0], dr.shape(dr.grad(opt[k]))[1]
                 grad = ch.Tensor(dr.grad(opt[k]).array).view((HH, WW, C))
                 tex = ch.Tensor(opt[k].array).view((HH, WW, C))
@@ -692,6 +802,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 params[k] = tex     
                 dr.enable_grad(params[k])
                 params.update()
+                gpu_mem(f"update:{k}:after-params.update", DEVICE)
                 perturbed_tex = mi.Bitmap(params[k])
                                 
                 mi.util.write_bitmap(os.path.join(tmp_perturbation_path,f"{k}_{it}.png"), data=perturbed_tex, write_async=False)
@@ -699,6 +810,38 @@ def attack_dt2(cfg:DictConfig) -> None:
                     perturbed_tex = mi.Bitmap(params[k])
                     mi.util.write_bitmap("perturbed_tex_map.png", data=perturbed_tex, write_async=False)
                 ch.cuda.empty_cache()
+
+            # Optional high-quality visualization render (no AD tape)
+            if int(spp_viz) > int(spp_grad):
+                gpu_mem("pre-render-viz", DEVICE)
+                try:
+                    with dr.suspend_grad():
+                        img_viz = mi.render(scene, params=params, spp=int(spp_viz), sensor=sensor_i, seed=it+12345)
+                    # Save HQ image using canonical filename (no _hq suffix)
+                    hq_path = os.path.join(render_path, f"render_b{it}_p{b}_s{cam_idx}.png")
+                    mi.util.write_bitmap(hq_path, data=img_viz, write_async=False)
+                    # Also run D2 predictions on the HQ image and save overlay with canonical name
+                    rendered_img_input_hq = dt2_input(hq_path)
+                    success = save_adv_image_preds(
+                            model,
+                            dt2_config,
+                            input=rendered_img_input_hq,
+                            instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST,
+                            target=label,
+                            untarget=unlabel,
+                            is_targeted=targeted,
+                            path=os.path.join(preds_path, f'render_b{it}_s{cam_idx}.png')
+                        )
+                except Exception as _viz_e:
+                    print(f"[VIZ] High-quality render failed: {_viz_e}")
+                gpu_mem("post-render-viz", DEVICE)
+            ch.cuda.empty_cache()
+            try:
+                dr.flush_malloc_cache()
+            except Exception:
+                pass
+            gpu_mem(f"iter {it} end", DEVICE)
+        gpu_mem("optim_batch:end", DEVICE)
         return scene
     
     # iters = iters  
@@ -717,4 +860,4 @@ def attack_dt2(cfg:DictConfig) -> None:
                       , alpha=alpha\
                       , epsilon=epsilon\
                       , targeted=targeted)
-    
+    gpu_mem("attack_dt2:end", DEVICE)

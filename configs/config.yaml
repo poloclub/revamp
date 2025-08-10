@@ -41,3 +41,4 @@ sysconfig:
   output_path: results/${attack_class}
   pass_idx: null
   log_dir: ./results/${attack_class}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  mem_profile: false
