@@ -1,10 +1,10 @@
 import os, PIL, csv
+import PIL.ImageOps, PIL.ImageDraw
 import numpy as np
 import torch as ch
 import gc
 import time
 import contextlib
-from torchvision.io import read_image
 import mitsuba as mi
 import drjit as dr
 import warnings
@@ -12,17 +12,7 @@ from omegaconf import DictConfig, ListConfig
 import logging
 from typing import Union
 from tqdm import tqdm
-from detectron2.config import get_cfg
-from detectron2.utils.visualizer import Visualizer, VisImage
-from detectron2.data import MetadataCatalog
-from detectron2.modeling import build_model
-from detectron2.checkpoint import DetectionCheckpointer
-
-from detectron2.structures import Boxes, Instances
-from detectron2.utils.events import EventStorage
-from detectron2.data.detection_utils import read_image
-from detectron2.structures import Instances
-from detectron2.data.detection_utils import *
+from .detectors.factory import load_detector
 from .utils.gpu_memory_profile import gpu_mem, NvtxRange
 
  # --------------------- Loss-resolution downscaling helper ---------------------
@@ -71,81 +61,6 @@ os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", ",".join(_alloc_opts))
 #     print(input['file_name'])
 #     return input
 
-def dt2_input(image_path:str)->dict:
-    """
-    Construct a Detectron2-friendly input for an image
-    """
-    input = {}
-    filename = image_path
-    adv_image = read_image(image_path, format="RGB")
-    adv_image_tensor = ch.as_tensor(np.ascontiguousarray(adv_image.transpose(2, 0, 1)))
-
-    height = adv_image_tensor.shape[1]
-    width = adv_image_tensor.shape[2]
-    instances = Instances(image_size=(height,width))
-    # TODO - review this class setting... why is it needed?
-    instances.gt_classes = ch.Tensor([2])
-    # taxi bbox
-    # instances.gt_boxes = Boxes(ch.tensor([[ 50.9523, 186.4931, 437.6184, 376.7764]]))
-    # stop sign bbox
-    # instances.gt_boxes = Boxes(ch.tensor([[ 162.0, 145.0, 364.0, 324.0]])) # for 512x512 img
-    # instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, height, width]]))
-    instances.gt_boxes = Boxes(ch.tensor([[0.0, 0.0, float(height), float(width)]]))
-    input['image'] = adv_image_tensor    
-    input['filename'] = filename
-    input['height'] = height
-    input['width'] = width
-    input['instances'] = instances
-    return input
-
-def save_adv_image_preds(model \
-    , dt2_config \
-    , input \
-    , instance_mask_thresh=0.7 \
-    , target:int=None \
-    , untarget:int=None
-    , is_targeted:bool=True \
-    , format="RGB" \
-    , path:str=None):
-    """
-    Helper fn to save the predictions on an adversarial image
-    attacked_image:ch.Tensor An attacked image
-    instance_mask_thresh:float threshold pred boxes on confidence score
-    path:str where to save image
-    """ 
-    model.train = False
-    model.training = False
-    model.proposal_generator.training = False
-    model.roi_heads.training = False    
-    with ch.no_grad():
-        gpu_mem("before detectron2 forward", dt2_config.MODEL.DEVICE)
-        adv_outputs = model([input])
-        perturbed_image = input['image'].data.permute((1,2,0)).detach().cpu().numpy()
-        pbi = ch.tensor(perturbed_image, requires_grad=False).detach().cpu().numpy()
-        if format=="BGR":
-            pbi = pbi[:, :, ::-1]
-        v = Visualizer(pbi, MetadataCatalog.get(dt2_config.DATASETS.TRAIN[0]),scale=1.0)
-        instances = adv_outputs[0]['instances']
-        things = np.array(MetadataCatalog.get(dt2_config.DATASETS.TRAIN[0]).thing_classes) # holds class labels
-        predicted_classes = things[instances.pred_classes.cpu().numpy().tolist()] 
-        print(f'Predicted Class: {predicted_classes}')        
-        mask = instances.scores > instance_mask_thresh
-        instances = instances[mask]
-        out = v.draw_instance_predictions(instances.to("cpu"))
-        target_pred_exists = target in instances.pred_classes.cpu().numpy().tolist()
-        untarget_pred_not_exists = untarget not in instances.pred_classes.cpu().numpy().tolist()
-        pred = out.get_image()
-        gpu_mem("after detectron2 forward", dt2_config.MODEL.DEVICE)
-    model.train = True
-    model.training = True
-    model.proposal_generator.training = True
-    model.roi_heads.training = True  
-    PIL.Image.fromarray(pred).save(path)
-    if is_targeted and target_pred_exists:
-        return True
-    elif (not is_targeted) and (untarget_pred_not_exists):
-        return True
-    return False
 
 def use_provided_cam_position(scene_file:str,sensor_key:str) -> np.array:
     #     from mitsuba import ScalarTransform4f as T  
@@ -357,8 +272,10 @@ def generate_bboxes_for_target(target_mesh:ListConfig, camera_positions, resx:in
 
 def attack_dt2(cfg:DictConfig) -> None:
 
-    cuda_visible_device = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
-    DEVICE = f"cuda:{cuda_visible_device}"
+    # cuda_visible_device = os.environ.get("CUDA_VISIBLE_DEVICES", default=1)
+    # DEVICE = f"cuda:{cuda_visible_device}"
+    DEVICE = f"cuda:{cfg.device}" 
+    # ch.cuda.set_device(DEVICE)
 
     # Hydra-controlled memory profiling flag (default false via config)
     MEM_PROFILE = getattr(cfg.sysconfig, "mem_profile", False)
@@ -381,7 +298,12 @@ def attack_dt2(cfg:DictConfig) -> None:
         ch.cuda.reset_peak_memory_stats()
         gpu_mem("startup", DEVICE)
 
-    logging.basicConfig(level=logging.INFO)
+    if not logging.getLogger().handlers:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s [%(name)s][%(levelname)s] - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
     logger = logging.getLogger("dt2")
 
     batch_size = cfg.attack.batch_size
@@ -407,9 +329,6 @@ def attack_dt2(cfg:DictConfig) -> None:
     param_keys = cfg.scene.target_param_keys
     target_mesh = cfg.scene.target_mesh
     sensor_key = cfg.scene.sensor_key
-    score_thresh = cfg.model.score_thresh_test
-    weights_file = cfg.model.weights_file 
-    model_config = cfg.model.config
     randomize_sensors = cfg.scenario.randomize_positions 
     scene_file_dir = os.path.dirname(scene_file)
     tex_paths = cfg.scene.textures
@@ -487,22 +406,15 @@ def attack_dt2(cfg:DictConfig) -> None:
     # concat moves_matrices with moves_matrices[24:]
     # moves_matrices = np.concatenate((moves_matrices[0:5], moves_matrices[25:][::-1]), axis=0)
 
-    # load pre-trained robust faster-rcnn model
-    dt2_config = get_cfg()
-    dt2_config.merge_from_file(model_config)
-    dt2_config.MODEL.WEIGHTS = weights_file
-    dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST = score_thresh
-    dt2_config.MODEL.DEVICE = DEVICE
-    model = build_model(dt2_config)
-    checkpointer = DetectionCheckpointer(model)
-    checkpointer.load(dt2_config.MODEL.WEIGHTS)
-    model.train = True
-    model.training = True
-    model.proposal_generator.training = True
-    model.roi_heads.training = True
-    # We only need gradients w.r.t. the input image, not model weights
-    for p in model.parameters():
-        p.requires_grad_(False)
+    # Initialize the selected detector via factory abstraction
+    detector = load_detector(cfg)
+    detector.load_model()
+    # Detector implementations manage their own params; ensure no detector weights require grads if applicable
+    try:
+        for p in detector.model.parameters():
+            p.requires_grad_(False)
+    except Exception:
+        pass
 
     def optim_batch(scene, batch_size, camera_positions, spp, k, label, unlabel, iters, alpha, epsilon, targeted=False):
         # run attack
@@ -517,73 +429,49 @@ def attack_dt2(cfg:DictConfig) -> None:
         assert(batch_size <= camera_positions.size)
         success = False
         
-        # wrapper function that models the input image and returns the loss
-        # TODO - 2 model input should accept a batch
         @dr.wrap(source='drjit', target='torch')
         def model_input(x, target, bboxes, batch_size=1):
+            """Convert Mitsuba render tensor to detector-ready NCHW and compute loss.
+            x comes in as HxWxC (single sensor) or Hx(W*N)xC (batch sensor with N views concatenated width-wise).
             """
-            To get the losses using DT2, we must supply the Ground Truth w/ the input dict
-            as an Instances object. This includes the ground truth boxes (gt_boxes)
-            and ground truth classes (gt_classes).  There should be a class & box for 
-            each GT object in the scene.
-            """
-            
+            # Ensure x is float in [0,1]
+            if not ch.is_floating_point(x):
+                x = x.float()
+
+            # Case 1: batch sensor => H x (W*N) x C -> N x C x H x W
             if batch_size > 1:
-                x = x.reshape(x.shape[0],batch_size,x.shape[1]//batch_size,x.shape[2]).permute(1, 0, 2, 3).requires_grad_()
-                x.retain_grad()
+                assert x.dim() == 3, "Expected Hx(W*N)xC tensor from Mitsuba for batch sensor"
+                H, WN, C = x.shape
+                assert C == 3, f"Expected 3 color channels, got {C}"
+                assert WN % batch_size == 0, f"Width {WN} not divisible by batch size {batch_size}"
+                W = WN // batch_size
+                # reshape to H x N x W x C, then to N x C x H x W
+                x = x.view(H, batch_size, W, C).permute(1, 3, 0, 2).contiguous().requires_grad_()
             else:
-                x = x.unsqueeze(0).requires_grad_()
-                x.retain_grad()
-            # visualize x
-            # z = x[0].detach().cpu().numpy()
-            # PIL.Image.fromarray(((z - z.min()) / (z.max() - z.min())*255).clip(0, 255).astype(np.uint8)).save("renders/bw/tensor.png")
-            
-            
-            # incoming tensor is N, H, W, C
-            losses_name = ["loss_cls", "loss_box_reg", "loss_rpn_cls", "loss_rpn_loc"]            
-            target_loss_idx = [0] # this targets es only `loss_cls` loss
-            # detectron2 wants images as RGB 0-255 range
-            x = ch.clip(x * 255 + 0.5, 0, 255).requires_grad_()
-            x = ch.permute(x, (0, 3, 1, 2)).requires_grad_()  # NCHW
+                # Case 2: single sensor => H x W x C -> 1 x C x H x W
+                if x.dim() == 3 and x.shape[-1] == 3:
+                    x = x.permute(2, 0, 1).unsqueeze(0).contiguous().requires_grad_()
+                elif x.dim() == 4 and x.shape[1] == 3:
+                    # already NCHW with batch dim 1
+                    pass
+                else:
+                    raise RuntimeError(f"Unexpected image tensor shape for single-sensor path: {tuple(x.shape)}")
             x.retain_grad()
-            # Downscale to reduce activation memory for D2
+
+            # Optional downscaling to control activation memory (detector-agnostic)
             x, scale = _downscale_for_loss(x, loss_max_side)
-            height = x.shape[2]
-            width = x.shape[3]
+            height, width = x.shape[2], x.shape[3]
+
+            # Normalize bbox shape and scale to match downscaled image
             if ch.tensor(bboxes).dim() == 1:
                 gt_boxes = ch.tensor(bboxes).unsqueeze(0)
             else:
                 gt_boxes = ch.tensor(bboxes)
-            # scale boxes to match downscaled image (xyxy)
             if scale != 1.0:
                 gt_boxes = gt_boxes * scale
 
-            inputs = list()
-            for i in  range(0, x.shape[0]):                
-                instances = Instances(image_size=(height,width))
-                instances.gt_classes = target.long()
-                instances.gt_boxes = Boxes(gt_boxes[i].unsqueeze(0))
-                input = {}
-                input['image']  = x[i]    
-                input['filename'] = ''
-                input['height'] = height
-                input['width'] = width
-                input['instances'] = instances      
-                inputs.append(input)
-            gpu_mem("model_input:pre-forward", DEVICE)
-            with EventStorage(0) as storage:
-                # Mixed precision to reduce activation memory
-                use_amp = ch.cuda.is_available()
-                ctx = ch.autocast(device_type="cuda", dtype=ch.float16) if use_amp else contextlib.nullcontext()
-                with ctx:
-                    losses = model(inputs)
-                    loss = sum([losses[losses_name[tgt_idx]] for tgt_idx in target_loss_idx]).requires_grad_()
-            gpu_mem("model_input:post-forward", DEVICE)
-            del x
-            try:
-                del losses
-            except Exception:
-                pass
+            # Delegate to detector for loss computation (expects N x C x H x W in ~[0,1])
+            loss = detector.infer(x, target, gt_boxes, batch_size=x.shape[0])
             return loss
 
         params = mi.traverse(scene)
@@ -605,8 +493,7 @@ def attack_dt2(cfg:DictConfig) -> None:
         # sensor 10 is focused on stop sign.
         sensors = [0]
         if iters % len(sensors) != 0:
-            print("uneven amount of iterations provided for sensors! Some sensors will be used more than others\
-                during attack")
+            logger.warning("Uneven amount of iterations provided for sensors; some sensors will be used more than others during attack")
         # if only one camera in the scene, then this idx will be repeated for each iter
         camera_idx = ch.Tensor(np.array(sensors)).repeat(int(iters/len(sensors))).to(dtype=ch.uint8).numpy().tolist()
         # one matrix per camera position that we want to render from, equivalent to batch size
@@ -641,7 +528,6 @@ def attack_dt2(cfg:DictConfig) -> None:
                 sampled_camera_positions = camera_positions
             if success:
                 cam_idx += 1
-                print(f"Successful pred, using camera_idx {cam_idx}")
                 logger.info(f"Successful pred, using camera_idx {cam_idx}")
             if use_batch_sensor:
                 batch_sensor_film_size = mi.traverse(batch_sensor)["film.size"]
@@ -657,8 +543,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 # set the camera position, render & attack
                 if not use_batch_sensor:
                     if cam_idx > len(sampled_camera_positions)-1:
-                        print(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
-                        logger.info(f"Successfull detections on all {len(sampled_camera_positions)} positions.")
+                        logger.info(f"Successful detections on all {len(sampled_camera_positions)} positions.")
                         return
                     if batch_size > 1: # sample from random camera positions
                         cam_idx = b
@@ -721,7 +606,6 @@ def attack_dt2(cfg:DictConfig) -> None:
             loss = model_input(img, target, selected_bboxes, N)
             gpu_mem("post-model_input(loss ready)", DEVICE)
             sensor_loss = f"[PASS {cfg.sysconfig.pass_idx}] iter: {it} sensor pos: {cam_idx}/{len(sampled_camera_positions)}, loss: {str(loss.array[0])[0:7]}"
-            print(sensor_loss)
             logger.info(sensor_loss)
             dr.enable_grad(loss)
             with NvtxRange("backward"):
@@ -736,7 +620,7 @@ def attack_dt2(cfg:DictConfig) -> None:
                 except Exception:
                     pass
                 try:
-                    model.zero_grad(set_to_none=True)
+                    detector.zero_grad()
                 except Exception:
                     pass
                 dr.backward(loss)
@@ -820,20 +704,22 @@ def attack_dt2(cfg:DictConfig) -> None:
                     # Save HQ image using canonical filename (no _hq suffix)
                     hq_path = os.path.join(render_path, f"render_b{it}_p{b}_s{cam_idx}.png")
                     mi.util.write_bitmap(hq_path, data=img_viz, write_async=False)
-                    # Also run D2 predictions on the HQ image and save overlay with canonical name
-                    rendered_img_input_hq = dt2_input(hq_path)
-                    success = save_adv_image_preds(
-                            model,
-                            dt2_config,
-                            input=rendered_img_input_hq,
-                            instance_mask_thresh=dt2_config.MODEL.ROI_HEADS.SCORE_THRESH_TEST,
-                            target=label,
-                            untarget=unlabel,
-                            is_targeted=targeted,
-                            path=os.path.join(preds_path, f'render_b{it}_s{cam_idx}.png')
-                        )
+                    # Also run predictions on the HQ image and save overlay with canonical name
+                    rendered_img_input_hq = detector.preprocess_input(hq_path)
+                    _thr = getattr(cfg.model, "score_thresh_test", 0.5)
+                    success = detector.predict_and_save(
+                        image=rendered_img_input_hq['image'].float().div(255.0),
+                        path=os.path.join(preds_path, f'render_b{it}_s{cam_idx}.png'),
+                        target=label,
+                        untarget=unlabel,
+                        is_targeted=targeted,
+                        threshold=_thr,
+                        format="RGB",
+                        gt_bbox=gt_bboxes[cam_idx] if not use_batch_sensor else None,
+                        result_dict=False
+                    )
                 except Exception as _viz_e:
-                    print(f"[VIZ] High-quality render failed: {_viz_e}")
+                    logger.warning(f"[VIZ] High-quality render failed: {_viz_e}")
                 gpu_mem("post-render-viz", DEVICE)
             ch.cuda.empty_cache()
             try:
