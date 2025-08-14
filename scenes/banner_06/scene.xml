@@ -1,0 +1,155 @@
+<scene version="3.0.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="64"/>
+	<default name="resx" value="1920"/>
+	<default name="resy" value="720"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="volpath">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+        <float name="fov" value="23.913168"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="179.999991348578"/>
+			<rotate y="1" angle="5.008956130975331e-06"/>
+			<rotate z="1" angle="180.00000500895632"/>
+			<translate value="-0.081774 0.071525 16.190189"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-Floor">
+		<bsdf type="principled">
+            <rgb value="0.400000 0.760950 0.833509" name="base_color"/>
+			<float name="specular" value="0.500000"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+
+    <default name="emitter_radiance_top" value="3.558620 3.558620 3.558620"/>
+    <default name="emitter_radiance_sides" value="10.791920 10.791920 10.791920"/>
+
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="1.273643 0.000000 0.000000 0.000000 0.000000 0.000000 1.273643 2.547201 0.000000 -1.273643 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="$emitter_radiance_top" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.321119 0.000000 0.711202 3.934294 -0.711202 0.000000 0.321119 1.833386 0.000000 -0.780337 0.000000 -0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="$emitter_radiance_sides" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.241108 0.000000 -0.742154 -4.465506 0.742154 0.000000 0.241108 1.285575 0.000000 -0.780337 0.000000 -0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="$emitter_radiance_sides" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/Floor.ply"/>
+		<ref id="mat-Floor" name="bsdf"/>
+	</shape>
+
+    <!--
+    <default name="x_scale" value="9.31178"/>
+	<default name="z_scale" value="5.64813"/>
+	<default name="y_scale" value="6.0552"/>
+    -->
+    <default name="x_scale" value="9.14406"/>
+	<default name="z_scale" value="6.2517"/>
+	<default name="y_scale" value="6.37222"/>
+
+    <!--
+	<default name="x_trans" value="-5.91298"/>
+	<default name="z_trans" value="-2.83308"/>
+	<default name="y_trans" value="-2.43341"/>
+    -->
+	<default name="x_trans" value="-5.71938"/>
+	<default name="z_trans" value="-3.47943"/>
+    <default name="y_trans" value="-2.22889"/>
+
+    <medium type="heterogeneous" id="smoke">
+		<volume name="sigma_t" type="gridvolume">
+            <string name="filename" value="smoke.vol"/>
+            <transform name="to_world">
+                <!-- fit into [-1,1] x [1, 1] -->
+                <translate x="-0.5" y="-0.5" z="-0.5"/>
+                <scale x="2" y="2" z="2"/>
+
+                <rotate x="1" angle="-90"/>
+
+                <!-- fit into [0,0] x [1, 1] -->
+                <translate x="1" y="1" z="1"/>
+                <scale x="0.5" y="0.5" z="0.5"/>
+
+                <scale x="$x_scale" y="$y_scale" z="$z_scale"/>
+                <translate x="$x_trans" y="$y_trans" z="$z_trans"/>
+            </transform>
+        </volume>
+		<!-- <volume name="albedo" type="gridvolume">
+            <string name="filename" value="albedo.vol"/>
+            <transform name="to_world">
+                <scale x="$x_scale" y="$y_scale" z="$z_scale"/>
+                <translate x="$x_trans" y="$y_trans" z="$z_trans"/>
+            </transform>
+        </volume> -->
+		<rgb name="albedo" value="0.99, 0.0, 0.0"/>
+		<float name="scale" value="2"/>
+    </medium>
+
+	<shape type="cube">
+        <transform name="to_world">
+            <!-- fit into [0,0] x [1, 1] -->
+            <translate x="1" y="1" z="1"/>
+            <scale x="0.5" y="0.5" z="0.5"/>
+
+            <scale x="$x_scale" y="$y_scale" z="$z_scale"/>
+            <translate x="$x_trans" y="$y_trans" z="$z_trans"/>
+        </transform>
+        <bsdf type="null"/>
+        <ref name="interior" id="smoke"/>
+	</shape>
+
+</scene>

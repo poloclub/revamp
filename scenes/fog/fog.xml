@@ -1,0 +1,71 @@
+<scene version="3.0.0">
+
+    <!-- Volumetric integrator -->
+    <integrator type="volpath"/>
+    <!-- If you don't need PRB/AD, use: <integrator type="volpath"/> -->
+    <!-- volpath/volpathmis are documented here. --> 
+
+    <!-- Constant environment light -->
+    <emitter type="constant">
+        <rgb name="radiance" value="1, 1, 1"/>
+    </emitter>
+
+	<default name="x_trans" value="-0.5"/>
+	<default name="z_trans" value="-0.5"/>
+    <default name="y_trans" value="-0.5"/>
+    <default name="fog_scale" value="2.0"/>
+
+    <!-- Blue box: centered at origin, then scaled -->
+    <shape type="cube">
+        <transform name="to_world">
+            <!-- <translate x="$x_trans" y="$y_trans" z="$z_trans"/> -->
+            <translate value="0.0, -0.5, -0.5"/>            
+            <scale value="0.35, 0.25, 0.35"/>
+            <rotate x="1" angle="-45"/>
+        </transform>
+        <bsdf type="diffuse">
+            <rgb name="reflectance" value="0.15, 0.25, 0.85"/>
+        </bsdf>
+    </shape>
+
+    <!-- Fog container cube: same transform as the sigma_t grid -->
+    <shape type="cube">
+        <transform name="to_world">
+            <!-- Center first, then rotate, then scale -->
+            <translate x="$x_trans" y="$y_trans" z="$z_trans"/>
+            <rotate x="1" angle="-90"/>
+            <scale value="2"/>
+        </transform>
+        <bsdf type="null"/>
+
+        <medium name="interior" type="heterogeneous">
+            <volume name="sigma_t" type="gridvolume">
+                <string name="filename" value="smoke3.vol"/>
+                <transform name="to_world">
+                    <!-- MUST match the container cube above -->
+                    <translate x="$x_trans" y="$y_trans" z="$z_trans"/>
+                    <rotate x="1" angle="-90"/>
+                    <scale value="2"/>
+                </transform>
+            </volume>
+            <float name="albedo" value="0.9"/>
+            <phase type="isotropic"/>
+            <float name="scale" value="$fog_scale"/>
+        </medium>
+    </shape>
+
+    <!-- Camera looks at the origin -->
+    <sensor type="perspective">
+        <float name="fov" value="45"/>
+        <transform name="to_world">
+            <lookat origin="0, 0, 4" target="0, 0, 0" up="0, 1, 0"/>
+        </transform>
+        <sampler type="independent"><integer name="sample_count" value="64"/></sampler>
+        <film type="hdrfilm">
+            <integer name="width" value="512"/>
+            <integer name="height" value="512"/>
+            <rfilter type="tent"/>
+        </film>
+    </sensor>
+
+</scene>
