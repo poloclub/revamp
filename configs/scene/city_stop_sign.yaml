@@ -5,9 +5,9 @@ target_param_keys: ["mat-Material.004.brdf_0.base_color.data"]
 target_mesh: ["scenes/${scene.name}/meshes/stop_sign.ply"]
 sensor_key: "PerspectiveCamera"
 sensor_radius: 1.5
-sensor_count: 8
-resx: 256
-resy: 256
+sensor_count: 5
+resx: 608
+resy: 608
 sensor_z_lats: [0.0]
 use_batch_sensor: true
 detector_name: detectron2
