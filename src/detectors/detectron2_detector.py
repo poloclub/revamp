@@ -25,6 +25,7 @@ class Detectron2Detector(BaseDetector):
         self.cfg = cfg            # The full Hydra/OmegaConf config
         self.dt2_cfg = None       # Will hold the Detectron2 config after load_model
         self.model = None
+        self.expects_unit_input = False
 
     def load_model(self):
         """
@@ -101,11 +102,52 @@ class Detectron2Detector(BaseDetector):
         else:
             raise RuntimeError(f"Unexpected bboxes ndim: {gt.dim()}")
 
+        # Ensure target length matches batch; broadcast if a single label was provided
+        # (inserted block)
+        # Ensure target length matches batch; broadcast if a single label was provided
+        if isinstance(target, ch.Tensor):
+            if target.dim() == 0:
+                target = target.view(1)
+            if target.shape[0] == 1 and x.shape[0] > 1:
+                target = target.repeat(x.shape[0])
+            elif target.shape[0] != x.shape[0]:
+                raise RuntimeError(f"Detectron2 infer(): target length ({target.shape[0]}) must be 1 or equal to batch size ({x.shape[0]}).")
+        else:
+            # non-tensor scalar/sequence; coerce and broadcast
+            target = ch.as_tensor(target, dtype=ch.long, device=x.device)
+            if target.dim() == 0:
+                target = target.view(1)
+            if target.shape[0] == 1 and x.shape[0] > 1:
+                target = target.repeat(x.shape[0])
+            elif target.shape[0] != x.shape[0]:
+                raise RuntimeError(f"Detectron2 infer(): target length ({target.shape[0]}) must be 1 or equal to batch size ({x.shape[0]}).")
+
         inputs = []
         for i in range(x.shape[0]):
             instances = Instances(image_size=(height, width))
-            instances.gt_classes = target.long()
-            instances.gt_boxes = Boxes(gt_boxes[i])
+            # --- Shape-safe GT assignment: set boxes first, then classes ---
+            boxes_i = gt_boxes[i]
+            if isinstance(boxes_i, ch.Tensor):
+                boxes_i = boxes_i.to(device=x.device, dtype=ch.float32)
+            else:
+                boxes_i = ch.as_tensor(boxes_i, dtype=ch.float32, device=x.device)
+
+            # Normalize shapes to [M, 4]
+            if boxes_i.dim() == 1:
+                boxes_i = boxes_i.view(1, 4)
+            elif boxes_i.dim() == 3:
+                boxes_i = boxes_i.view(-1, 4)
+            elif boxes_i.dim() == 2 and boxes_i.shape[1] == 4:
+                pass
+            else:
+                raise RuntimeError(f"Unexpected gt_boxes shape per image: {tuple(boxes_i.shape)}")
+
+            num_gt = boxes_i.shape[0]
+            instances.gt_boxes = Boxes(boxes_i)
+
+            # Class labels must match number of boxes for this image
+            cls_val = int(target[i].item()) if isinstance(target, ch.Tensor) else int(target)
+            instances.gt_classes = ch.full((num_gt,), cls_val, dtype=ch.int64, device=x.device)
             input_dict = {
                 'image': x[i],
                 'filename': '',
@@ -121,16 +163,19 @@ class Detectron2Detector(BaseDetector):
         del x
         return loss
 
-    def predict_and_save(self, image: ch.Tensor, path: str, target: int = None, untarget: int = None, is_targeted: bool = True, threshold: float = 0.7, format: str = "RGB", gt_bbox: List[int] = None, result_dict: bool = False, image_id: int = None) -> Any:
+    def predict_and_save(self, image: ch.Tensor, path: str, target: int = None, untarget: int = None, is_targeted: bool = True, threshold: float = 0.7, format: str = "RGB", gt_bbox: List[int] = None, result_dict: bool = False, image_id: int = None, *, tile_w: int = None, tile_h: int = None, tiles: int = 1, **kwargs) -> Any:
         """
         Run model prediction on the given image and save the visualization to disk.
         """
+        # Tiling-related args are accepted for API compatibility but unused in Detectron2
+        _ = (tile_w, tile_h, tiles, kwargs)
         self.model_eval_mode()
         with ch.no_grad():
             height = image.shape[1]
             width = image.shape[2]
             input = {
-                'image': (image * 255).to(dtype=ch.uint8),
+                # If max > 1.5, assume already in 0-255, else scale up
+                'image': image.to(dtype=ch.uint8) if image.max() > 1.5 else (image * 255).to(dtype=ch.uint8),
                 'height': height,
                 'width': width,
                 'instances': Instances((height, width))
@@ -144,7 +189,10 @@ class Detectron2Detector(BaseDetector):
             instances = instances[mask]
 
             # Convert tensor image to numpy for visualization
-            pbi = (image.detach().cpu().clamp(0, 1).permute(1, 2, 0).numpy() * 255).astype(np.uint8)
+            if image.max() > 1.5:
+                pbi = image.detach().cpu().clamp(0, 255).permute(1, 2, 0).numpy().astype(np.uint8)
+            else:
+                pbi = (image.detach().cpu().clamp(0, 1).permute(1, 2, 0).numpy() * 255).astype(np.uint8)
             if format == "BGR":
                 pbi = pbi[:, :, ::-1]
 
@@ -261,8 +309,11 @@ class Detectron2Detector(BaseDetector):
         """
         input = {}
         filename = image_path
-        adv_image = read_image(image_path, format="RGB")
-        adv_image_tensor = ch.as_tensor(np.ascontiguousarray(adv_image.transpose(2, 0, 1)))
+        adv_image = read_image(image_path, format="RGB")  # HWC uint8
+        adv_image_tensor = ch.as_tensor(
+            np.ascontiguousarray(adv_image.transpose(2, 0, 1)),
+            dtype=ch.float32
+        ) / 255.0
 
         height = adv_image_tensor.shape[1]
         width = adv_image_tensor.shape[2]
