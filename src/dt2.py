@@ -470,6 +470,20 @@ def attack_dt2(cfg:DictConfig) -> None:
             if scale != 1.0:
                 gt_boxes = gt_boxes * scale
 
+            # Ensure target is a torch.LongTensor on the same device
+            if not isinstance(target, ch.Tensor):
+                try:
+                    # drjit arrays expose `.array`; fall back to numpy conversion
+                    t_arr = getattr(target, 'array', None)
+                    if t_arr is not None:
+                        target = ch.as_tensor(t_arr, dtype=ch.long, device=x.device)
+                    else:
+                        target = ch.as_tensor(target, dtype=ch.long, device=x.device)
+                except Exception:
+                    target = ch.as_tensor(target, dtype=ch.long, device=x.device)
+            else:
+                target = target.to(device=x.device, dtype=ch.long)
+
             # Delegate to detector for loss computation (expects N x C x H x W in ~[0,1])
             loss = detector.infer(x, target, gt_boxes, batch_size=x.shape[0])
             return loss
@@ -707,8 +721,19 @@ def attack_dt2(cfg:DictConfig) -> None:
                     # Also run predictions on the HQ image and save overlay with canonical name
                     rendered_img_input_hq = detector.preprocess_input(hq_path)
                     _thr = getattr(cfg.model, "score_thresh_test", 0.5)
+                    img_for_pred = rendered_img_input_hq['image'].float()
+                    # Range-aware scaling so both detectors behave:
+                    # - If detector expects [0,1] but input is 0–255, divide by 255.
+                    # - If detector expects 0–255 but input is [0,1], multiply by 255.
+                    maxv = float(img_for_pred.max().item())
+                    if getattr(detector, 'expects_unit_input', True):
+                        if maxv > 1.5:
+                            img_for_pred = (img_for_pred / 255.0).clamp(0.0, 1.0)
+                    else:
+                        if maxv <= 1.5:
+                            img_for_pred = (img_for_pred * 255.0).clamp(0.0, 255.0)
                     success = detector.predict_and_save(
-                        image=rendered_img_input_hq['image'].float().div(255.0),
+                        image=img_for_pred,
                         path=os.path.join(preds_path, f'render_b{it}_s{cam_idx}.png'),
                         target=label,
                         untarget=unlabel,
@@ -716,7 +741,10 @@ def attack_dt2(cfg:DictConfig) -> None:
                         threshold=_thr,
                         format="RGB",
                         gt_bbox=gt_bboxes[cam_idx] if not use_batch_sensor else None,
-                        result_dict=False
+                        result_dict=False,
+                        tile_w=resx,
+                        tile_h=resy,
+                        tiles=(sensor_count if use_batch_sensor else 1)
                     )
                 except Exception as _viz_e:
                     logger.warning(f"[VIZ] High-quality render failed: {_viz_e}")
