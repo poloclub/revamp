@@ -7,6 +7,10 @@ defaults:
   - _self_
 
 device: "0"
+debug: false
+
+model:
+  debug_yolo: false
 
 texture: noise_tex
 
