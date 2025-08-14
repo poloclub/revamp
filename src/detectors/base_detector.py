@@ -18,7 +18,10 @@ class BaseDetector(ABC):
                                               }
     Subclasses must implement these methods.
     """
-    
+
+    def __init__(self):
+        # By default, detectors expect [0,1] floats for predict_and_save inputs
+        self.expects_unit_input = True
     @abstractmethod
     def load_model(self):
         """
