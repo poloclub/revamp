@@ -298,6 +298,7 @@
 <!-- Emitters -->
 	<emitter type="envmap">
 		<string name="filename" value="textures/city.hdr"/>
+		<!-- <string name="filename" value="textures/dramatic-sunset-clouds.exr"/> -->
 		<float name="scale" value="0.5"/>
 		<transform name="to_world">
 			<matrix value="0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
