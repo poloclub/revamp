@@ -1,0 +1,10 @@
+# MART YOLO via Darknet cfg/weights
+mart_backend: darknet
+# cfg_path: pretrained-models/mart_darknet/yolov4-tiny.cfg
+# weights_path: pretrained-models/mart_darknet/yolov4-tiny.weights
+cfg_path: pretrained-models/yolov4/yolov4.cfg
+weights_path: pretrained-models/yolov4/yolov4.weights
+auto_download: false
+mart_conf_threshold: 0.25
+mart_nms_threshold: 0.45
+mart_max_det: 300

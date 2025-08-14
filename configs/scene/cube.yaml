@@ -10,3 +10,4 @@ resx: 256
 resy: 256
 sensor_z_lats: [2.1381900311, 4.1942100525, 6.0890493393]
 use_batch_sensor: false
+detector_name: detectron2

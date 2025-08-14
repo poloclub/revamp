@@ -1,0 +1,15 @@
+# MART YOLOv4 (torchvision-style)
+mart_backend: yolov4
+
+# Required for this backend (no weights baked in)
+num_classes: 80
+
+# Postprocessing thresholds (MART side)
+mart_conf_threshold: 0.25
+mart_nms_threshold: 0.45
+mart_max_det: 300
+
+# Not used in this backend, but harmless to leave here if you want symmetry:
+auto_download: false
+cfg_path:
+weights_path:

@@ -1,0 +1,4 @@
+[submodule "submodules/MART"]
+	path = submodules/MART
+	url = https://github.com/IntelLabs/MART.git
+	branch = shapeshifter_yolo
