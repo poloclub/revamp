@@ -1,0 +1,132 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="4096"/>
+	<default name="resx" value="1920"/>
+	<default name="resy" value="1080"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="volpath">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective" id="elm__4" name="elm__4">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597752"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="6.400041785331919"/>
+			<rotate y="1" angle="1.733406331796509e-05"/>
+			<rotate z="1" angle="1.6914126693818103e-05"/>
+			<translate value="-0.248968 2.062757 -26.505436"/>
+		</transform>
+		<sampler type="independent" name="sampler">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm" name="film">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="default-bsdf" name="default-bsdf">
+		<bsdf type="diffuse" name="bsdf"/>
+	</bsdf>
+
+<!-- Emitters -->
+
+
+    <default name="emitter_radiance_top" value="3.558620 3.558620 3.558620"/>
+    <default name="emitter_radiance_sides" value="10.791920 10.791920 10.791920"/>
+
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="1.273643 0.000000 0.000000 0.000000 0.000000 0.000000 1.273643 2.547201 0.000000 -1.273643 0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="$emitter_radiance_top" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.321119 0.000000 0.711202 3.934294 -0.711202 0.000000 0.321119 1.833386 0.000000 -0.780337 0.000000 -0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="$emitter_radiance_sides" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.241108 0.000000 -0.742154 -4.465506 0.742154 0.000000 0.241108 1.285575 0.000000 -0.780337 0.000000 -0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="$emitter_radiance_sides" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+
+    <!--
+    <default name="x_scale" value="9.31178"/>
+	<default name="z_scale" value="5.64813"/>
+	<default name="y_scale" value="6.0552"/>
+    -->
+    <default name="x_scale" value="5"/>
+	<default name="z_scale" value="5"/>
+	<default name="y_scale" value="5"/>
+
+    <!--
+	<default name="x_trans" value="-5.91298"/>
+	<default name="z_trans" value="-2.83308"/>
+	<default name="y_trans" value="-2.43341"/>
+    -->
+	<default name="x_trans" value="0"/>
+	<default name="z_trans" value="0"/>
+    <default name="y_trans" value="0"/>
+
+
+<!-- Volumes -->
+
+ <medium type="heterogeneous" id="smoke">
+		<volume name="sigma_t" type="gridvolume">
+            <string name="filename" value="smoke3.vol"/>
+        </volume>
+		<!-- <volume name="albedo" type="gridvolume">
+            <string name="filename" value="albedo.vol"/>
+            <transform name="to_world">
+                <scale x="$x_scale" y="$y_scale" z="$z_scale"/>
+                <translate x="$x_trans" y="$y_trans" z="$z_trans"/>
+            </transform>
+        </volume> -->
+		<rgb name="albedo" value="0.9, 0.0, 0.0"/>
+		<float name="scale" value="50"/>
+    </medium>
+
+<!-- Shapes -->
+
+	<shape type="ply" id="elm__3" name="elm__3">
+		<string name="filename" value="meshes/Floor.ply"/>
+		<ref id="default-bsdf" name="bsdf"/>
+	</shape>
+
+	<shape type="ply" id="elm__8" name="elm__8">
+		<string name="filename" value="meshes/smoke3.ply"/>
+		<boolean name="face_normals" value="true"/>
+        <transform name="to_world">
+            <!-- fit into [0,0] x [1, 1] -->
+            <scale x="1.5" y="1.5" z="1.5"/>
+        </transform>		
+		<bsdf type="null"/>
+        <ref name="interior" id="smoke"/>				
+	</shape>	
+</scene>
