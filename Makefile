@@ -35,6 +35,8 @@ clean: clean_renders clean_preds
 .PHONY: clean_renders
 clean_renders:
 > rm -f $(RENDERS)/$(TARGET)/*.png
+> rm -f $(RENDERS)/bw/*.jpg
+
 
 .PHONY: clean_preds
 clean_preds:

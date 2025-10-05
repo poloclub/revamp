@@ -63,8 +63,10 @@ def run(cfg: DictConfig) -> None:
         preds_path = f"preds/{cfg.attack_class}"
         clean_renders_command = f"rm -f {renders_path}/*.png"
         clean_preds_command = f"rm -f {preds_path}/*.png"
+        clean_bbox_renders_command = f"rm -f renders/bw/*.jpg"
         subprocess.run(clean_renders_command, shell=True, check=True)
-        subprocess.run(clean_preds_command, shell=True, check=True)        
+        subprocess.run(clean_preds_command, shell=True, check=True)  
+        subprocess.run(clean_bbox_renders_command, shell=True, check=True)      
 
         fn = f"{passes[i]}.txt"
         cfg.sysconfig.output_path = os.path.join(cfg.sysconfig.output_path, fn)

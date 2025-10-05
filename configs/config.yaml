@@ -6,6 +6,12 @@ defaults:
   - scenario/sensor_positions: generate_cube_scene_orbit_cam_positions
   - _self_
 
+device: "0"
+debug: false
+
+model:
+  debug_yolo: false
+
 texture: noise_tex
 
 attack_class: stop_sign
