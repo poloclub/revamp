@@ -1,6 +1,6 @@
 name: city_stop_sign
 path: "scenes/${scene.name}/${scene.name}.xml"
-textures: ["scenes/${scene.name}/textures/${texture}.png"]
+textures: ["scenes/${scene.name}/textures/${texture}.png"] # original stop sign
 target_param_keys: ["mat-Material.004.brdf_0.base_color.data"]
 target_mesh: ["scenes/${scene.name}/meshes/stop_sign.ply"]
 sensor_key: "PerspectiveCamera"

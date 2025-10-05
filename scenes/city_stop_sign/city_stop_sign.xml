@@ -265,7 +265,7 @@
 	<bsdf type="twosided" id="mat-Material.004" name="mat-Material.004">
 		<bsdf type="principled" name="bsdf">
 			<texture type="bitmap" name="base_color">
-				<string name="filename" value="textures/stop_sign_tex.png"/>
+				<string name="filename" value="textures/noise_tex.png"/>
 			</texture>
 			<rgb value="1.000000 1.000000 1.000000" name="spec_tint"/>
 			<float name="spec_trans" value="0.000000"/>
